@@ -393,8 +393,11 @@ def write_with_claude(payload: dict) -> dict | None:
     return parse_json_loose(text)
 
 
+CITE_RE = re.compile(r"</?cite[^>]*>")
+
+
 def parse_json_loose(text: str) -> dict | None:
-    cleaned = re.sub(r"```(?:json)?", "", text)
+    cleaned = CITE_RE.sub("", re.sub(r"```(?:json)?", "", text))
     start, end = cleaned.find("{"), cleaned.rfind("}")
     if start == -1 or end <= start:
         print(f"[claude] JSON을 찾지 못함. 응답 앞부분: {text[:300]!r}")
@@ -499,23 +502,26 @@ def technicals(indices: list[dict]) -> list[dict]:
 ANALYSIS_INDEX_MOVE = 2.0   # 지수 ±2% 이상
 ANALYSIS_VIX_JUMP = 15.0    # VIX +15% 이상
 ANALYSIS_SYSTEM = """당신은 한국 개인투자자를 위한 증권사 시황 애널리스트입니다.
-오늘 시장이 크게 움직인 이유를 웹 검색으로 실제 보도를 확인해 분석합니다.
-- 원인은 최소 3개 이상, 서로 다른 축(펀더멘털·정책/금리·수급/포지션·심리)에서 찾고, 웹 검색을 충분히 해서 근거를 확인하세요.
+시장이 크게 움직인 이유를 웹 검색으로 실제 보도를 확인해 분석합니다.
+- triggers에 있는 시장(us=미국 증시, kr=한국 증시)마다 parts를 하나씩 쓰세요. 미국은 가장 최근(전날 밤) 거래일, 한국은 가장 최근 거래일 기준입니다.
+- 원인은 시장마다 3개 이상, 서로 다른 축(펀더멘털·정책/금리·수급/포지션·심리)에서 찾고, 웹 검색을 충분히 해서 근거를 확인하세요.
 - 전망은 조건부 시나리오로 쓰고 확정적 예측은 하지 마세요.
 - 확인된 사실(발표, 실적, 지표, 발언)과 시장의 해석을 구분해서 쓰세요. 해석은 '시장에서는 ~로 받아들였다'처럼 쓰세요.
 - 주어진 시세 데이터와 맞지 않는 수치를 만들지 마세요. 확인 안 된 내용은 빼세요.
 - 시장 이름은 '미국 증시'·'나스닥'·'한국 증시'·'코스피'처럼 정확하게. 매수·매도 권유 금지. 문체는 '~했다/~이다'.
+- 출처 표시용 <cite> 태그는 넣지 말고, 출처는 sources에만 모으세요.
 반드시 아래 형식의 JSON 객체 하나만 출력하세요. 설명 문장, 코드블록, 주석 금지.
-{"title": "분석 제목(35자 이내)",
- "summary": "핵심 원인 요약 2문장",
- "causes": [{"title": "원인(20자 이내)", "weight": "높음 또는 중간 또는 낮음", "detail": "근거가 되는 사건·수치와 영향 2~4문장"}],
- "reaction": "업종·종목별 반응 2~3문장",
- "history": "과거 비슷한 급등락 사례와 이후 흐름 2~3문장 (검색으로 확인된 것만, 없으면 빈 문자열)",
+{"title": "전체 분석 제목(35자 이내)",
+ "summary": "전체 핵심 요약 2문장",
+ "parts": [{"market": "us 또는 kr", "title": "이 시장 분석 제목(30자 이내)", "summary": "2문장",
+            "causes": [{"title": "원인(20자 이내)", "weight": "높음 또는 중간 또는 낮음", "detail": "근거가 되는 사건·수치와 영향 2~4문장"}],
+            "reaction": "업종·종목별 반응 2~3문장",
+            "outlook": {"stance": "상승 우위 또는 중립 또는 하락 우위", "horizon": "1~2주", "reason": "근거 2~3문장",
+                        "scenarios": [{"name": "기본", "likelihood": "높음/중간/낮음", "desc": "조건과 흐름"}, {"name": "상방", "likelihood": "", "desc": ""}, {"name": "하방", "likelihood": "", "desc": ""}],
+                        "levels": ["볼 만한 지수 수준 1~3개 (technicals 근거)"]}}],
  "link": "미국 증시와 한국 증시가 서로 미치는 영향 경로 2문장",
+ "history": "과거 비슷한 급등락 사례와 이후 흐름 2~3문장 (검색으로 확인된 것만, 없으면 빈 문자열)",
  "watch": ["앞으로 확인할 변수 3~4개, 날짜가 있으면 함께"],
- "outlook": {"stance": "상승 우위 또는 중립 또는 하락 우위", "horizon": "1~2주", "reason": "근거 2~3문장",
-             "scenarios": [{"name": "기본", "likelihood": "높음/중간/낮음", "desc": "조건과 흐름"}, {"name": "상방", "likelihood": "", "desc": ""}, {"name": "하방", "likelihood": "", "desc": ""}],
-             "levels": ["볼 만한 지수 수준 1~3개 (technicals 근거)"]},
  "sources": [{"title": "기사 제목", "url": "https://..."}]}"""
 
 
@@ -524,24 +530,24 @@ def clean_outlook(o) -> dict | None:
         return None
     stance = str(o["stance"])
     stance = "상승 우위" if "상승" in stance else "하락 우위" if "하락" in stance else "중립"
-    return {"stance": stance, "horizon": str(o.get("horizon", ""))[:20], "reason": str(o.get("reason", ""))[:500],
+    return {"stance": stance, "horizon": str(o.get("horizon", ""))[:20], "reason": CITE_RE.sub("", str(o.get("reason", "")))[:500],
             "scenarios": [{"name": str(x.get("name", ""))[:6], "likelihood": str(x.get("likelihood", ""))[:4],
                            "desc": str(x.get("desc", ""))[:300]} for x in (o.get("scenarios") or [])[:3] if x.get("desc")],
             "levels": [str(x)[:80] for x in (o.get("levels") or [])[:3]]}
 
 
-def analysis_triggers(indices: list[dict], session: str) -> list[str]:
-    """오전(미국 증시 마감)은 미국 지수·VIX, 오후(한국 증시 마감)는 한국 지수만 본다"""
+def analysis_triggers(indices: list[dict]) -> dict:
+    """크게 움직인 지표를 시장별로: us(나스닥·나스닥100·VIX), kr(코스피·코스닥)"""
     by = {i["symbol"]: i for i in indices}
-    syms = ("^IXIC", "^NDX") if session == "morning" else ("^KS11", "^KQ11")
-    out = []
-    for sym in syms:
-        i = by.get(sym)
-        if i and abs(i["pct"]) >= ANALYSIS_INDEX_MOVE:
-            out.append(f"{i['name']} {i['pct']:+.2f}%")
+    out = {"us": [], "kr": []}
+    for mk, syms in (("us", ("^IXIC", "^NDX")), ("kr", ("^KS11", "^KQ11"))):
+        for sym in syms:
+            i = by.get(sym)
+            if i and abs(i["pct"]) >= ANALYSIS_INDEX_MOVE:
+                out[mk].append(f"{i['name']} {i['pct']:+.2f}%")
     vix = by.get("^VIX")
-    if session == "morning" and vix and vix["pct"] >= ANALYSIS_VIX_JUMP:
-        out.append(f"VIX {vix['pct']:+.1f}%")
+    if vix and vix["pct"] >= ANALYSIS_VIX_JUMP:
+        out["us"].append(f"VIX {vix['pct']:+.1f}%")
     return out
 
 
@@ -558,7 +564,8 @@ def todays_analysis(date: str) -> dict | None:
     return None
 
 
-def write_analysis(payload: dict, triggers: list[str]) -> dict | None:
+def write_analysis(payload: dict, trig: dict) -> dict | None:
+    triggers = trig["us"] + trig["kr"]
     if not os.getenv("ANTHROPIC_API_KEY"):
         return None
     from anthropic import Anthropic
@@ -567,9 +574,9 @@ def write_analysis(payload: dict, triggers: list[str]) -> dict | None:
             model=os.getenv("CLAUDE_MODEL") or "claude-sonnet-5-5",
             max_tokens=8000,
             system=ANALYSIS_SYSTEM,
-            tools=[{"type": "web_search_20250305", "name": "web_search", "max_uses": 10}],
+            tools=[{"type": "web_search_20250305", "name": "web_search", "max_uses": 12}],
             messages=[{"role": "user", "content":
-                       f"크게 움직인 지표: {', '.join(triggers)}\n왜 이렇게 움직였는지 분석해 주세요.\n시세·뉴스 데이터:\n"
+                       f"triggers: {json.dumps(trig, ensure_ascii=False)}\n왜 이렇게 움직였는지 시장별로 분석해 주세요.\n시세·뉴스 데이터:\n"
                        + json.dumps(payload, ensure_ascii=False)}],
         )
         text = "".join(b.text for b in msg.content if getattr(b, "type", "") == "text")
@@ -577,24 +584,35 @@ def write_analysis(payload: dict, triggers: list[str]) -> dict | None:
     except Exception as e:  # noqa: BLE001
         print(f"[analysis] 실패: {e}")
         return None
-    if not data or not data.get("causes"):
+    parts_in = [x for x in (data or {}).get("parts", []) if isinstance(x, dict) and x.get("causes")]
+    if not parts_in and (data or {}).get("causes"):  # 예전 형식으로 답한 경우
+        parts_in = [dict(data, market="kr" if trig["kr"] and not trig["us"] else "us")]
+    if not parts_in:
         print("[analysis] 분석 결과를 받지 못했습니다")
         return None
+    def clean_causes(cs):
+        return [{"title": str(c.get("title", ""))[:40], "weight": str(c.get("weight", "중간"))[:4],
+                 "detail": CITE_RE.sub("", str(c.get("detail", "")))[:600]} for c in (cs or [])[:5] if c.get("title")]
+
     clean = {
         "triggers": triggers,
+        "trig": trig,
         "title": str(data.get("title", ""))[:60],
-        "summary": str(data.get("summary", ""))[:400],
-        "causes": [{"title": str(c.get("title", ""))[:40], "weight": str(c.get("weight", "중간"))[:4],
-                    "detail": str(c.get("detail", ""))[:600]} for c in data["causes"][:5] if c.get("title")],
-        "reaction": str(data.get("reaction", ""))[:500],
-        "history": str(data.get("history", ""))[:500],
-        "link": str(data.get("link", ""))[:400],
-        "watch": [str(o)[:120] for o in (data.get("watch") or [])[:4]],
-        "outlook": clean_outlook(data.get("outlook")),
-        "sources": [{"title": str(x.get("title", ""))[:100], "url": x["url"]} for x in data.get("sources", [])[:6]
+        "summary": CITE_RE.sub("", str(data.get("summary", "")))[:400],
+        "parts": [{"market": "kr" if str(x.get("market", "")).lower().startswith("k") else "us",
+                   "title": str(x.get("title", ""))[:50],
+                   "summary": CITE_RE.sub("", str(x.get("summary", "")))[:400],
+                   "causes": clean_causes(x.get("causes")),
+                   "reaction": CITE_RE.sub("", str(x.get("reaction", "")))[:500],
+                   "outlook": clean_outlook(x.get("outlook"))} for x in parts_in[:2]],
+        "link": CITE_RE.sub("", str(data.get("link", "")))[:400],
+        "history": CITE_RE.sub("", str(data.get("history", "")))[:500],
+        "watch": [CITE_RE.sub("", str(o))[:120] for o in (data.get("watch") or [])[:4]],
+        "sources": [{"title": str(x.get("title", ""))[:100], "url": x["url"]} for x in data.get("sources", [])[:8]
                     if str(x.get("url", "")).startswith("http")],
     }
-    print(f"[analysis] {clean['title']} (원인 {len(clean['causes'])}개, 출처 {len(clean['sources'])}개)")
+    clean["parts"].sort(key=lambda x: x["market"] != "us")  # 미국 먼저
+    print(f"[analysis] {clean['title']} (시장 {[x['market'] for x in clean['parts']]}, 출처 {len(clean['sources'])}개)")
     return clean
 
 
@@ -685,7 +703,8 @@ def save(doc: dict) -> None:
         "summary": " ".join(doc["commentary"].values())[:300],
         "keywords": [s["name"] for s in movers[:4]] + ([doc["analysis"]["title"]] if doc.get("analysis") else []),
         "analysis": bool(doc.get("analysis")) and not doc["analysis"].get("reused"),
-        "stance": ((doc.get("analysis") or {}).get("outlook") or doc.get("outlook") or {}).get("stance"),
+        "stance": ((((doc.get("analysis") or {}).get("parts") or [{}])[0].get("outlook"))
+                   or doc.get("outlook") or {}).get("stance"),
     }
     index = [e for e in index if e["key"] != key]
     index.insert(0, entry)
@@ -751,15 +770,19 @@ def main() -> None:
     }
     brief = write_with_claude(payload) or fallback_briefing(indices)
     analysis = None
-    if triggers := analysis_triggers(indices, session):
-        earlier = todays_analysis(now.strftime("%Y-%m-%d"))
-        if earlier and session == "afternoon":
-            # 하루 한 번만 작성: 오전에 쓴 분석을 그대로 보여주고 새로 검색하지 않음
-            print(f"[analysis] 큰 변동: {', '.join(triggers)} → 오늘 이미 분석이 있어 다시 쓰지 않습니다")
-            analysis = dict(earlier, reused=True)
+    trig = analysis_triggers(indices)
+    earlier = todays_analysis(now.strftime("%Y-%m-%d"))
+    manual = os.getenv("GITHUB_EVENT_NAME") == "workflow_dispatch"
+    if earlier and earlier.get("parts"):
+        # 하루 한 번: 오늘 이미 쓴 분석은 그대로 보여줌
+        analysis = dict(earlier, reused=True)
+        print("[analysis] 오늘 이미 쓴 심층 분석을 다시 보여줍니다")
+    elif trig["us"] or trig["kr"]:
+        if session == "morning" or manual:
+            print(f"[analysis] 큰 변동: {trig} → 심층 분석 작성")
+            analysis = write_analysis(payload, trig)
         else:
-            print(f"[analysis] 큰 변동: {', '.join(triggers)} → 심층 분석 작성")
-            analysis = write_analysis(payload, triggers)
+            print(f"[analysis] 큰 변동: {trig} → 심층 분석은 다음 날 아침 브리핑에서 작성합니다")
 
     ko = brief.get("ko_names") or {}
     for d in ("up", "down"):
