@@ -1,25 +1,25 @@
 {
- "generated_at": "2026-11-21T18:59+09:00",
+ "generated_at": "2026-11-21T19:55+09:00",
  "date": "2026-11-21",
  "session": "afternoon",
  "sample": false,
- "headline": "미국 기술주 급락에 코스피 4,870선…반도체 직격탄",
+ "headline": "미국 기술주 폭락에 코스피 4,900선 붕괴",
  "commentary": {
-  "us": "나스닥은 5.28% 급락한 22,617.73에 마감했고 S&P 500은 3.70%, 다우는 1.93% 하락했다. 필라델피아 반도체지수가 10.73% 떨어졌고 엔비디아(-14.01%)와 브로드컴(-12.19%)의 낙폭이 컸다. VIX는 35.89로 26.2% 올랐다. 11개 업종 중 기술이 7.27% 내렸고, 필수소비재(+0.67%)만 올랐다.",
-  "kr": "코스피는 5.21% 하락한 4,869.96, 코스닥은 5.71% 하락한 645.68에 마감했다. 코스피는 4,900선을 내줬고 올해 1월 수준으로 돌아갔다. 삼성전자가 7.01%, SK하이닉스가 5.92%, SK스퀘어가 8.39% 내렸고 반도체 업종은 9.52% 하락했다. 건설(-6.09%)과 에너지화학(-4.32%)도 약했다. 은행(-0.31%)과 헬스케어(-1.28%)는 낙폭이 작았다.",
-  "macro": "원/달러 환율은 1,334.79원으로 0.33% 올랐다. 미국채 10년 금리는 4.912%로 하루 0.14%p 내렸다. 금은 4.62% 하락한 3,515.4달러, WTI는 0.93% 오른 83.98달러였다. 비트코인은 1.5% 내린 57,915달러 안팎이다."
+  "us": "20일(현지시간) 미국 증시는 기술주 중심으로 급락했다. 나스닥 종합은 5.28% 내린 22,617.73, S&P 500은 3.70%, 다우는 1.93% 하락했다. 필라델피아 반도체지수가 10.73% 급락한 가운데 엔비디아(-14.01%)와 브로드컴(-12.19%)의 낙폭이 컸다. VIX는 35.89로 26.2% 올랐다.",
+  "kr": "한국 증시는 반도체 중심으로 급락했다. 코스피는 5.21% 내린 4,869.96, 코스닥은 5.71% 내린 645.68에 마감했다. 삼성전자(-7.01%)와 SK하이닉스(-5.92%)가 떨어졌고 반도체 업종지수는 9.52% 하락했다. 한국 증시 마감 뒤 미국 증시가 추가로 급락해 다음 거래일 부담으로 남았다.",
+  "macro": "원/달러 환율은 1,334.79원으로 0.33% 올랐다. 미국채 10년 금리는 4.912%로 2.77% 내려 채권이 강세였고, 달러 인덱스는 103.81로 0.09% 하락했다. 금은 4.62% 내린 3,515.40달러, WTI는 0.93% 오른 83.98달러였다."
  },
  "watch": [
-  "11/23(월) 한국 11월 1~20일 수출 동향과 23:45 미국 S&P글로벌 PMI 잠정치. 급락 이후 반도체 업황과 경기 지표 확인",
-  "11/25(화) 22:30 미국 10월 PCE 물가와 3분기 GDP 2차 추정치. 금리와 기술주 변동성에 미칠 영향 점검",
-  "11/26(수) 09:00 한국은행 금통위(현재 기준금리 3.00%). 같은 날 미국 증시는 추수감사절로 휴장하고 27일은 조기 폐장"
+  "11/23(월) 한국 증시가 미국 증시 급락(나스닥 -5.28%, 반도체지수 -10.73%)을 어떻게 반영하는지, 코스피 4,870선 지지 여부",
+  "11/23(월) 관세청 11월 1~20일 수출 동향(반도체 수출 흐름)과 23:45 S&P글로벌 PMI 잠정치",
+  "11/25(화) 22:30 미국 10월 PCE 물가·3분기 GDP 2차 추정치, 11/26(수) 한국은행 금통화위원회(현 기준금리 3.00%), 같은 날 미국 추수감사절 휴장"
  ],
  "tags": [
   "반도체",
   "AI",
   "변동성",
   "금리",
-  "환율"
+  "앤트로픽 IPO"
  ],
  "indices": [
   {
@@ -1585,9 +1585,9 @@
   {
    "symbol": "BTC-USD",
    "name": "비트코인",
-   "price": 57915.3086,
-   "change": -883.6719,
-   "pct": -1.5,
+   "price": 57891.75,
+   "change": -907.2305,
+   "pct": -1.54,
    "date": "2026-11-21",
    "spark": [
     76677.2969,
@@ -1609,7 +1609,7 @@
     62987.2656,
     61901.8203,
     58798.9805,
-    57915.3086
+    57891.75
    ],
    "unit": "usd"
   }
@@ -1651,11 +1651,19 @@
     },
     {
      "symbol": "HDB",
-     "name": "HDFC뱅크",
+     "name": "HDFC은행",
      "price": 27.42,
      "pct": 4.5,
      "cap": 141064077312,
      "name_en": "HDFC Bank Limited"
+    },
+    {
+     "symbol": "KVYO",
+     "name": "클라비요",
+     "price": 22.24,
+     "pct": 4.41,
+     "cap": 6261946880,
+     "name_en": "Klaviyo, Inc. Series A"
     },
     {
      "symbol": "PLMR",
@@ -1664,14 +1672,6 @@
      "pct": 4.41,
      "cap": 4301590528,
      "name_en": "Palomar Holdings, Inc."
-    },
-    {
-     "symbol": "KVYO",
-     "name": "클래비요",
-     "price": 22.24,
-     "pct": 4.41,
-     "cap": 6261946880,
-     "name_en": "Klaviyo, Inc. Series A"
     },
     {
      "symbol": "BGSI",
@@ -1690,12 +1690,12 @@
      "name_en": "Rocket Companies, Inc."
     },
     {
-     "symbol": "BIPC",
+     "symbol": "BIP",
      "name": "브룩필드 인프라스트럭처",
-     "price": 42.82,
+     "price": 42.81,
      "pct": 4.24,
-     "cap": 5267762176,
-     "name_en": "Brookfield Infrastructure Corpo"
+     "cap": 33901916160,
+     "name_en": "Brookfield Infrastructure Partn"
     }
    ],
    "down": [
@@ -1998,7 +1998,7 @@
    "link": "https://news.google.com/rss/articles/CBMiW0FVX3lxTFBnVVZsZm5TYkNqNjhpUHlQamVYZTdGMVZSVVEtQ2dkeEJBM3lYNVc3cGNudFFDLXJPTWhuWFBjWnhoZDFFWF9vcy14Ukp5YTZPMGl6V0NvVmJFOTA?oc=5",
    "source": "KBS 뉴스",
    "published": "Fri, 20 Nov 2026 21:23:00 GMT",
-   "note": "나스닥 5%대 급락에 S&P 500의 연속 하락 기간이 길어지며 위험회피 분위기가 커졌다."
+   "note": "기술주 매도가 지수 전반으로 번지며 S&P 500의 하락 기간도 길어졌다. 위험 회피 심리가 뚜렷하다."
   },
   {
    "market": "us",
@@ -2012,15 +2012,16 @@
    "title": "사상 최대 IPO 앤트로픽 오늘 밤 나스닥 데뷔…국내 연관주는 ’뉴스에 팔아라’",
    "link": "https://news.google.com/rss/articles/CBMicEFVX3lxTFBETW00eTVWWkpfd0VmQTZvZTVqYmwwckh0S21SUUdpaWIxbnlqOU42Um53bUZTd3NqOHUyeHM0eGhpd1ZSaGFSSC1PS3JXSl9BaXl2OWtxVHZBUEx2akpNalZvRzIxV0pNT0ZTUnNLWG4?oc=5",
    "source": "Investing.com 한국어",
-   "published": "Sat, 21 Nov 2026 03:37:34 GMT"
+   "published": "Sat, 21 Nov 2026 03:37:34 GMT",
+   "note": "대형 IPO에 대한 기대보다 차익 실현 매물이 앞섰다는 해석이다. 연관주 수급을 확인할 필요가 있다."
   },
   {
    "market": "us",
-   "title": "나스닥 '준공황', 반도체지수 10% 폭락 … 韓 증시 '중대 위기'",
-   "link": "https://news.google.com/rss/articles/CBMie0FVX3lxTE1JakhwY0ItSUU4cnR1c1JyLWJZLTZILXE5em9xUXczcTBTMU92ZmVvV3JqUGxPT2ROT3h5TXlyMW0xSWlLaFRVaWJmaWJ1akpzbmJ5cGpEM0pGVW5SWkJBOXVOeml2amN1NmJiZF9NWk4zM2ZuSUgwNzVkONIBgAFBVV95cUxObDNpcldTclJNMG41WHRmZHBjbUp1QTk0VGxqMjFRbjRNc0tjT01kN3E4emhjYVNhMDEzSHhoN3ZNMzlRc0J4bm5mczRfNDhIcjV6bjNKeC1xNzY3MFJBekFOZGkyOUt6dXFaVVMwcGhxaFU3SXpjV0RtV2hKZFFkUQ?oc=5",
-   "source": "뉴데일리",
-   "published": "Fri, 20 Nov 2026 20:34:00 GMT",
-   "note": "필라델피아 반도체지수 10% 급락이 삼성전자·SK하이닉스 등 한국 반도체주의 부담으로 이어졌다."
+   "title": "‘투매 장세’에 무너진 뉴욕증시…월요일 코스피 덮칠 충격은",
+   "link": "https://news.google.com/rss/articles/CBMiVEFVX3lxTFBFSzBGNlYyVFRxSXBSMnkzZGRVeUsxM1NYYlZDS3I4cjE2LVFzcU4wOU0xR0NDZUVZNHRUMXdBZ3BtM012d1FwdGxkYzd3ZVQ3dHlVZQ?oc=5",
+   "source": "JTBC",
+   "published": "Sat, 21 Nov 2026 10:26:00 GMT",
+   "note": "한국 증시 마감 뒤 미국 증시가 추가 급락해 월요일 한국 증시에 부담 요인이다."
   },
   {
    "market": "us",
@@ -2031,25 +2032,18 @@
   },
   {
    "market": "us",
+   "title": "나스닥 '준공황', 반도체지수 10% 폭락 … 韓 증시 '중대 위기'",
+   "link": "https://news.google.com/rss/articles/CBMie0FVX3lxTE1JakhwY0ItSUU4cnR1c1JyLWJZLTZILXE5em9xUXczcTBTMU92ZmVvV3JqUGxPT2ROT3h5TXlyMW0xSWlLaFRVaWJmaWJ1akpzbmJ5cGpEM0pGVW5SWkJBOXVOeml2amN1NmJiZF9NWk4zM2ZuSUgwNzVkONIBgAFBVV95cUxObDNpcldTclJNMG41WHRmZHBjbUp1QTk0VGxqMjFRbjRNc0tjT01kN3E4emhjYVNhMDEzSHhoN3ZNMzlRc0J4bm5mczRfNDhIcjV6bjNKeC1xNzY3MFJBekFOZGkyOUt6dXFaVVMwcGhxaFU3SXpjV0RtV2hKZFFkUQ?oc=5",
+   "source": "뉴데일리",
+   "published": "Fri, 20 Nov 2026 20:34:00 GMT",
+   "note": "반도체지수 10% 급락은 삼성전자·SK하이닉스 등 한국 반도체 대형주에 직접적인 부담이다."
+  },
+  {
+   "market": "us",
    "title": "뉴욕증시, 나스닥 5.3% 폭락‥올해 상승분 반납",
    "link": "https://news.google.com/rss/articles/CBMieEFVX3lxTE5jYU9tQ3d4ZWw1NWoxcHpreWVQd0JFTEFtU09lTkktV29PZl9xNXpWdU80SUQwVjM3dWM1NHFJclpOVTNhSy16NFZZMmtNNjBfc0x5bjNORng3U0dQSHBIUVpLU1k2VXdHQnZTeHJrOGlrS2ZrLVotNg?oc=5",
    "source": "MBC 뉴스",
    "published": "Sat, 21 Nov 2026 02:50:10 GMT"
-  },
-  {
-   "market": "us",
-   "title": "상장 이틀 만에 무너진 앤트로픽...뉴욕증시 AI '패닉 매도'",
-   "link": "https://news.google.com/rss/articles/CBMiXkFVX3lxTFA1NWc1SzlSWlNnZ3Y2S3ZQT0xZbmp4anEyeXQtTDVreF9kMjZGZTEtMHNoVEJhOWZ4bDRDQk9WZU5fc3NLUWxweEZ5QklKZldFUEZjWDVqS2VQN2FlX3c?oc=5",
-   "source": "YTN",
-   "published": "Sat, 21 Nov 2026 00:54:00 GMT"
-  },
-  {
-   "market": "kr",
-   "title": "‘4869.96’ 올해 1월 수준 돌아간 코스피…고점 대비 3400조 증발",
-   "link": "https://news.google.com/rss/articles/CBMiZ0FVX3lxTE1GR2d1M1dqY1JuV0I3OEpDcldiOVJKOEx2cUNnRzZzZjBHcDMyX2t3MnNpa2tTdk1WRUx1ZmQydS1Rd0lORVM5emtWT2tBSzM5Wk5GMHE2MGh4aXdqODdxWl9IQXoxVms?oc=5",
-   "source": "한겨레",
-   "published": "Sat, 21 Nov 2026 09:24:00 GMT",
-   "note": "코스피는 4,869.96으로 올해 1월 수준까지 되돌려졌고, 고점 대비 시가총액 감소 폭이 부각됐다."
   },
   {
    "market": "kr",
@@ -2057,15 +2051,14 @@
    "link": "https://news.google.com/rss/articles/CBMidkFVX3lxTE4xeGVFMFoyMlU1TWZnZ1QzZlRWejFrZkZWQ0RGVE1HTkhGc3FLUjVsYWVQLTJsM3dkS0VNWVhsd2JaNmtaME9QSlNUdTg2RG53OE11X0VHT2NRTDBYMjVxYnpQT0FTRFJfUUJuMi1hWkdWMzJtRHc?oc=5",
    "source": "YTN",
    "published": "Sat, 21 Nov 2026 06:04:00 GMT",
-   "note": "4,900선 이탈 이후 다음 주 미국 물가 지표와 금통위가 방향성의 변수다."
+   "note": "코스피가 4,900선 아래로 내려왔다. 다음 주 PCE 물가와 금통위가 방향성을 가를 변수다."
   },
   {
    "market": "kr",
    "title": "코스피와 따로 가는 달러-원…하반기 들어 역상관 약화",
    "link": "https://news.google.com/rss/articles/CBMicEFVX3lxTE5qNkpsSThuS29SR3BvcGNRQUI3NHpLU0pXcG1ZQy1jaEI2MVFqeW9XSEJTSjZYVEllRUF4WnVtaWs2RVUzYjlSR2ZzdWhhZVM0RWY0YXA1Tm8xOEVCYUpDRzNubHBfQUhMeE5xZWs1OUQ?oc=5",
    "source": "연합인포맥스",
-   "published": "Sat, 21 Nov 2026 04:01:45 GMT",
-   "note": "코스피 급락에도 원/달러 환율은 0.33% 상승에 그쳐 주가와 환율의 연동성이 약해진 모습이다."
+   "published": "Sat, 21 Nov 2026 04:01:45 GMT"
   },
   {
    "market": "kr",
@@ -2073,7 +2066,7 @@
    "link": "https://news.google.com/rss/articles/CBMiaEFVX3lxTE5BNkVNWl9aTHB2c2ZFWDMwUjZieU52UENhRi1naWNjR1F4VkFERXNxcDdLMWRrQlJVSkNRR3VVWk5hOXp4VGFobmNMRXgtaG1vTWIwTzRJX1NkUnU5V2VmX3NYdTRXM1It0gFuQVVfeXFMTmxQcDZDVDJGeHJnZDNvYjIxZWpGeHhiM2xtVlZfOUdOZmQxWUsxbF9XUldzb3NSSVdxYzJ2TGdmbmtyTGdCMU16MHhGaFRTLTRZZVJURXZPVGI2Umd1UW53aFlUNXo4WjhseHpFdmc?oc=5",
    "source": "머니투데이",
    "published": "Sat, 21 Nov 2026 04:58:03 GMT",
-   "note": "앤트로픽 IPO와 AMD 관련 악재가 겹치며 AI 반도체 밸류체인 전반의 불안 심리가 커졌다."
+   "note": "AMD 악재와 앤트로픽 IPO가 반도체·AI 관련주 약세 요인으로 거론됐다."
   },
   {
    "market": "kr",
@@ -2096,5 +2089,129 @@
    "source": "시사저널",
    "published": "Sat, 21 Nov 2026 01:49:02 GMT"
   }
- ]
+ ],
+ "analysis": {
+  "triggers": [
+   "코스피 -5.21%",
+   "코스닥 -5.71%"
+  ],
+  "title": "AI 투자 의구심·수급 쏠림에 코스피 5% 급락",
+  "summary": "코스피와 코스닥은 20일 AI 투자 수익성 의구심, 앤트로픽 상장에 따른 자금 이동, 대중국 반도체 규제 우려, 미국 추가 금리 인상 경계가 겹치며 5%대 급락했다. 한국 증시 마감 뒤 열린 미국 증시에서는 나스닥이 5.28%, 필라델피아 반도체지수가 10.73% 더 빠져 다음 거래일 부담이 커졌다.",
+  "causes": [
+   {
+    "title": "AI 투자 수익성 의구심",
+    "weight": "높음",
+    "detail": "엔비디아의 호실적과 앤트로픽의 상장 흥행에도 투자심리가 살아나지 않고 기술주 매도세가 이어졌다. 한국 증시가 열리기 직전인 19일(현지시간) 미국 증시에서는 <cite index=\"17-15,17-16\">나스닥이 2.25% 하락했고 엔비디아는 3.3%, 마이크론은 2.1% 떨어졌다.</cite> 엔비디아가 실적 발표에서 AI 생태계를 선별 지원하겠다고 밝히자 <cite index=\"33-6\">AI 투자가 지연될 수 있다는 우려가 주가에 부정적으로 작용했다.</cite> 한국 증시 마감 뒤인 20일 미국장에서는 <cite index=\"37-9\">로이터의 SEC 회계 조사 보도 이후 엔비디아가 14.01% 폭락했다.</cite> 다만 <cite index=\"39-1\">확인된 것은 조사 보도이지 회계 부정 적발이나 제재 확정이 아니다.</cite>"
+   },
+   {
+    "title": "대중 수출통제·Fed 긴축 우려",
+    "weight": "중간",
+    "detail": "<cite index=\"10-12\">미국 공매도 투자회사 헌터브룩 캐피털이 제재 대상인 중국 서버업체 IEIT시스템스에 AMD의 최신 펌웨어가 공급됐다는 의혹을 제기했다.</cite> <cite index=\"12-13\">AMD는 의혹을 부인했지만 주가 급락은 피하지 못했다.</cite> <cite index=\"11-6\">삼성전자와 TSMC가 중국 일부 고객사로의 반도체 출하를 중단했다는 보도도 생산 차질 우려를 키웠다.</cite> 통화정책 면에서는 <cite index=\"5-12\">리사 쿡 연준 이사가 현재 기준금리가 물가 압력을 억제하기에 충분하지 않다는 견해를 밝혔고,</cite> <cite index=\"36-8\">월러 이사는 12월 회의에서 0.5%포인트 인상을 고려해야 한다고 주장했다.</cite> 시장에서는 이를 성장주 밸류에이션 부담 요인으로 받아들였다."
+   },
+   {
+    "title": "앤트로픽 IPO 자금 이동·수급",
+    "weight": "높음",
+    "detail": "<cite index=\"13-9\">국내외 증권가에서는 앤트로픽을 사기 위해 다른 기술주를 대량 매도한 것으로 해석했다.</cite> 국내에서는 <cite index=\"11-1\">외국인·기관이 2.8조원을 순매도했고 양대 시장에 매도 사이드카가 발동됐다.</cite> <cite index=\"11-8\">코스피 시장에서 상승 종목은 88개에 그친 반면 하락 종목은 808개에 달했다.</cite> <cite index=\"11-11,11-12\">SK텔레콤은 앤트로픽 상장에 따른 차익실현 매물로 급락했고, 지분가치 상승 기대가 주가에 선반영됐다는 인식이 매도로 이어진 것으로 풀이됐다.</cite>"
+   },
+   {
+    "title": "낙폭 확대와 투자심리 위축",
+    "weight": "중간",
+    "detail": "키움증권 한지영 연구원은 <cite index=\"13-13\">호재가 나와도 주가가 계속 급락하면서 시장 참여자 대다수의 매수 의지가 약해진 것이 가장 큰 원인</cite>이라고 진단했다. 코스피는 <cite index=\"31-2\">이번 주 7.95% 하락했고</cite> 직전 주에도 <cite index=\"29-1\">11% 넘게 급락했다.</cite> 주어진 시세 기준으로 VIX는 35.89로 26.2% 올랐고 코스피는 20일 고점 대비 19.0% 낮은 수준이다. 시장에서는 연속 낙폭에 따른 투매성 매물이 더해진 것으로 받아들였다."
+   }
+  ],
+  "reaction": "반도체가 가장 크게 흔들렸다. 삼성전자는 -7.01%, SK하이닉스는 -5.92%, SK스퀘어는 -8.39%였고 KRX 반도체 업종 ETF는 -9.52%였다. 코스피에서는 <cite index=\"10-16\">전기·가스를 뺀 모든 업종이 내렸고,</cite> 건설(-6.09%)과 자동차(-3.61%)도 약세였다. 은행(-0.31%)과 헬스케어(-1.28%)는 낙폭이 작았고, 코스닥에서는 AI·부품 관련 중소형주의 낙폭이 컸다.",
+  "history": "<cite index=\"23-1,23-3\">이달 5일 미국 증시에서도 AI 규제 공포에 필라델피아 반도체지수가 12.2% 급락했고, 이는 2020년 3월 이후 가장 큰 하루 낙폭이었다.</cite> 6월 5일에는 <cite index=\"24-1\">브로드컴 실적 실망과 강한 고용지표에 따른 금리 인상 우려로 반도체지수가 10.3% 폭락했다.</cite> 다만 <cite index=\"23-6\">반도체지수의 올해 최고치는 6월 22일에 기록됐다.</cite> 6월 급락 뒤 약 2주 반 만에 고점을 새로 썼다는 뜻이지만, 같은 흐름이 이번에도 나온다는 보장은 없다.",
+  "link": "한국 증시가 마감한 뒤 열린 20일 미국 증시에서 나스닥이 5.28%, 필라델피아 반도체지수가 10.73% 급락해 한국 반도체주의 다음 거래일 부담으로 작용할 수 있다. 반대로 <cite index=\"35-14\">주말 사이 미국 증시의 기술주 매도세가 다음 주 초반 국내 투자심리에 부정적일 것으로 전망됐다.</cite> 한국 반도체 대형주와 외국인 수급이 다시 미국 AI 반도체 흐름에 연동될 수 있다.",
+  "watch": [
+   "11/23(월) 코스피·코스닥 개장 반응과 외국인 수급(미국 20일 폭락 반영 정도), 11/23 관세청 11월 1~20일 수출 동향",
+   "11/23 23:45 미국 S&P글로벌 PMI 잠정치",
+   "11/25 22:30 미국 10월 PCE 물가와 3분기 GDP 2차 추정치(예상 상회 시 추가 금리 인상 우려 재부각 가능)",
+   "11/26 한국은행 금통위(시장은 3.00%에서 3.25%로의 인상을 예상), 11/26 미국 추수감사절 휴장·11/27 조기 폐장에 따른 거래 위축"
+  ],
+  "outlook": {
+   "stance": "하락 우위",
+   "horizon": "1~2주",
+   "reason": "한국 증시가 반영하지 못한 미국 20일 급락(나스닥 -5.28%, 반도체지수 -10.73%)이 다음 거래일 부담으로 남아 있다. PCE와 금통위 등 금리 변수가 이어지고 추수감사절 전후로 거래가 얇아져 변동성이 커질 수 있다. 다만 코스피는 20일 고점 대비 19.0% 낮고 20일선 대비 9.68% 아래여서 기술적 반등 가능성도 열려 있다.",
+   "scenarios": [
+    {
+     "name": "기본",
+     "likelihood": "높음",
+     "desc": "미국 급락의 영향으로 갭하락 출발한 뒤 외국인 수급과 PCE 결과를 확인하며 4800~5000선 부근에서 등락이 커지는 흐름."
+    },
+    {
+     "name": "상방",
+     "likelihood": "낮음",
+     "desc": "PCE가 예상보다 둔화하고 엔비디아 조사·대중 규제 우려가 확산하지 않으며 외국인 매도가 잦아들 경우, 코스피 5000선 회복을 시도하는 반등."
+    },
+    {
+     "name": "하방",
+     "likelihood": "중간",
+     "desc": "PCE가 예상을 웃돌고 금통위·연준 발언이 매파적으로 받아들여지거나 미국 반도체주 매도가 이어질 경우, 4800선 하회와 사이드카 재발동 가능성."
+    }
+   ],
+   "levels": [
+    "코스피 4831.69(20일 장중 저점)와 4869.96(20일 종가)",
+    "코스피 5028.85(5일선)와 5000선",
+    "코스닥 638.97(20일 저점)과 645.68(20일 종가)"
+   ]
+  },
+  "sources": [
+   {
+    "title": "코스피, 앤트로픽 IPO·AMD 악재에 5%대 급락 - 서울경제TV",
+    "url": "https://www.sentv.co.kr/article/view/sentv202611200201"
+   },
+   {
+    "title": "코스피, 美 반도체주 급락·외국인 매도에 5%대 하락 마감···4900선 붕괴 - 서울파이낸스",
+    "url": "https://www.seoulfn.com/news/articleView.html?idxno=643505"
+   },
+   {
+    "title": "\"대체 바닥이 어디야\"…코스피 4900선 붕괴, 반등 열쇠는? - 머니투데이",
+    "url": "https://www.mt.co.kr/stock/2026/11/20/2026112015522358657"
+   },
+   {
+    "title": "나스닥, 기술주 매도에 5.3% 폭락…다우·S&P500 조정 진입 - SBS Biz",
+    "url": "https://biz.sbs.co.kr/article/20000347950"
+   },
+   {
+    "title": "美 SEC, 엔비디아 회계 들여다본다⋯주가 14% 폭락 - 이투데이",
+    "url": "https://www.etoday.co.kr/news/view/2651155"
+   },
+   {
+    "title": "美 뉴욕증시 3대 지수 급락…AI 투자 과열 우려에 나스닥 5.3%↓ - 블루밍비트",
+    "url": "https://bloomingbit.io/feed/news/124916"
+   }
+  ]
+ },
+ "drivers": [
+  "필라델피아 반도체지수가 10.73% 급락하고 엔비디아(-14.01%)·브로드컴(-12.19%)이 큰 폭으로 내리며 기술주 매도가 이어졌다.",
+  "코스피 반도체 업종지수가 9.52% 하락하고 삼성전자(-7.01%), SK하이닉스(-5.92%)가 밀리며 지수 낙폭을 키웠다. 보도에서는 AI 불안과 AMD 악재, 앤트로픽 IPO가 거론됐다.",
+  "VIX가 26.2% 급등한 35.89를 기록했고 미국채 10년 금리는 2.77% 하락했다. 위험자산 회피 속에 채권으로 자금이 이동했다."
+ ],
+ "outlook": {
+  "stance": "하락 우위",
+  "horizon": "다음 거래일~1주",
+  "reason": "코스피는 20일 종가가 20일 저점(4,869.96)과 같고 5일 이동평균(5,028.85)과 20일 이동평균(5,391.73)을 모두 밑돌았다. 한국 증시 마감 뒤 미국 증시가 나스닥 -5.28%, 반도체지수 -10.73%로 추가 급락해 단기 하방 압력이 크다. 다만 낙폭이 커 기술적 반등 가능성도 있어, 25일 PCE와 26일 금통위 결과에 따라 흐름이 갈릴 수 있다.",
+  "scenarios": [
+   {
+    "name": "기본",
+    "likelihood": "높음",
+    "desc": "미국 증시 급락 영향으로 월요일 한국 증시가 약세로 출발하고, 반도체 중심으로 변동성이 큰 장이 이어진다."
+   },
+   {
+    "name": "상방",
+    "likelihood": "낮음",
+    "desc": "미국 증시가 낙폭을 일부 되돌리고 반도체 매도세가 진정되면 코스피가 5일 이동평균(5,028.85) 부근까지 반등을 시도한다."
+   },
+   {
+    "name": "하방",
+    "likelihood": "중간",
+    "desc": "VIX 상승과 반도체 약세가 이어져 코스피가 20일 저점(4,869.96)을 이탈하면 추가 투매로 번질 수 있다."
+   }
+  ],
+  "levels": [
+   "코스피 20일 저점이자 종가인 4,869.96선",
+   "코스피 5일 이동평균 5,028.85선, 20일 이동평균 5,391.73선",
+   "나스닥 종합 20일 저점이자 종가인 22,617.73선"
+  ]
+ }
 }
