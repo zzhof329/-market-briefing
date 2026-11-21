@@ -245,6 +245,7 @@ button.cell:hover{border-color:var(--steel)}
 .fng .bar{flex:1;height:8px;border-radius:4px;background:linear-gradient(90deg,var(--down),#9aa3ad,var(--up));position:relative}
 .fng .bar i{position:absolute;top:-4px;width:4px;height:16px;border-radius:2px;background:var(--ink)}
 .tag.st-up{background:var(--upbg);color:var(--up)} .tag.st-down{background:var(--downbg);color:var(--down)} .tag.st-flat{background:var(--flatbg);color:var(--sub)}
+small.krw{display:block;color:var(--sub);font-size:12px;font-weight:400;white-space:nowrap}
 .links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
 .empty{padding:24px 14px;color:var(--sub);text-align:center}
 footer{margin:40px 0 28px;padding-top:14px;border-top:1px solid var(--line);font-size:12.5px;color:var(--sub)}
@@ -308,7 +309,7 @@ const S = {tab: "home", doc: null, key: "latest", index: [], q: "", month: "all"
   cal: null, season: null, calMonth: null, seasonIdx: 0, seasonAll: false, stockSort: "cap", krBoard: "kospi", anaMk: null};
 
 const TABS = [
-  ["home", "홈"], ["us", "미국 시장"], ["kr", "한국 시장"], ["macro", "환율·금리"], ["coin", "코인"],
+  ["home", "홈"], ["us", "미국 시장"], ["kr", "한국 시장"], ["coin", "코인"], ["macro", "환율·금리"],
   ["calendar", "달력"], ["news", "뉴스"], ["archive", "아카이브"], ["links", "바로가기"],
 ];
 const US_IDX = ["^IXIC", "^NDX", "^GSPC", "^DJI", "^SOX", "^VIX"], KR_IDX = ["^KS11", "^KQ11"];
@@ -373,6 +374,11 @@ function idxTable(list) {
   </tbody></table></div>`;
 }
 
+// 달러 → 원화 환산 (그날 원/달러 환율)
+const usdkrw = () => (S.doc?.macro || []).find(m => m.symbol === "KRW=X")?.price || S.doc?.crypto?.usdkrw || null;
+const wonShort = v => v >= 1e8 ? `${nf(v / 1e8, 2)}억 원` : v >= 1e4 ? `${nf(v / 1e4, 1)}만 원` : `${nf(v, 0)}원`;
+const krwSub = usd => { const r = usdkrw(); return r && usd ? `<small class="krw">약 ${wonShort(usd * r)}</small>` : ""; };
+
 function stockTable(list, mk) {
   if (!list?.length) return `<p class="empty">데이터 없음</p>`;
   const fmt = v => mk === "kr" ? `${nf(v, 0)}원` : `$${nf(v)}`;
@@ -381,7 +387,7 @@ function stockTable(list, mk) {
     : [...list].sort((a, b) => (a.rank || 99) - (b.rank || 99) || (b.cap || 0) - (a.cap || 0));
   return `<div class="tablewrap"><table><thead><tr><th class="n">순위</th><th>종목</th><th class="n">종가</th><th class="n">등락률</th><th class="n hide-m">시가총액</th><th class="hide-m">20일 추이</th></tr></thead><tbody>
   ${rows.map((s, i) => { const d = dir(s.pct); return `<tr><td class="n mono">${s.rank || i + 1}</td><td class="nm">${esc(s.name)}<small>${esc(s.symbol.replace(".KS", ""))}<span class="show-m"> · ${capFmt(s.cap)}</span></small></td>
-    <td class="n">${fmt(s.price)}</td><td class="n ${d}"><b>${pct(s.pct)}</b></td><td class="n mono hide-m">${capFmt(s.cap)}</td><td class="sp hide-m">${spark(s.spark, d)}</td></tr>`; }).join("")}
+    <td class="n">${fmt(s.price)}${mk === "us" ? krwSub(s.price) : ""}</td><td class="n ${d}"><b>${pct(s.pct)}</b></td><td class="n mono hide-m">${capFmt(s.cap)}</td><td class="sp hide-m">${spark(s.spark, d)}</td></tr>`; }).join("")}
   </tbody></table></div>`;
 }
 
@@ -389,7 +395,7 @@ function moverTable(list, mk, title) {
   if (!list?.length) return `<div><h3 style="margin:0;font-size:15px">${title}</h3><p class="empty">해당 종목이 없거나 데이터를 받지 못했습니다.</p></div>`;
   const fmt = v => v == null ? "–" : mk === "us" ? `$${nf(v)}` : `${nf(v, 0)}원`;
   return `<div><h3 style="margin:0;font-size:15px">${title}</h3><div class="tablewrap"><table><thead><tr><th class="n">#</th><th>종목</th><th class="n">종가</th><th class="n">등락률</th></tr></thead><tbody>
-    ${list.map((r, i) => `<tr><td class="n mono">${i + 1}</td><td class="nm">${esc(r.name)}<small>${esc(r.symbol)}${r.name_en ? `<span class="hide-m"> · ${esc(r.name_en)}</span>` : ""}</small></td><td class="n">${fmt(r.price)}</td><td class="n ${dir(r.pct)}"><b>${pct(r.pct)}</b></td></tr>`).join("")}
+    ${list.map((r, i) => `<tr><td class="n mono">${i + 1}</td><td class="nm">${esc(r.name)}<small>${esc(r.symbol)}${r.name_en ? `<span class="hide-m"> · ${esc(r.name_en)}</span>` : ""}</small></td><td class="n">${fmt(r.price)}${mk === "us" ? krwSub(r.price) : ""}</td><td class="n ${dir(r.pct)}"><b>${pct(r.pct)}</b></td></tr>`).join("")}
   </tbody></table></div></div>`;
 }
 
@@ -421,10 +427,20 @@ function sectorBars(list) {
 }
 
 function macroTable(list) {
-  const val = m => m.unit === "pct" ? `${nf(m.price, 3)}%` : m.unit === "krw" ? `${nf(m.price)}원` : m.unit === "usd" ? `$${nf(m.price)}` : nf(m.price);
+  const val = m => m.unit === "pct" ? `${nf(m.price, 3)}%` : m.unit === "krw" ? `${nf(m.price)}원` : m.unit === "krw100" ? `${nf(m.price * 100)}원`
+    : m.unit === "jpy" ? `¥${nf(m.price)}` : m.unit === "usd" ? `$${nf(m.price)}` : nf(m.price);
   const chg = m => m.unit === "pct" ? `${m.change > 0 ? "+" : ""}${nf(m.change * 100, 1)}bp` : pct(m.pct);
+  const OZ = 31.1035, DON = 3.75;
+  const sub = m => {
+    const r = usdkrw();
+    if (m.unit !== "usd" || !r) return "";
+    if (m.symbol === "GC=F") { const g = m.price * r / OZ;
+      return `<small class="krw">1돈 ${nf(g * DON, 0)}원</small><small class="krw">1g ${nf(g, 0)}원</small>`; }
+    if (m.symbol === "CL=F") return `<small class="krw">배럴당 약 ${wonShort(m.price * r)}</small>`;
+    return krwSub(m.price);
+  };
   return `<div class="tablewrap"><table><thead><tr><th>지표</th><th class="n">현재</th><th class="n">변동</th><th class="hide-m">20일 추이</th><th class="n hide-m">기준일</th></tr></thead><tbody>
-  ${(list || []).map(m => { const d = dir(m.change); return `<tr><td class="nm">${esc(m.name)}<small>${esc(m.symbol)}</small></td><td class="n"><b>${val(m)}</b></td>
+  ${(list || []).map(m => { const d = dir(m.change); return `<tr><td class="nm">${esc(m.name)}<small>${esc(m.symbol)}</small></td><td class="n"><b>${val(m)}</b>${sub(m)}</td>
     <td class="n ${d}">${chg(m)}</td><td class="sp hide-m">${spark(m.spark, d)}</td><td class="n mono hide-m">${md(m.date)}</td></tr>`; }).join("")}
   </tbody></table></div>`;
 }
@@ -482,7 +498,7 @@ function viewAnalysis(a) {
     outlook: a.outlook && !Array.isArray(a.outlook) ? a.outlook : null}];
   const mk = parts.some(x => x.market === S.anaMk) ? S.anaMk : parts[0].market;
   const part = parts.find(x => x.market === mk) || parts[0];
-  const mkName = m => m === "kr" ? "한국 증시" : "미국 증시";
+  const mkName = m => m === "kr" ? "한국 증시" : m === "crypto" ? "코인" : "미국 증시";
   const watch = a.watch || (Array.isArray(a.outlook) ? a.outlook : []);
   return `<section class="ana" aria-label="심층 분석">
     <div><span class="badge">심층 분석</span><span class="trig">${a.triggers.map(esc).join(" · ")}${a.reused ? " · 오늘 아침 분석" : ""}</span></div>
@@ -594,7 +610,10 @@ function viewMacro() {
   <div class="shead"><div><h2 style="margin:0;font-family:var(--f-display);font-size:21px">환율·금리·원자재</h2>
     <p class="desc" style="margin:4px 0 0;color:var(--sub)">금리는 bp(0.01%p), 나머지는 전일 대비 등락률</p></div></div>
   <div class="memo"><p>${esc(d.commentary?.macro || "코멘트 없음")}</p></div>
-  <section class="sec">${macroTable(d.macro)}</section>`;
+  ${[["환율", ["krw", "krw100", "jpy", "idx"]], ["금리", ["pct"]], ["원자재", ["usd"]]].map(([t, units]) => {
+    const rows = (d.macro || []).filter(m => units.includes(m.unit || "idx"));
+    return rows.length ? `<section class="sec"><h2>${t}</h2>${t === "원자재" ? `<p class="desc">원화 가격은 국제 시세를 그날 원/달러 환율로 환산한 값입니다. 국내 금 시세(금은방·KRX 금시장)와는 차이가 있을 수 있습니다.</p>` : ""}${macroTable(rows)}</section>` : "";
+  }).join("")}`;
 }
 
 function viewCoin() {
@@ -625,7 +644,7 @@ function viewCoin() {
       <td class="n ${d}"><b>${pct(x.pct)}</b></td>
       <td class="n hide-m">${usd(x.price)}</td><td class="sp hide-m">${spark(x.spark, d)}</td></tr>`; }).join("")}
     </tbody></table></div>
-    <p class="disc">코인은 24시간 거래되어 등락률은 일봉(해외 시세) 기준입니다. 바이낸스코인은 업비트에 없어 환율로 환산한 가격입니다.</p>
+    <p class="disc">코인은 24시간 거래되어 등락률은 일봉(해외 시세) 기준입니다. 업비트 원화 시장에 없는 코인(바이낸스코인)은 환율로 환산한 가격입니다.</p>
   </section>`;
 }
 
