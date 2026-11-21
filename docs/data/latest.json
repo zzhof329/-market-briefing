@@ -1,17 +1,47 @@
 {
- "generated_at": "2026-11-21T16:09+09:00",
+ "generated_at": "2026-11-21T16:16+09:00",
  "date": "2026-11-21",
  "session": "afternoon",
  "sample": false,
- "headline": ", 코스피 -5.21%",
+ "headline": "나스닥 종합 -5.28%, 코스피 -5.21%",
  "commentary": {
-  "us": ", S&P 500 -3.70%, 필라델피아 반도체 -10.73%로 마감했다.",
+  "us": "나스닥 종합 -5.28%, S&P 500 -3.70%, 필라델피아 반도체 -10.73%로 마감했다.",
   "kr": "코스피 -5.21%, 코스닥 -5.71%로 마감했다.",
   "macro": ""
  },
  "watch": [],
  "tags": [],
  "indices": [
+  {
+   "symbol": "^IXIC",
+   "name": "나스닥 종합",
+   "price": 22617.7305,
+   "change": -1261.4688,
+   "pct": -5.28,
+   "date": "2026-11-20",
+   "spark": [
+    26169.3809,
+    26477.8105,
+    26549.8496,
+    26184.7207,
+    25437.0,
+    25164.3105,
+    25372.0098,
+    25736.5098,
+    24315.0,
+    24579.4297,
+    25253.1406,
+    25065.8691,
+    25466.1895,
+    25366.0898,
+    25136.2695,
+    24509.7598,
+    24328.3809,
+    24429.8809,
+    23879.1992,
+    22617.7305
+   ]
+  },
   {
    "symbol": "^GSPC",
    "name": "S&P 500",
@@ -1356,12 +1386,11 @@
   {
    "symbol": "BTC-USD",
    "name": "비트코인",
-   "price": 58156.0508,
-   "change": -3745.7695,
-   "pct": -6.05,
+   "price": 58055.8008,
+   "change": -743.1797,
+   "pct": -1.26,
    "date": "2026-11-21",
    "spark": [
-    78248.4531,
     76677.2969,
     77345.0469,
     80405.2891,
@@ -1380,7 +1409,8 @@
     64893.9453,
     62987.2656,
     61901.8203,
-    58156.0508
+    58798.9805,
+    58055.8008
    ],
    "unit": "usd"
   }
@@ -1437,17 +1467,17 @@
   },
   {
    "market": "kr",
+   "title": "4,900선 무너진 코스피...다음 주 미국 물가·금통위 주목",
+   "link": "https://news.google.com/rss/articles/CBMiX0FVX3lxTE9QSGVuWDV4OEhyZVZCZVRKWnU0MVpUbjhNMXU4bThyR1E0UDBVeFdaZTBzc3FkQnVXOXUxcmhtUlFVbU5mSE1qQWI1Z1dvQjEwUklFV1JjUnRLb1Z6LVVz?oc=5",
+   "source": "YTN",
+   "published": "Sat, 21 Nov 2026 06:04:00 GMT"
+  },
+  {
+   "market": "kr",
    "title": "코스피와 따로 가는 달러-원…하반기 들어 역상관 약화",
    "link": "https://news.google.com/rss/articles/CBMicEFVX3lxTE5qNkpsSThuS29SR3BvcGNRQUI3NHpLU0pXcG1ZQy1jaEI2MVFqeW9XSEJTSjZYVEllRUF4WnVtaWs2RVUzYjlSR2ZzdWhhZVM0RWY0YXA1Tm8xOEVCYUpDRzNubHBfQUhMeE5xZWs1OUQ?oc=5",
    "source": "연합인포맥스",
    "published": "Sat, 21 Nov 2026 04:01:45 GMT"
-  },
-  {
-   "market": "kr",
-   "title": "4,900선 무너진 코스피...다음 주 미국 물가·금통위 주목",
-   "link": "https://news.google.com/rss/articles/CBMiXkFVX3lxTE5tVDRZT0xPbnYtbXFGVGdWRlRHUEFucUdQRDBFOG5wN05QUWRYY0VLdGhwdU5fNWs3Y3JNdWIyTUhVVlVqYWFRZDA4WUJOY2lMMlZyMHBzVmVyNG0wT0E?oc=5",
-   "source": "YTN",
-   "published": "Sat, 21 Nov 2026 06:04:00 GMT"
   },
   {
    "market": "kr",
