@@ -190,9 +190,9 @@ SYSTEM = """당신은 한국 개인투자자를 위한 증권사 리서치센터
 반드시 아래 형식의 JSON 객체 하나만 출력하세요. 설명 문장, 마크다운 코드블록, 주석(//)은 넣지 마세요.
 {
   "headline": "오늘 시장을 한 문장으로 (40자 내외)",
-  "us": "미국 시장 코멘트 3~4문장",
-  "kr": "한국 시장 코멘트 3~4문장",
-  "macro": "환율·금리·원자재 코멘트 2~3문장",
+  "us": "미국 시장 코멘트 3~4문장 (300자 이내)",
+  "kr": "한국 시장 코멘트 3~4문장 (300자 이내)",
+  "macro": "환율·금리·원자재 코멘트 2~3문장 (200자 이내)",
   "watch": ["오늘/다음 거래일 체크포인트 3개"],
   "tags": ["아카이브 분류용 주제 태그 3~5개. 짧은 명사, 예: 반도체, 환율, 금리, 실적, 2차전지, 유가"],
   "news_notes": [{"i": 0, "note": "중요한 뉴스 최대 6개에 대한 시장 관점 한줄평. i는 뉴스 번호(숫자)"}]
@@ -207,11 +207,13 @@ def write_with_claude(payload: dict) -> dict | None:
     client = Anthropic()
     msg = client.messages.create(
         model=os.getenv("CLAUDE_MODEL") or "claude-sonnet-5-5",
-        max_tokens=2000,
+        max_tokens=8000,
         system=SYSTEM,
         messages=[{"role": "user", "content": json.dumps(payload, ensure_ascii=False)}],
     )
     text = "".join(b.text for b in msg.content if b.type == "text")
+    if msg.stop_reason == "max_tokens":
+        print("[claude] 답이 길어서 중간에 잘렸습니다. max_tokens를 늘리거나 분량을 줄이세요.")
     return parse_json_loose(text)
 
 
