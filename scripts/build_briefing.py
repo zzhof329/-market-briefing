@@ -9,7 +9,8 @@
 
 환경변수
   ANTHROPIC_API_KEY  (없으면 규칙 기반 요약으로 대체)
-  CLAUDE_MODEL       (기본값: claude-sonnet-5-5)
+  BRIEF_MODEL        매일 브리핑 모델 (기본값: claude-haiku-5-5)
+  CLAUDE_MODEL       심층 분석·달력 모델 (기본값: claude-sonnet-5-5)
   ECOS_API_KEY       (선택)
 """
 from __future__ import annotations
@@ -31,6 +32,10 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 DATA_DIR = ROOT / "docs" / "data"
 ARCHIVE_DIR = DATA_DIR / "archive"
 KST = ZoneInfo("Asia/Seoul")
+
+# 매일 브리핑은 가벼운 Haiku, 웹 검색이 필요한 심층 분석·달력은 Sonnet
+BRIEF_MODEL = os.getenv("BRIEF_MODEL") or "claude-haiku-5-5"
+DEEP_MODEL = os.getenv("CLAUDE_MODEL") or "claude-sonnet-5-5"
 
 # ── 수집 대상 (원하는 대로 수정하세요) ─────────────────────────────
 INDICES = [
@@ -464,7 +469,7 @@ def write_with_claude(payload: dict) -> dict | None:
 
     client = Anthropic()
     msg = client.messages.create(
-        model=os.getenv("CLAUDE_MODEL") or "claude-sonnet-5-5",
+        model=BRIEF_MODEL,
         max_tokens=8000,
         system=SYSTEM,
         messages=[{"role": "user", "content": json.dumps(payload, ensure_ascii=False)}],
@@ -682,7 +687,7 @@ def write_analysis(payload: dict, trig: dict) -> dict | None:
     from anthropic import Anthropic
     try:
         msg = Anthropic().messages.create(
-            model=os.getenv("CLAUDE_MODEL") or "claude-sonnet-5-5",
+            model=DEEP_MODEL,
             max_tokens=8000,
             system=ANALYSIS_SYSTEM,
             tools=[{"type": "web_search_20250305", "name": "web_search", "max_uses": 12}],
@@ -760,7 +765,7 @@ def build_calendar() -> list[dict]:
                 continue
             try:
                 msg = client.messages.create(
-                    model=os.getenv("CLAUDE_MODEL") or "claude-sonnet-5-5",
+                    model=DEEP_MODEL,
                     max_tokens=8000,
                     system=CAL_SYSTEM,
                     tools=[{"type": "web_search_20250305", "name": "web_search", "max_uses": 8}],
@@ -890,7 +895,8 @@ def main() -> None:
     trig = analysis_triggers(indices, crypto)
     earlier = todays_analysis(now.strftime("%Y-%m-%d"))
     manual = os.getenv("GITHUB_EVENT_NAME") == "workflow_dispatch"
-    if earlier and earlier.get("parts"):
+    has_crypto = any(x.get("market") == "crypto" for x in (earlier or {}).get("parts", []))
+    if earlier and earlier.get("parts") and not (manual and crypto and not has_crypto):
         # 하루 한 번: 오늘 이미 쓴 분석은 그대로 보여줌
         analysis = dict(earlier, reused=True)
         print("[analysis] 오늘 이미 쓴 심층 분석을 다시 보여줍니다")
@@ -900,6 +906,8 @@ def main() -> None:
             analysis = write_analysis(payload, trig)
         else:
             print(f"[analysis] 큰 변동: {trig} → 심층 분석은 다음 날 아침 브리핑에서 작성합니다")
+    if analysis is None and earlier:
+        analysis = dict(earlier, reused=True)  # 새로 쓰기에 실패하면 오늘 쓴 분석이라도 보여줌
 
     ko = brief.get("ko_names") or {}
     for d in ("up", "down"):
