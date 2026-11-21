@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>나스닥·코스피 브리핑 아카이브</title>
-<meta name="description" content="매일 아침 뉴욕 마감, 매일 오후 서울 마감 브리핑을 쌓아두는 아카이브">
+<meta name="description" content="매일 아침 미국 증시 마감, 매일 오후 한국 증시 마감 브리핑을 쌓아두는 아카이브">
 <!-- 홈 화면 앱 설정 -->
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -204,7 +204,7 @@ button.cell:hover{border-color:var(--steel)}
 footer{margin:40px 0 28px;padding-top:14px;border-top:1px solid var(--line);font-size:12.5px;color:var(--sub)}
 
 @media (max-width:820px){
-  .hero,.cols,.links{grid-template-columns:1fr}
+  .hero,.cols,.links{grid-template-columns:minmax(0,1fr)}
   .facts{justify-content:flex-start}
   .cards{grid-template-columns:repeat(2,minmax(0,1fr))}
   .season-sum{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -245,15 +245,15 @@ const dir = v => v > 0 ? "up" : v < 0 ? "down" : "flat";
 const arrow = v => v > 0 ? "▲" : v < 0 ? "▼" : "–";
 const nf = (v, d = 2) => Number(v).toLocaleString("ko-KR", {minimumFractionDigits: d, maximumFractionDigits: d});
 const pct = v => v == null ? "–" : `${v > 0 ? "+" : ""}${nf(v)}%`;
-const sesName = s => s === "morning" ? "뉴욕 마감" : "서울 마감";
+const sesName = s => s === "morning" ? "미국 증시 마감" : "한국 증시 마감";
 const md = d => d ? d.slice(5).replace("-", ".") : "";
 
 const EMBED = window.BRIEFING_EMBED || null;   // 미리보기용: 데이터가 페이지 안에 들어 있으면 그걸 사용
 const S = {tab: "home", doc: null, key: "latest", index: [], q: "", month: "all", ses: "all", tag: null, newsMk: "all", cache: {},
-  cal: null, season: null, calMonth: null, seasonIdx: 0, seasonAll: false};
+  cal: null, season: null, calMonth: null, seasonIdx: 0, seasonAll: false, stockSort: "cap", krBoard: "kospi"};
 
 const TABS = [
-  ["home", "홈"], ["us", "미국 시장"], ["kr", "한국 시장"], ["macro", "매크로"],
+  ["home", "홈"], ["us", "미국 시장"], ["kr", "한국 시장"], ["macro", "환율·금리"],
   ["calendar", "달력"], ["news", "뉴스"], ["archive", "아카이브"], ["links", "바로가기"],
 ];
 const US_IDX = ["^IXIC", "^NDX", "^GSPC", "^DJI", "^SOX", "^VIX"], KR_IDX = ["^KS11", "^KQ11"];
@@ -321,10 +321,35 @@ function idxTable(list) {
 function stockTable(list, mk) {
   if (!list?.length) return `<p class="empty">데이터 없음</p>`;
   const fmt = v => mk === "kr" ? `${nf(v, 0)}원` : `$${nf(v)}`;
-  return `<div class="tablewrap"><table><thead><tr><th>종목</th><th class="n">종가</th><th class="n">등락률</th><th>20일 추이</th></tr></thead><tbody>
-  ${[...list].sort((a, b) => b.pct - a.pct).map(s => { const d = dir(s.pct); return `<tr><td class="nm">${esc(s.name)}<small>${esc(s.symbol.replace(".KS", ""))}</small></td>
-    <td class="n">${fmt(s.price)}</td><td class="n ${d}"><b>${pct(s.pct)}</b></td><td class="sp">${spark(s.spark, d)}</td></tr>`; }).join("")}
+  const capFmt = c => !c ? "–" : mk === "kr" ? `${nf(c / 1e12, 0)}조 원` : `${nf(c / 1e12, 2)}조 달러`;
+  const rows = S.stockSort === "pct" ? [...list].sort((a, b) => b.pct - a.pct)
+    : [...list].sort((a, b) => (a.rank || 99) - (b.rank || 99) || (b.cap || 0) - (a.cap || 0));
+  return `<div class="tablewrap"><table><thead><tr><th class="n">순위</th><th>종목</th><th class="n">종가</th><th class="n">등락률</th><th class="n">시가총액</th><th>20일 추이</th></tr></thead><tbody>
+  ${rows.map((s, i) => { const d = dir(s.pct); return `<tr><td class="n mono">${s.rank || i + 1}</td><td class="nm">${esc(s.name)}<small>${esc(s.symbol.replace(".KS", ""))}</small></td>
+    <td class="n">${fmt(s.price)}</td><td class="n ${d}"><b>${pct(s.pct)}</b></td><td class="n mono">${capFmt(s.cap)}</td><td class="sp">${spark(s.spark, d)}</td></tr>`; }).join("")}
   </tbody></table></div>`;
+}
+
+function moverTable(list, mk, title) {
+  if (!list?.length) return `<div><h3 style="margin:0;font-size:15px">${title}</h3><p class="empty">오늘은 데이터를 받지 못했습니다.</p></div>`;
+  const fmt = v => v == null ? "–" : mk === "us" ? `$${nf(v)}` : `${nf(v, 0)}원`;
+  return `<div><h3 style="margin:0;font-size:15px">${title}</h3><div class="tablewrap"><table><thead><tr><th class="n">#</th><th>종목</th><th class="n">종가</th><th class="n">등락률</th></tr></thead><tbody>
+    ${list.map((r, i) => `<tr><td class="n mono">${i + 1}</td><td class="nm">${esc(r.name)}<small>${esc(r.symbol)}</small></td><td class="n">${fmt(r.price)}</td><td class="n ${dir(r.pct)}"><b>${pct(r.pct)}</b></td></tr>`).join("")}
+  </tbody></table></div></div>`;
+}
+
+function viewMovers(mk) {
+  const mv = S.doc.movers;
+  if (!mv) return "";
+  const board = mk === "us" ? mv.us : mv[S.krBoard];
+  if (!board || (!board.up?.length && !board.down?.length)) return "";
+  const chip = (v, l) => `<button class="chip ${S.krBoard === v ? "on" : ""}" type="button" data-krboard="${v}">${l}</button>`;
+  return `<section class="sec">
+    <div class="shead" style="margin-top:0"><div><h2>오늘의 상승·하락 상위</h2>
+      <p class="desc">${mk === "us" ? "시가총액 20억 달러 이상 미국 종목, Yahoo Finance 기준" : "우선주·스팩·ETN 제외, 네이버 증권 기준"}</p></div>
+      ${mk === "kr" ? `<div class="frow">${chip("kospi", "코스피")}${chip("kosdaq", "코스닥")}</div>` : ""}</div>
+    <div class="cols" style="margin-top:10px">${moverTable(board.up, mk === "us" ? "us" : "kr", "상승 상위")}${moverTable(board.down, mk === "us" ? "us" : "kr", "하락 상위")}</div>
+  </section>`;
 }
 
 function sectorBars(list) {
@@ -396,23 +421,23 @@ function viewHome() {
   ${d.sample ? `<div class="notice">지금 보이는 숫자와 뉴스는 화면 확인용 예시 데이터입니다. 자동 실행이 시작되면 실제 시세로 바뀝니다.</div>` : ""}
 
   <div class="cards">
-    ${card("us", "미국", "뉴욕 시장", nas, "지수·섹터·대형주 흐름")}
-    ${card("kr", "한국", "서울 시장", ksp, "지수·업종·대형주 흐름")}
-    ${card("macro", "매크로", "환율·금리", fx, "달러, 국채 금리, 유가, 금")}
+    ${card("us", "미국", "나스닥 종합", nas, "지수·섹터·대형주 흐름")}
+    ${card("kr", "한국", "코스피", ksp, "지수·업종·대형주 흐름")}
+    ${card("macro", "환율·금리", "원/달러 환율", fx, "달러, 국채 금리, 유가, 금")}
     <button class="card" type="button" data-tab="news"><span class="lbl">뉴스</span><h3>오늘의 뉴스</h3>
       <span class="big">${(d.news || []).length}<small class="flat">건</small></span><p>${esc((d.news || []).find(n => n.note)?.title || "시장 관련 주요 기사")}</p></button>
   </div>
 
   <section class="sec">
     <h2>지수 한눈에</h2>
-    <p class="desc">뉴욕은 전 거래일 종가, 서울은 가장 최근 종가 기준입니다.</p>
+    <p class="desc">미국 지수는 전 거래일 종가, 한국 지수는 가장 최근 종가 기준입니다.</p>
     ${idxTable(d.indices)}
   </section>
 
   <section class="sec cols">
     <div>
       <h2>최근 브리핑</h2>
-      <p class="desc">하루 두 번, 뉴욕 마감과 서울 마감 직후에 쌓입니다.</p>
+      <p class="desc">하루 두 번, 미국 증시와 한국 증시 마감 직후에 쌓입니다.</p>
       ${recent.length ? `<ul class="list">${recent.map(briefRow).join("")}</ul><button class="more" type="button" data-tab="archive">전체 아카이브 보기</button>` : `<p class="empty">아직 보관된 브리핑이 없습니다.</p>`}
     </div>
     <div>
@@ -436,8 +461,11 @@ function viewMarket(mk) {
   <section class="sec"><h2>지수</h2>${idxTable(pick(us ? US_IDX : KR_IDX))}</section>
   <section class="sec cols">
     <div><h2>섹터 흐름</h2><p class="desc">${us ? "SPDR 섹터 ETF" : "KODEX 섹터 ETF"} 등락률 기준</p>${sectorBars(d.sectors?.[mk])}</div>
-    <div><h2>주요 종목</h2><p class="desc">등락률 높은 순</p>${stockTable(d.stocks?.[mk], mk)}</div>
+    <div><div class="shead" style="margin-top:0;align-items:center"><h2>시가총액 상위 10</h2>
+      <div class="frow"><button class="chip ${S.stockSort === "cap" ? "on" : ""}" type="button" data-stocksort="cap">시총 순</button><button class="chip ${S.stockSort === "pct" ? "on" : ""}" type="button" data-stocksort="pct">등락률 순</button></div></div>
+      <p class="desc">${us ? "미국 상장 기업" : "코스피 보통주"} 기준, 매일 순위를 새로 확인합니다</p>${stockTable(d.stocks?.[mk], mk)}</div>
   </section>
+  ${viewMovers(mk)}
   <section class="sec"><h2>관련 뉴스</h2>${newsList((d.news || []).filter(n => n.market === mk))}</section>`;
 }
 
@@ -482,7 +510,7 @@ function viewArchive() {
   <div class="filters">
     <input id="archQ" type="search" placeholder="헤드라인·태그·종목명으로 찾기" value="${esc(S.q)}" aria-label="아카이브 검색">
     <div class="frow"><span class="flbl">기간</span>${chip("month", "all", S.month, "전체")}${months.map(m => chip("month", m, S.month, `${m.slice(0, 4)}년 ${+m.slice(5)}월`)).join("")}</div>
-    <div class="frow"><span class="flbl">구분</span>${chip("ses", "all", S.ses, "전체")}${chip("ses", "morning", S.ses, "뉴욕 마감")}${chip("ses", "afternoon", S.ses, "서울 마감")}</div>
+    <div class="frow"><span class="flbl">구분</span>${chip("ses", "all", S.ses, "전체")}${chip("ses", "morning", S.ses, "미국 증시 마감")}${chip("ses", "afternoon", S.ses, "한국 증시 마감")}</div>
     ${tags.length ? `<div class="frow"><span class="flbl">태그</span>${tags.map(([t, n]) => `<button class="chip ${S.tag === t ? "on" : ""}" type="button" data-tag="${esc(t)}">#${esc(t)} <span class="mono">${n}</span></button>`).join("")}</div>` : ""}
   </div>
   ${hits.length ? `<ul class="list">${hits.map(briefRow).join("")}</ul>` : `<p class="empty">조건에 맞는 브리핑이 없습니다. 검색어나 필터를 바꿔 보세요.</p>`}`;
@@ -677,7 +705,7 @@ function fillPicker() {
 }
 
 document.addEventListener("click", e => {
-  const t = e.target.closest("[data-tab],[data-open],[data-month],[data-ses],[data-tag],[data-tagjump],[data-newsmk],[data-calmove],[data-season],[data-seasonall],[data-calday]");
+  const t = e.target.closest("[data-tab],[data-open],[data-month],[data-ses],[data-tag],[data-tagjump],[data-newsmk],[data-calmove],[data-season],[data-seasonall],[data-calday],[data-stocksort],[data-krboard]");
   if (!t) return;
   const ds = t.dataset;
   if (ds.tab) return setTab(ds.tab);
@@ -690,6 +718,8 @@ document.addEventListener("click", e => {
   if (ds.calmove) { S.calDay = null; }
   if (ds.calmove) { const [yy, mm] = (S.calMonth || todayStr().slice(0, 7)).split("-").map(Number); const nd = new Date(Date.UTC(yy, mm - 1 + +ds.calmove, 1)); S.calMonth = nd.toISOString().slice(0, 7); }
   if (ds.season) S.seasonIdx = +ds.season;
+  if (ds.stocksort) S.stockSort = ds.stocksort;
+  if (ds.krboard) S.krBoard = ds.krboard;
   if (ds.calday) S.calDay = S.calDay === ds.calday ? null : ds.calday;
   if (ds.seasonall) S.seasonAll = !S.seasonAll;
   render();
