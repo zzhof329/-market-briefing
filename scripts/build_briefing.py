@@ -260,12 +260,70 @@ def kr_movers(kind: str, sosok: int, n: int = 10) -> list[dict]:
     return out
 
 
+KOSDAQ_POOL = [
+    ("247540.KQ", "에코프로비엠"), ("086520.KQ", "에코프로"), ("196170.KQ", "알테오젠"), ("028300.KQ", "HLB"),
+    ("277810.KQ", "레인보우로보틱스"), ("141080.KQ", "리가켐바이오"), ("298380.KQ", "에이비엘바이오"),
+    ("145020.KQ", "휴젤"), ("214150.KQ", "클래시스"), ("058470.KQ", "리노공업"), ("039030.KQ", "이오테크닉스"),
+    ("263750.KQ", "펄어비스"), ("357780.KQ", "솔브레인"), ("403870.KQ", "HPSP"), ("095340.KQ", "ISC"),
+    ("240810.KQ", "원익IPS"), ("293490.KQ", "카카오게임즈"), ("035900.KQ", "JYP Ent."),
+]
+
+
+def _num(v):
+    try:
+        return float(str(v).replace(",", "").replace("%", "").replace("+", ""))
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def kr_movers_api(kind: str, market: str, n: int = 10) -> list[dict]:
+    """네이버 증권 모바일 데이터 (kind: up/down, market: KOSPI/KOSDAQ)"""
+    url = f"https://m.stock.naver.com/api/stocks/{kind}/{market}?page=1&pageSize=40"
+    try:
+        r = requests.get(url, timeout=15, headers={"User-Agent": "Mozilla/5.0", "Referer": "https://m.stock.naver.com/"})
+        data = r.json()
+    except Exception as e:  # noqa: BLE001
+        print(f"[movers] 네이버 API {kind}/{market} 실패: {e}")
+        return []
+    rows = data.get("stocks") if isinstance(data, dict) else data
+    out = []
+    for it in rows or []:
+        name = it.get("stockName") or it.get("itemName") or ""
+        code = it.get("itemCode") or it.get("reutersCode") or ""
+        pct, price = _num(it.get("fluctuationsRatio")), _num(it.get("closePrice"))
+        if not name or pct is None or KR_SKIP.search(name) or str(it.get("stockEndType", "stock")) not in ("stock", ""):
+            continue
+        out.append({"symbol": str(code)[:6], "name": name, "price": price, "pct": pct})
+        if len(out) >= n:
+            break
+    if not out:
+        print(f"[movers] 네이버 API {kind}/{market}: 받은 종목이 없습니다")
+    return out
+
+
+def pool_movers(pool: list[tuple], n: int = 10) -> dict:
+    """대체 수단: 대형주 후보군 안에서 등락률 순으로 정렬"""
+    rows = fetch_quotes(pool)
+    rows = [{"symbol": r["symbol"][:6], "name": r["name"], "price": r["price"], "pct": r["pct"]} for r in rows]
+    up = sorted([r for r in rows if r["pct"] > 0], key=lambda r: -r["pct"])[:n]
+    down = sorted([r for r in rows if r["pct"] < 0], key=lambda r: r["pct"])[:n]
+    return {"up": up, "down": down, "src": "pool"}
+
+
 def fetch_movers() -> dict:
-    return {
-        "us": {"up": us_movers("day_gainers"), "down": us_movers("day_losers")},
-        "kospi": {"up": kr_movers("rise", 0), "down": kr_movers("fall", 0)},
-        "kosdaq": {"up": kr_movers("rise", 1), "down": kr_movers("fall", 1)},
-    }
+    result = {"us": {"up": us_movers("day_gainers"), "down": us_movers("day_losers"), "src": "yahoo"}}
+    for key, market, sosok, pool in (("kospi", "KOSPI", 0, KR_POOL), ("kosdaq", "KOSDAQ", 1, KOSDAQ_POOL)):
+        up, down, src = kr_movers_api("up", market), kr_movers_api("down", market), "naver"
+        if not up and not down:
+            up, down = kr_movers("rise", sosok), kr_movers("fall", sosok)
+        if not up and not down:
+            print(f"[movers] {market}: 네이버에서 받지 못해 대형주 기준으로 대체합니다")
+            result[key] = pool_movers(pool)
+            continue
+        result[key] = {"up": up, "down": down, "src": src}
+    for k, v in result.items():
+        print(f"[movers] {k}: 상승 {len(v['up'])}개, 하락 {len(v['down'])}개 ({v.get('src')})")
+    return result
 
 
 def fetch_news(limit: int = 7) -> list[dict]:
@@ -298,6 +356,7 @@ SYSTEM = """당신은 한국 개인투자자를 위한 증권사 리서치센터
   "macro": "환율·금리·원자재 코멘트 2~3문장 (200자 이내)",
   "watch": ["오늘/다음 거래일 체크포인트 3개. upcoming_events가 있으면 날짜와 함께 반영"],
   "tags": ["아카이브 분류용 주제 태그 3~5개. 짧은 명사, 예: 반도체, 환율, 금리, 실적, 2차전지, 유가"],
+  "ko_names": {"티커": "us_movers_names에 있는 미국 종목의 한국어 회사명. 국내 언론 표기 기준, 짧게(예: GAP→갭, GPN→글로벌 페이먼츠)"},
   "news_notes": [{"i": 0, "note": "중요한 뉴스 최대 6개에 대한 시장 관점 한줄평. i는 뉴스 번호(숫자)"}]
 }"""
 
@@ -545,11 +604,19 @@ def main() -> None:
         "sectors": {k: lite(v) for k, v in sectors.items()},
         "macro": lite(macro),
         "news": [{"i": n, "market": x["market"], "title": x["title"]} for n, x in enumerate(news)],
+        "us_movers_names": [{"symbol": r["symbol"], "name": r["name"]}
+                            for r in movers.get("us", {}).get("up", []) + movers.get("us", {}).get("down", [])],
         "movers_top5": {k: {d: [f"{r['name']} {r['pct']:+.1f}%" for r in v.get(d, [])[:5]] for d in ("up", "down")}
                         for k, v in movers.items()},
         "upcoming_events": upcoming,  # watch 항목 작성에 참고
     }
     brief = write_with_claude(payload) or fallback_briefing(indices)
+
+    ko = brief.get("ko_names") or {}
+    for d in ("up", "down"):
+        for r in movers.get("us", {}).get(d, []):
+            if isinstance(ko.get(r["symbol"]), str) and ko[r["symbol"]].strip():
+                r["name_en"], r["name"] = r["name"], ko[r["symbol"]].strip()[:20]
 
     notes = {n["i"]: n["note"] for n in brief.get("news_notes", []) if "i" in n}
     for n, item in enumerate(news):
