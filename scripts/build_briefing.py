@@ -107,13 +107,53 @@ MACRO = [
     ("^IRX", "미국채 3개월", "pct"),
     ("CL=F", "WTI 유가", "usd"),
     ("GC=F", "금", "usd"),
-    ("BTC-USD", "비트코인", "usd"),
 ]
 
 NEWS_QUERIES = {
     "us": "나스닥 OR 뉴욕증시 when:1d",
     "kr": "코스피 OR 코스닥 when:1d",
 }
+
+
+# ── 코인 ─────────────────────────────────────────────────────────
+COINS = [("BTC", "비트코인"), ("ETH", "이더리움"), ("XRP", "엑스알피(리플)"),
+         ("SOL", "솔라나"), ("BNB", "바이낸스코인"), ("DOGE", "도지코인")]
+
+
+def fetch_crypto(usdkrw: float | None) -> dict:
+    """달러 시세(yfinance) + 원화 시세(업비트) + 김치 프리미엄 + 공포·탐욕 지수"""
+    rows = fetch_quotes([(f"{c}-USD", name) for c, name in COINS])
+    krw = {}
+    try:
+        markets = ",".join(f"KRW-{c}" for c, _ in COINS if c != "BNB")  # 업비트에 없는 코인 제외
+        r = requests.get(f"https://api.upbit.com/v1/ticker?markets={markets}", timeout=15)
+        for t in r.json():
+            krw[t["market"].split("-")[1]] = {"price": t["trade_price"], "pct": round(t["signed_change_rate"] * 100, 2)}
+    except Exception as e:  # noqa: BLE001
+        print(f"[crypto] 업비트 실패: {e}")
+    coins = []
+    for r in rows:
+        c = r["symbol"].split("-")[0]
+        item = {**r, "symbol": c}
+        if c in krw:
+            item["krw"] = krw[c]["price"]
+            item["krw_pct"] = krw[c]["pct"]
+            if usdkrw:
+                item["premium"] = round((krw[c]["price"] / (r["price"] * usdkrw) - 1) * 100, 2)
+        elif usdkrw:
+            item["krw_est"] = round(r["price"] * usdkrw)  # 업비트에 없으면 환율로 환산
+        coins.append(item)
+    fng = None
+    try:
+        d = requests.get("https://api.alternative.me/fng/?limit=2", timeout=15).json()["data"]
+        label = {"Extreme Fear": "극단적 공포", "Fear": "공포", "Neutral": "중립", "Greed": "탐욕",
+                 "Extreme Greed": "극단적 탐욕"}
+        fng = {"value": int(d[0]["value"]), "label": label.get(d[0]["value_classification"], d[0]["value_classification"]),
+               "prev": int(d[1]["value"]) if len(d) > 1 else None}
+    except Exception as e:  # noqa: BLE001
+        print(f"[crypto] 공포·탐욕 지수 실패: {e}")
+    print(f"[crypto] 코인 {len(coins)}개, 업비트 {len(krw)}개, 공포·탐욕 {fng and fng['value']}")
+    return {"coins": coins, "fng": fng, "usdkrw": usdkrw}
 
 
 # ── 시세 ─────────────────────────────────────────────────────────
@@ -362,11 +402,12 @@ SYSTEM = """당신은 한국 개인투자자를 위한 증권사 리서치센터
   "us": "미국 시장 코멘트 3~4문장 (300자 이내)",
   "kr": "한국 시장 코멘트 3~4문장 (300자 이내)",
   "macro": "환율·금리·원자재 코멘트 2~3문장 (200자 이내)",
+  "crypto": "비트코인·주요 코인 흐름 2~3문장 (200자 이내). 김치 프리미엄·공포탐욕지수가 있으면 반영, 주식시장과의 연관성도 짧게",
   "watch": ["오늘/다음 거래일 체크포인트 3개. upcoming_events가 있으면 날짜와 함께 반영"],
   "drivers": ["오늘 시장이 움직인 이유 2~3개. 각 1문장, 근거(지표·뉴스·수급) 포함"],
   "outlook": {"stance": "상승 우위 또는 중립 또는 하락 우위", "horizon": "다음 거래일~1주",
               "reason": "그렇게 판단한 근거 2~3문장 (technicals·일정·뉴스 근거)",
-              "scenarios": [{"name": "기본", "likelihood": "높음 또는 중간 또는 낮음", "desc": "어떤 조건에서 어떤 흐름인지 1~2문장"},
+              "scenarios": [{"name": "기본", "likelihood": "높음 또는 중간 또는 낮음", "direction": "up 또는 flat 또는 down (이 시나리오에서 지수가 가는 방향)", "desc": "어떤 조건에서 어떤 흐름인지 1~2문장"},
                             {"name": "상방", "likelihood": "...", "desc": "..."}, {"name": "하방", "likelihood": "...", "desc": "..."}],
               "levels": ["볼 만한 지수 수준 1~3개. technicals의 20일 고점·저점·이동평균 근거, 예: 코스피 20일 이동평균 5,050선"]},
   "tags": ["아카이브 분류용 주제 태그 3~5개. 짧은 명사, 예: 반도체, 환율, 금리, 실적, 2차전지, 유가"],
@@ -517,12 +558,28 @@ ANALYSIS_SYSTEM = """당신은 한국 개인투자자를 위한 증권사 시황
             "causes": [{"title": "원인(20자 이내)", "weight": "높음 또는 중간 또는 낮음", "detail": "근거가 되는 사건·수치와 영향 2~4문장"}],
             "reaction": "업종·종목별 반응 2~3문장",
             "outlook": {"stance": "상승 우위 또는 중립 또는 하락 우위", "horizon": "1~2주", "reason": "근거 2~3문장",
-                        "scenarios": [{"name": "기본", "likelihood": "높음/중간/낮음", "desc": "조건과 흐름"}, {"name": "상방", "likelihood": "", "desc": ""}, {"name": "하방", "likelihood": "", "desc": ""}],
+                        "scenarios": [{"name": "기본", "likelihood": "높음/중간/낮음", "direction": "up/flat/down", "desc": "조건과 흐름"}, {"name": "상방", "likelihood": "", "desc": ""}, {"name": "하방", "likelihood": "", "desc": ""}],
                         "levels": ["볼 만한 지수 수준 1~3개 (technicals 근거)"]}}],
  "link": "미국 증시와 한국 증시가 서로 미치는 영향 경로 2문장",
  "history": "과거 비슷한 급등락 사례와 이후 흐름 2~3문장 (검색으로 확인된 것만, 없으면 빈 문자열)",
  "watch": ["앞으로 확인할 변수 3~4개, 날짜가 있으면 함께"],
  "sources": [{"title": "기사 제목", "url": "https://..."}]}"""
+
+
+def scen_direction(x: dict) -> str:
+    d = str(x.get("direction", "")).lower()
+    if d in ("up", "flat", "down"):
+        return d
+    name, desc = str(x.get("name", "")), str(x.get("desc", ""))
+    if "상방" in name:
+        return "up"
+    if "하방" in name:
+        return "down"
+    if re.search(r"반등|상승|회복", desc) and not re.search(r"하락|약세|투매|이탈", desc):
+        return "up"
+    if re.search(r"하락|약세|투매|이탈|붕괴", desc) and not re.search(r"반등|회복", desc):
+        return "down"
+    return "flat"
 
 
 def clean_outlook(o) -> dict | None:
@@ -532,7 +589,8 @@ def clean_outlook(o) -> dict | None:
     stance = "상승 우위" if "상승" in stance else "하락 우위" if "하락" in stance else "중립"
     return {"stance": stance, "horizon": str(o.get("horizon", ""))[:20], "reason": CITE_RE.sub("", str(o.get("reason", "")))[:500],
             "scenarios": [{"name": str(x.get("name", ""))[:6], "likelihood": str(x.get("likelihood", ""))[:4],
-                           "desc": str(x.get("desc", ""))[:300]} for x in (o.get("scenarios") or [])[:3] if x.get("desc")],
+                           "direction": scen_direction(x),
+                           "desc": CITE_RE.sub("", str(x.get("desc", "")))[:300]} for x in (o.get("scenarios") or [])[:3] if x.get("desc")],
             "levels": [str(x)[:80] for x in (o.get("levels") or [])[:3]]}
 
 
@@ -727,6 +785,12 @@ def main() -> None:
         stocks[mk] = sorted(rows, key=lambda r: r["rank"])
     sectors = {"us": fetch_quotes(US_SECTORS), "kr": fetch_quotes(KR_SECTORS)}
     macro = fetch_quotes(MACRO)
+    usdkrw = next((m["price"] for m in macro if m["symbol"] == "KRW=X"), None)
+    try:
+        crypto = fetch_crypto(usdkrw)
+    except Exception as e:  # noqa: BLE001
+        print(f"[crypto] 실패: {e}")
+        crypto = None
     if kr3y := fetch_ecos_kr3y():
         macro.insert(3, kr3y)
     news = fetch_news()
@@ -767,6 +831,8 @@ def main() -> None:
                         for k, v in movers.items()},
         "upcoming_events": upcoming,  # watch 항목 작성에 참고
         "technicals": technicals(indices),  # 전망·지수 수준 근거
+        "crypto": {"coins": [{k: v for k, v in c.items() if k != "spark"} for c in crypto["coins"]],
+                   "fear_greed": crypto["fng"]} if crypto else None,
     }
     brief = write_with_claude(payload) or fallback_briefing(indices)
     analysis = None
@@ -801,7 +867,8 @@ def main() -> None:
         "session": session,
         "sample": False,
         "headline": brief.get("headline", ""),
-        "commentary": {k: brief.get(k, "") for k in ("us", "kr", "macro")},
+        "commentary": {k: brief.get(k, "") for k in ("us", "kr", "macro", "crypto")},
+        "crypto": crypto,
         "watch": brief.get("watch", []),
         "tags": [t.lstrip("#").strip() for t in brief.get("tags", []) if t.strip()][:5],
         "indices": indices, "stocks": stocks, "sectors": sectors, "macro": macro, "movers": movers,
