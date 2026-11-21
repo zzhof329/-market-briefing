@@ -212,6 +212,15 @@ footer{margin:40px 0 28px;padding-top:14px;border-top:1px solid var(--line);font
   .cell .ev{font-size:11px;letter-spacing:-.02em}
   .cell .ev i{display:none}
 }
+/* 휴대폰: 표는 핵심 칸만, 이름은 줄바꿈 허용 */
+.show-m{display:none}
+@media (max-width:820px){
+  .hide-m{display:none}
+  .show-m{display:inline}
+  td.nm{white-space:normal;word-break:keep-all;line-height:1.35}
+  td,th{padding:8px 7px}
+  table{font-size:13.5px}
+}
 @media (max-width:480px){
   .sync{display:none}
   .fact{min-width:0;flex:1 1 40%}
@@ -311,10 +320,10 @@ const find = (list, sym) => (list || []).find(x => x.symbol === sym);
 
 function idxTable(list) {
   if (!list.length) return `<p class="empty">데이터 없음</p>`;
-  return `<div class="tablewrap"><table><thead><tr><th>지수</th><th class="n">종가</th><th class="n">전일 대비</th><th class="n">등락률</th><th>20일 추이</th><th class="n">기준일</th></tr></thead><tbody>
+  return `<div class="tablewrap"><table><thead><tr><th>지수</th><th class="n">종가</th><th class="n hide-m">전일 대비</th><th class="n">등락률</th><th class="hide-m">20일 추이</th><th class="n hide-m">기준일</th></tr></thead><tbody>
   ${list.map(i => { const d = dir(i.change); return `<tr><td class="nm">${esc(i.name)}<small>${esc(i.symbol)}</small></td>
-    <td class="n"><b>${nf(i.price)}</b></td><td class="n ${d}">${arrow(i.change)} ${nf(Math.abs(i.change))}</td>
-    <td class="n ${d}"><b>${pct(i.pct)}</b></td><td class="sp">${spark(i.spark, d)}</td><td class="n mono">${md(i.date)}</td></tr>`; }).join("")}
+    <td class="n"><b>${nf(i.price)}</b></td><td class="n ${d} hide-m">${arrow(i.change)} ${nf(Math.abs(i.change))}</td>
+    <td class="n ${d}"><b>${pct(i.pct)}</b><small class="show-m" style="display:block;font-weight:400">${arrow(i.change)} ${nf(Math.abs(i.change))}</small></td><td class="sp hide-m">${spark(i.spark, d)}</td><td class="n mono hide-m">${md(i.date)}</td></tr>`; }).join("")}
   </tbody></table></div>`;
 }
 
@@ -324,9 +333,9 @@ function stockTable(list, mk) {
   const capFmt = c => !c ? "–" : mk === "kr" ? `${nf(c / 1e12, 0)}조 원` : `${nf(c / 1e12, 2)}조 달러`;
   const rows = S.stockSort === "pct" ? [...list].sort((a, b) => b.pct - a.pct)
     : [...list].sort((a, b) => (a.rank || 99) - (b.rank || 99) || (b.cap || 0) - (a.cap || 0));
-  return `<div class="tablewrap"><table><thead><tr><th class="n">순위</th><th>종목</th><th class="n">종가</th><th class="n">등락률</th><th class="n">시가총액</th><th>20일 추이</th></tr></thead><tbody>
-  ${rows.map((s, i) => { const d = dir(s.pct); return `<tr><td class="n mono">${s.rank || i + 1}</td><td class="nm">${esc(s.name)}<small>${esc(s.symbol.replace(".KS", ""))}</small></td>
-    <td class="n">${fmt(s.price)}</td><td class="n ${d}"><b>${pct(s.pct)}</b></td><td class="n mono">${capFmt(s.cap)}</td><td class="sp">${spark(s.spark, d)}</td></tr>`; }).join("")}
+  return `<div class="tablewrap"><table><thead><tr><th class="n">순위</th><th>종목</th><th class="n">종가</th><th class="n">등락률</th><th class="n hide-m">시가총액</th><th class="hide-m">20일 추이</th></tr></thead><tbody>
+  ${rows.map((s, i) => { const d = dir(s.pct); return `<tr><td class="n mono">${s.rank || i + 1}</td><td class="nm">${esc(s.name)}<small>${esc(s.symbol.replace(".KS", ""))}<span class="show-m"> · ${capFmt(s.cap)}</span></small></td>
+    <td class="n">${fmt(s.price)}</td><td class="n ${d}"><b>${pct(s.pct)}</b></td><td class="n mono hide-m">${capFmt(s.cap)}</td><td class="sp hide-m">${spark(s.spark, d)}</td></tr>`; }).join("")}
   </tbody></table></div>`;
 }
 
@@ -334,7 +343,7 @@ function moverTable(list, mk, title) {
   if (!list?.length) return `<div><h3 style="margin:0;font-size:15px">${title}</h3><p class="empty">오늘은 데이터를 받지 못했습니다.</p></div>`;
   const fmt = v => v == null ? "–" : mk === "us" ? `$${nf(v)}` : `${nf(v, 0)}원`;
   return `<div><h3 style="margin:0;font-size:15px">${title}</h3><div class="tablewrap"><table><thead><tr><th class="n">#</th><th>종목</th><th class="n">종가</th><th class="n">등락률</th></tr></thead><tbody>
-    ${list.map((r, i) => `<tr><td class="n mono">${i + 1}</td><td class="nm">${esc(r.name)}<small>${esc(r.symbol)}</small></td><td class="n">${fmt(r.price)}</td><td class="n ${dir(r.pct)}"><b>${pct(r.pct)}</b></td></tr>`).join("")}
+    ${list.map((r, i) => `<tr><td class="n mono">${i + 1}</td><td class="nm">${esc(r.name)}<small>${esc(r.symbol)}${r.name_en ? `<span class="hide-m"> · ${esc(r.name_en)}</span>` : ""}</small></td><td class="n">${fmt(r.price)}</td><td class="n ${dir(r.pct)}"><b>${pct(r.pct)}</b></td></tr>`).join("")}
   </tbody></table></div></div>`;
 }
 
@@ -342,11 +351,13 @@ function viewMovers(mk) {
   const mv = S.doc.movers;
   if (!mv) return "";
   const board = mk === "us" ? mv.us : mv[S.krBoard];
-  if (!board || (!board.up?.length && !board.down?.length)) return "";
+  if (!board || (!board.up?.length && !board.down?.length))
+    return mk === "kr" ? `<section class="sec"><h2>오늘의 상승·하락 상위</h2><p class="empty">오늘은 순위 데이터를 받지 못했습니다. 다음 업데이트 때 다시 시도합니다.</p></section>` : "";
   const chip = (v, l) => `<button class="chip ${S.krBoard === v ? "on" : ""}" type="button" data-krboard="${v}">${l}</button>`;
   return `<section class="sec">
     <div class="shead" style="margin-top:0"><div><h2>오늘의 상승·하락 상위</h2>
-      <p class="desc">${mk === "us" ? "시가총액 20억 달러 이상 미국 종목, Yahoo Finance 기준" : "우선주·스팩·ETN 제외, 네이버 증권 기준"}</p></div>
+      <p class="desc">${mk === "us" ? "시가총액 20억 달러 이상 미국 종목, Yahoo Finance 기준"
+        : board.src === "pool" ? "오늘은 전체 순위를 받지 못해 대형주 안에서 정렬했습니다" : "우선주·스팩·ETN 제외, 네이버 증권 기준"}</p></div>
       ${mk === "kr" ? `<div class="frow">${chip("kospi", "코스피")}${chip("kosdaq", "코스닥")}</div>` : ""}</div>
     <div class="cols" style="margin-top:10px">${moverTable(board.up, mk === "us" ? "us" : "kr", "상승 상위")}${moverTable(board.down, mk === "us" ? "us" : "kr", "하락 상위")}</div>
   </section>`;
@@ -366,9 +377,9 @@ function sectorBars(list) {
 function macroTable(list) {
   const val = m => m.unit === "pct" ? `${nf(m.price, 3)}%` : m.unit === "krw" ? `${nf(m.price)}원` : m.unit === "usd" ? `$${nf(m.price)}` : nf(m.price);
   const chg = m => m.unit === "pct" ? `${m.change > 0 ? "+" : ""}${nf(m.change * 100, 1)}bp` : pct(m.pct);
-  return `<div class="tablewrap"><table><thead><tr><th>지표</th><th class="n">현재</th><th class="n">변동</th><th>20일 추이</th><th class="n">기준일</th></tr></thead><tbody>
+  return `<div class="tablewrap"><table><thead><tr><th>지표</th><th class="n">현재</th><th class="n">변동</th><th class="hide-m">20일 추이</th><th class="n hide-m">기준일</th></tr></thead><tbody>
   ${(list || []).map(m => { const d = dir(m.change); return `<tr><td class="nm">${esc(m.name)}<small>${esc(m.symbol)}</small></td><td class="n"><b>${val(m)}</b></td>
-    <td class="n ${d}">${chg(m)}</td><td class="sp">${spark(m.spark, d)}</td><td class="n mono">${md(m.date)}</td></tr>`; }).join("")}
+    <td class="n ${d}">${chg(m)}</td><td class="sp hide-m">${spark(m.spark, d)}</td><td class="n mono hide-m">${md(m.date)}</td></tr>`; }).join("")}
   </tbody></table></div>`;
 }
 
