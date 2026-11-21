@@ -1,0 +1,520 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>나스닥·코스피 브리핑 아카이브</title>
+<meta name="description" content="매일 아침 뉴욕 마감, 매일 오후 서울 마감 브리핑을 쌓아두는 아카이브">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@500;600;700&family=Noto+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* 레이아웃: 상단 고정 바(브리핑 선택·검색) → 탭 → 홈(요약·시장 카드·지수표·최근 브리핑) / 시장별 탭 / 아카이브. 상승 빨강·하락 파랑 */
+:root{
+  --bg:#eef1f4; --surface:#ffffff; --surface2:#f6f8fa; --ink:#18202b; --sub:#566273; --line:#d7dde4;
+  --steel:#24415f; --steel-ink:#ffffff; --accent:#c4561d; --accent-soft:#fbeee6; --link:#24415f;
+  --up:#cf2e3e; --upbg:#fbe8ea; --down:#1f5fc6; --downbg:#e6eefb; --flat:#7b8491; --flatbg:#eceff2;
+  --f-display:"IBM Plex Sans KR","Noto Sans KR","Malgun Gothic",sans-serif;
+  --f-body:"Noto Sans KR","Malgun Gothic","Apple SD Gothic Neo",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+  color-scheme:light; box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0f141a; --surface:#18202a; --surface2:#1f2833; --ink:#e4e9ef; --sub:#9aa6b4; --line:#2c3846;
+  --steel:#1b3049; --steel-ink:#e8eef6; --accent:#e9874f; --accent-soft:#3a2416; --link:#9cc3ec;
+  --up:#ff6b75; --upbg:#3d1a1f; --down:#6aa5ff; --downbg:#16263f; --flat:#9aa3ad; --flatbg:#252e38;
+  color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#0f141a; --surface:#18202a; --surface2:#1f2833; --ink:#e4e9ef; --sub:#9aa6b4; --line:#2c3846;
+  --steel:#1b3049; --steel-ink:#e8eef6; --accent:#e9874f; --accent-soft:#3a2416; --link:#9cc3ec;
+  --up:#ff6b75; --upbg:#3d1a1f; --down:#6aa5ff; --downbg:#16263f; --flat:#9aa3ad; --flatbg:#252e38;
+  color-scheme:dark }
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 var(--f-body);font-variant-numeric:tabular-nums;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--steel)}
+a{color:var(--link)}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1100px;margin:0 auto}
+
+/* 상단 바 */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--steel);color:var(--steel-ink);
+  margin-left:calc(-1*max(16px,env(safe-area-inset-left,0px)));margin-right:calc(-1*max(16px,env(safe-area-inset-right,0px)));
+  padding-block:10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.top .in{max-width:1100px;margin:0 auto;display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
+.brand{font-family:var(--f-display);font-weight:700;font-size:17px;letter-spacing:-.01em;white-space:nowrap;cursor:pointer;background:none;border:0;color:inherit;padding:0}
+.top select{max-width:58vw;padding:5px 8px;border-radius:6px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.12);color:var(--steel-ink)}
+.top select option{color:#18202b;background:#fff}
+.search{display:flex;gap:6px;flex:1 1 260px;min-width:0}
+.search input{flex:1;min-width:0;padding:6px 10px;border-radius:6px;border:0;background:#fff;color:#18202b}
+.search button{padding:6px 12px;border-radius:6px;border:0;background:var(--accent);color:#fff;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap}
+.sync{font-size:12px;opacity:.85;white-space:nowrap}
+.sync i{display:inline-block;width:8px;height:8px;border-radius:50%;background:#5cc98c;margin-right:5px;vertical-align:1px}
+.sync.sample i{background:#e8a94a}
+
+/* 탭 */
+.tabs{display:flex;gap:4px;overflow-x:auto;margin-top:14px;border-bottom:2px solid var(--line);scrollbar-width:thin}
+.tab{flex:0 0 auto;padding:9px 14px 8px;cursor:pointer;border:0;background:transparent;color:var(--sub);font-family:var(--f-display);font-weight:600;border-bottom:3px solid transparent;margin-bottom:-2px}
+.tab.on{color:var(--ink);border-bottom-color:var(--accent)}
+.tab .cnt{font-family:var(--f-mono);font-weight:400;font-size:11.5px;margin-left:5px;color:var(--sub)}
+
+/* 홈 */
+.hero{margin-top:22px;display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:18px;align-items:end}
+.hero .when{margin:0 0 6px;font-size:13px;color:var(--sub)}
+.hero .when b{color:var(--accent);font-weight:700;margin-right:6px}
+.hero h1{margin:0;font-family:var(--f-display);font-size:clamp(24px,4.2vw,34px);line-height:1.3;letter-spacing:-.02em;text-wrap:balance;word-break:keep-all}
+.hero p.lede{margin:10px 0 0;color:var(--sub);max-width:60ch}
+.facts{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
+.fact{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 12px;min-width:104px}
+.fact b{display:block;font-family:var(--f-display);font-size:20px;line-height:1.3}
+.fact span{font-size:12px;color:var(--sub)}
+.notice{margin-top:14px;background:var(--accent-soft);border:1px solid var(--line);border-radius:8px;padding:9px 13px;font-size:13.5px}
+
+.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:20px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;cursor:pointer;text-align:left;display:flex;flex-direction:column;gap:4px}
+.card:hover{border-color:var(--steel)}
+.card .lbl{font-size:12px;font-weight:700;color:var(--accent)}
+.card h3{margin:0;font-family:var(--f-display);font-size:17px}
+.card .big{font-family:var(--f-display);font-size:22px;font-weight:700;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.card .big small{font-size:14px}
+.card p{margin:0;font-size:13px;color:var(--sub)}
+.card svg{width:100%;height:30px;margin-top:4px}
+
+.sec{margin-top:30px}
+.sec h2{margin:0;font-family:var(--f-display);font-size:19px;letter-spacing:-.01em}
+.sec .desc{margin:4px 0 0;color:var(--sub);font-size:13.5px}
+.cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px}
+.shead{display:flex;flex-wrap:wrap;gap:10px 20px;align-items:flex-end;justify-content:space-between;margin-top:18px}
+
+/* 표 */
+.tablewrap{overflow-x:auto;margin-top:10px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{background:var(--surface2);text-align:left;font-weight:600;color:var(--sub);font-size:12.5px;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+td.n,th.n{text-align:right;white-space:nowrap}
+td.nm{font-weight:700;white-space:nowrap}
+td.nm small{display:block;font-weight:400;color:var(--sub);font-family:var(--f-mono);font-size:11.5px}
+td.sp svg{width:90px;height:26px;display:block}
+.mono{font-family:var(--f-mono);font-size:12.5px;color:var(--sub)}
+.up{color:var(--up)} .down{color:var(--down)} .flat{color:var(--flat)}
+
+/* 코멘트 박스 */
+.memo{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--steel);border-radius:0 8px 8px 0;padding:14px 16px;margin-top:10px;word-break:keep-all}
+.memo p{margin:0}
+.watch{list-style:none;margin:10px 0 0;padding:0;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+.watch li{padding:10px 14px;border-bottom:1px solid var(--line);word-break:keep-all}
+.watch li:last-child{border-bottom:0}
+
+/* 목록 */
+.list{list-style:none;margin:10px 0 0;padding:0;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+.list li{border-bottom:1px solid var(--line)}
+.list li:last-child{border-bottom:0}
+.list .row{display:flex;gap:10px;align-items:baseline;padding:10px 14px;width:100%;background:none;border:0;text-align:left;cursor:pointer;color:inherit}
+.list .row:hover{background:var(--surface2)}
+.list .row.cur{background:var(--accent-soft)}
+.list .row .mono{flex:0 0 auto}
+.list .row .t{flex:1;min-width:0}
+.list .row .t b{font-weight:600}
+.list .row .meta{display:flex;flex-wrap:wrap;gap:4px 6px;margin-top:4px;align-items:center;font-size:12.5px}
+.more{display:inline-block;margin-top:8px;font-size:13px;background:none;border:0;padding:0;color:var(--link);text-decoration:underline;cursor:pointer}
+
+.tag{font-size:11.5px;border-radius:4px;padding:1px 6px;background:var(--flatbg);color:var(--sub);white-space:nowrap}
+.tag.us{background:var(--downbg);color:var(--down)}
+.tag.kr{background:var(--upbg);color:var(--up)}
+.tag.ses{background:var(--accent-soft);color:var(--accent)}
+.chip{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);border-radius:999px;padding:4px 11px;background:var(--surface);cursor:pointer;user-select:none;font-size:13px}
+.chip.on{background:var(--steel);border-color:var(--steel);color:var(--steel-ink)}
+.frow{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.flbl{font-size:12.5px;color:var(--sub);margin-right:4px;min-width:34px}
+.filters{display:grid;gap:8px;margin-top:12px}
+.filters input{width:100%;padding:8px 12px;border-radius:8px;border:1px solid var(--line);background:var(--surface)}
+
+/* 섹터 막대 */
+.bars{display:grid;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px;margin-top:10px}
+.bar{display:grid;grid-template-columns:84px 1fr 62px;align-items:center;gap:10px;font-size:13.5px}
+.bar .track{position:relative;height:14px}
+.bar .track::before{content:"";position:absolute;left:50%;top:-3px;bottom:-3px;width:1px;background:var(--line)}
+.bar .fill{position:absolute;top:1px;height:12px;border-radius:2px}
+.bar .v{text-align:right;font-weight:700}
+
+/* 뉴스 */
+.news li{padding:12px 14px}
+.news a{font-weight:600;text-decoration:none;color:var(--ink)}
+.news a:hover{text-decoration:underline}
+.news .why{margin:4px 0 0;font-size:13.5px;color:var(--sub)}
+
+.links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
+.empty{padding:24px 14px;color:var(--sub);text-align:center}
+footer{margin:40px 0 28px;padding-top:14px;border-top:1px solid var(--line);font-size:12.5px;color:var(--sub)}
+
+@media (max-width:820px){
+  .hero,.cols,.links{grid-template-columns:1fr}
+  .facts{justify-content:flex-start}
+  .cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:480px){
+  .sync{display:none}
+  .fact{min-width:0;flex:1 1 40%}
+}
+</style>
+</head>
+<body>
+<div class="top"><div class="in">
+  <button class="brand" id="brand" type="button">나스닥·코스피 브리핑 아카이브</button>
+  <select id="pick" aria-label="브리핑 선택"></select>
+  <form class="search" id="searchForm" role="search">
+    <input id="topQ" type="search" placeholder="지난 브리핑 검색 (예: 반도체, 환율, 엔비디아)" aria-label="브리핑 검색">
+    <button type="submit">검색</button>
+  </form>
+  <div class="sync" id="sync"><i></i><span>불러오는 중</span></div>
+</div></div>
+
+<div class="wrap">
+  <nav class="tabs" id="tabs" aria-label="메뉴"></nav>
+  <main id="view"><p class="empty">브리핑을 불러오는 중입니다.</p></main>
+  <footer>
+    시세는 Yahoo Finance(yfinance) 지연 시세, 뉴스는 Google News, 코멘트는 Claude가 자동 작성합니다. 수치에 오류가 있을 수 있으니 원 출처에서 확인하세요.
+    이 사이트는 정보 제공용이며 투자 권유가 아닙니다. 투자 판단과 책임은 본인에게 있습니다.
+  </footer>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const dir = v => v > 0 ? "up" : v < 0 ? "down" : "flat";
+const arrow = v => v > 0 ? "▲" : v < 0 ? "▼" : "–";
+const nf = (v, d = 2) => Number(v).toLocaleString("ko-KR", {minimumFractionDigits: d, maximumFractionDigits: d});
+const pct = v => v == null ? "–" : `${v > 0 ? "+" : ""}${nf(v)}%`;
+const sesName = s => s === "morning" ? "뉴욕 마감" : "서울 마감";
+const md = d => d ? d.slice(5).replace("-", ".") : "";
+
+const EMBED = window.BRIEFING_EMBED || null;   // 미리보기용: 데이터가 페이지 안에 들어 있으면 그걸 사용
+const S = {tab: "home", doc: null, key: "latest", index: [], q: "", month: "all", ses: "all", tag: null, newsMk: "all", cache: {}};
+
+const TABS = [
+  ["home", "홈"], ["us", "미국 시장"], ["kr", "한국 시장"], ["macro", "매크로"],
+  ["news", "뉴스"], ["archive", "아카이브"], ["links", "바로가기"],
+];
+const US_IDX = ["^IXIC", "^GSPC", "^DJI", "^SOX"], KR_IDX = ["^KS11", "^KQ11"];
+
+const LINKS = [
+  ["한국 시장", [
+    ["KRX 정보데이터시스템", "https://data.krx.co.kr", "투자자별 매매동향, 업종 지수"],
+    ["DART 전자공시", "https://dart.fss.or.kr", "상장사 공시·실적"],
+    ["네이버 증권", "https://finance.naver.com", "종목 시세·리서치 리포트"],
+    ["한국은행 ECOS", "https://ecos.bok.or.kr", "국고채 금리, 환율, 경제통계"],
+  ]],
+  ["미국 시장", [
+    ["Nasdaq 마켓", "https://www.nasdaq.com/market-activity", "지수·종목 시세, 실적 일정"],
+    ["SEC EDGAR", "https://www.sec.gov/edgar/search/", "미국 기업 공시(10-K, 10-Q)"],
+    ["Yahoo Finance", "https://finance.yahoo.com", "종목 차트·뉴스"],
+    ["FRED", "https://fred.stlouisfed.org", "미국 금리·경제지표 시계열"],
+  ]],
+  ["일정·정책", [
+    ["연준 FOMC 일정", "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm", "금리 결정 회의 일정"],
+    ["CME FedWatch", "https://www.cmegroup.com/markets/interest-rates/cme-fedwatch-tool.html", "금리 인하·인상 확률"],
+    ["인베스팅닷컴 경제 캘린더", "https://kr.investing.com/economic-calendar/", "국가별 지표 발표 일정"],
+  ]],
+];
+
+/* ── 데이터 ─────────────────────────────────── */
+async function getJSON(path) {
+  const r = await fetch(`${path}?t=${Date.now()}`);
+  if (!r.ok) throw new Error(`${path} ${r.status}`);
+  return r.json();
+}
+async function getDoc(key) {
+  if (S.cache[key]) return S.cache[key];
+  let d;
+  if (EMBED) d = key === "latest" ? EMBED.latest : EMBED.items[key];
+  else d = await getJSON(key === "latest" ? "data/latest.json" : `data/archive/${encodeURIComponent(key)}.json`);
+  if (!d) throw new Error("not found");
+  return (S.cache[key] = d);
+}
+async function getIndex() {
+  try { return EMBED ? EMBED.index : await getJSON("data/archive/index.json"); } catch { return []; }
+}
+
+/* ── 작은 부품 ───────────────────────────────── */
+function spark(values, d, w = 90, h = 26) {
+  if (!values || values.length < 2) return "";
+  const mn = Math.min(...values), mx = Math.max(...values), r = (mx - mn) || 1;
+  const pts = values.map((v, i) => `${(i / (values.length - 1) * w).toFixed(1)},${(h - 2 - (v - mn) / r * (h - 4)).toFixed(1)}`).join(" ");
+  return `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true"><polyline points="${pts}" fill="none" stroke="var(--${d})" stroke-width="1.6" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg>`;
+}
+const pick = ids => ids.map(id => S.doc.indices.find(i => i.symbol === id)).filter(Boolean);
+const find = (list, sym) => (list || []).find(x => x.symbol === sym);
+
+function idxTable(list) {
+  if (!list.length) return `<p class="empty">데이터 없음</p>`;
+  return `<div class="tablewrap"><table><thead><tr><th>지수</th><th class="n">종가</th><th class="n">전일 대비</th><th class="n">등락률</th><th>20일 추이</th><th class="n">기준일</th></tr></thead><tbody>
+  ${list.map(i => { const d = dir(i.change); return `<tr><td class="nm">${esc(i.name)}<small>${esc(i.symbol)}</small></td>
+    <td class="n"><b>${nf(i.price)}</b></td><td class="n ${d}">${arrow(i.change)} ${nf(Math.abs(i.change))}</td>
+    <td class="n ${d}"><b>${pct(i.pct)}</b></td><td class="sp">${spark(i.spark, d)}</td><td class="n mono">${md(i.date)}</td></tr>`; }).join("")}
+  </tbody></table></div>`;
+}
+
+function stockTable(list, mk) {
+  if (!list?.length) return `<p class="empty">데이터 없음</p>`;
+  const fmt = v => mk === "kr" ? `${nf(v, 0)}원` : `$${nf(v)}`;
+  return `<div class="tablewrap"><table><thead><tr><th>종목</th><th class="n">종가</th><th class="n">등락률</th><th>20일 추이</th></tr></thead><tbody>
+  ${[...list].sort((a, b) => b.pct - a.pct).map(s => { const d = dir(s.pct); return `<tr><td class="nm">${esc(s.name)}<small>${esc(s.symbol.replace(".KS", ""))}</small></td>
+    <td class="n">${fmt(s.price)}</td><td class="n ${d}"><b>${pct(s.pct)}</b></td><td class="sp">${spark(s.spark, d)}</td></tr>`; }).join("")}
+  </tbody></table></div>`;
+}
+
+function sectorBars(list) {
+  if (!list?.length) return `<p class="empty">데이터 없음</p>`;
+  const sorted = [...list].sort((a, b) => b.pct - a.pct);
+  const m = Math.max(...sorted.map(s => Math.abs(s.pct)), .5);
+  return `<div class="bars">${sorted.map(s => {
+    const w = Math.abs(s.pct) / m * 50, d = dir(s.pct);
+    const pos = s.pct >= 0 ? `left:50%;width:${w}%` : `left:${50 - w}%;width:${w}%`;
+    return `<div class="bar"><span>${esc(s.name)}</span><div class="track"><div class="fill" style="${pos};background:var(--${d})"></div></div><span class="v ${d}">${pct(s.pct)}</span></div>`;
+  }).join("")}</div>`;
+}
+
+function macroTable(list) {
+  const val = m => m.unit === "pct" ? `${nf(m.price, 3)}%` : m.unit === "krw" ? `${nf(m.price)}원` : m.unit === "usd" ? `$${nf(m.price)}` : nf(m.price);
+  const chg = m => m.unit === "pct" ? `${m.change > 0 ? "+" : ""}${nf(m.change * 100, 1)}bp` : pct(m.pct);
+  return `<div class="tablewrap"><table><thead><tr><th>지표</th><th class="n">현재</th><th class="n">변동</th><th>20일 추이</th><th class="n">기준일</th></tr></thead><tbody>
+  ${(list || []).map(m => { const d = dir(m.change); return `<tr><td class="nm">${esc(m.name)}<small>${esc(m.symbol)}</small></td><td class="n"><b>${val(m)}</b></td>
+    <td class="n ${d}">${chg(m)}</td><td class="sp">${spark(m.spark, d)}</td><td class="n mono">${md(m.date)}</td></tr>`; }).join("")}
+  </tbody></table></div>`;
+}
+
+function newsList(list, limit) {
+  if (!list?.length) return `<p class="empty">수집된 뉴스가 없습니다.</p>`;
+  const sorted = [...list].sort((a, b) => (b.note ? 1 : 0) - (a.note ? 1 : 0)).slice(0, limit || 99);
+  return `<ul class="list news">${sorted.map(n => `<li>
+    <span class="tag ${n.market}">${n.market === "us" ? "미국" : "한국"}</span>
+    <a href="${esc(n.link)}" target="_blank" rel="noopener">${esc(n.title)}</a>
+    ${n.source ? `<span class="mono"> ${esc(n.source)}</span>` : ""}
+    ${n.note ? `<p class="why">${esc(n.note)}</p>` : ""}</li>`).join("")}</ul>`;
+}
+
+function briefRow(e) {
+  const cur = e.key === S.key || (S.key === "latest" && e.key === `${S.doc?.date}-${S.doc?.session}`);
+  return `<li><button class="row ${cur ? "cur" : ""}" type="button" data-open="${esc(e.key)}">
+    <span class="mono">${md(e.date)}</span>
+    <span class="t"><b>${esc(e.headline)}</b>
+      <span class="meta"><span class="tag ses">${sesName(e.session)}</span>
+        <span class="${dir(e.us_pct)}">나스닥 ${pct(e.us_pct)}</span><span class="${dir(e.kr_pct)}">코스피 ${pct(e.kr_pct)}</span>
+        ${(e.tags || []).map(t => `<span class="tag">#${esc(t)}</span>`).join("")}</span></span>
+  </button></li>`;
+}
+
+/* ── 화면 ───────────────────────────────────── */
+function viewHome() {
+  const d = S.doc, c = d.commentary || {};
+  const nas = find(d.indices, "^IXIC"), ksp = find(d.indices, "^KS11");
+  const fx = find(d.macro, "KRW=X"), tnx = find(d.macro, "^TNX");
+  const fact = (v, lbl, cls = "") => `<div class="fact"><b class="${cls}">${v}</b><span>${lbl}</span></div>`;
+  const card = (tab, lbl, title, item, desc) => `<button class="card" type="button" data-tab="${tab}">
+    <span class="lbl">${lbl}</span><h3>${title}</h3>
+    ${item ? `<span class="big">${nf(item.price)} <small class="${dir(item.pct)}">${arrow(item.pct)} ${pct(item.pct)}</small></span>${spark(item.spark, dir(item.pct), 200, 30)}` : ""}
+    <p>${desc}</p></button>`;
+  const recent = S.index.slice(0, 8);
+  return `
+  <section class="hero">
+    <div>
+      <p class="when"><b>${sesName(d.session)} 브리핑</b><span class="mono">${esc(d.generated_at.replace("T", " ").slice(0, 16))} KST</span></p>
+      <h1>${esc(d.headline)}</h1>
+      <p class="lede">${esc((c.us || "").split(/(?<=다\.)\s/)[0])} ${esc((c.kr || "").split(/(?<=다\.)\s/)[0])}</p>
+    </div>
+    <div class="facts">
+      ${nas ? fact(pct(nas.pct), "나스닥", dir(nas.pct)) : ""}
+      ${ksp ? fact(pct(ksp.pct), "코스피", dir(ksp.pct)) : ""}
+      ${fx ? fact(nf(fx.price, 1), "원/달러") : ""}
+      ${tnx ? fact(nf(tnx.price, 2) + "%", "미국채 10년") : ""}
+    </div>
+  </section>
+  ${d.sample ? `<div class="notice">지금 보이는 숫자와 뉴스는 화면 확인용 예시 데이터입니다. 자동 실행이 시작되면 실제 시세로 바뀝니다.</div>` : ""}
+
+  <div class="cards">
+    ${card("us", "미국", "뉴욕 시장", nas, "지수·섹터·대형주 흐름")}
+    ${card("kr", "한국", "서울 시장", ksp, "지수·업종·대형주 흐름")}
+    ${card("macro", "매크로", "환율·금리", fx, "달러, 국채 금리, 유가, 금")}
+    <button class="card" type="button" data-tab="news"><span class="lbl">뉴스</span><h3>오늘의 뉴스</h3>
+      <span class="big">${(d.news || []).length}<small class="flat">건</small></span><p>${esc((d.news || []).find(n => n.note)?.title || "시장 관련 주요 기사")}</p></button>
+  </div>
+
+  <section class="sec">
+    <h2>지수 한눈에</h2>
+    <p class="desc">뉴욕은 전 거래일 종가, 서울은 가장 최근 종가 기준입니다.</p>
+    ${idxTable(d.indices)}
+  </section>
+
+  <section class="sec cols">
+    <div>
+      <h2>최근 브리핑</h2>
+      <p class="desc">하루 두 번, 뉴욕 마감과 서울 마감 직후에 쌓입니다.</p>
+      ${recent.length ? `<ul class="list">${recent.map(briefRow).join("")}</ul><button class="more" type="button" data-tab="archive">전체 아카이브 보기</button>` : `<p class="empty">아직 보관된 브리핑이 없습니다.</p>`}
+    </div>
+    <div>
+      <h2>오늘 챙겨볼 것</h2>
+      <p class="desc">다음 거래일까지 확인할 일정과 변수</p>
+      ${d.watch?.length ? `<ul class="watch">${d.watch.map(w => `<li>${esc(w)}</li>`).join("")}</ul>` : `<p class="empty">체크포인트 없음</p>`}
+      ${d.tags?.length ? `<div class="frow" style="margin-top:12px">${d.tags.map(t => `<button class="chip" type="button" data-tagjump="${esc(t)}">#${esc(t)}</button>`).join("")}</div>` : ""}
+    </div>
+  </section>`;
+}
+
+function viewMarket(mk) {
+  const d = S.doc, us = mk === "us";
+  return `
+  <div class="shead"><div><h2 class="sec" style="margin:0;font-family:var(--f-display);font-size:21px">${us ? "미국 시장" : "한국 시장"}</h2>
+    <p class="desc" style="margin:4px 0 0;color:var(--sub)">${us ? "나스닥·S&P 500·다우·반도체 지수와 대형 기술주" : "코스피·코스닥과 시가총액 상위 종목"}</p></div></div>
+  <div class="memo"><p>${esc(d.commentary?.[mk] || "코멘트 없음")}</p></div>
+  <section class="sec"><h2>지수</h2>${idxTable(pick(us ? US_IDX : KR_IDX))}</section>
+  <section class="sec cols">
+    <div><h2>섹터 흐름</h2><p class="desc">${us ? "SPDR 섹터 ETF" : "KODEX 섹터 ETF"} 등락률 기준</p>${sectorBars(d.sectors?.[mk])}</div>
+    <div><h2>주요 종목</h2><p class="desc">등락률 높은 순</p>${stockTable(d.stocks?.[mk], mk)}</div>
+  </section>
+  <section class="sec"><h2>관련 뉴스</h2>${newsList((d.news || []).filter(n => n.market === mk))}</section>`;
+}
+
+function viewMacro() {
+  const d = S.doc;
+  return `
+  <div class="shead"><div><h2 style="margin:0;font-family:var(--f-display);font-size:21px">환율·금리·원자재</h2>
+    <p class="desc" style="margin:4px 0 0;color:var(--sub)">금리는 bp(0.01%p), 나머지는 전일 대비 등락률</p></div></div>
+  <div class="memo"><p>${esc(d.commentary?.macro || "코멘트 없음")}</p></div>
+  <section class="sec">${macroTable(d.macro)}</section>`;
+}
+
+function viewNews() {
+  const list = (S.doc.news || []).filter(n => S.newsMk === "all" || n.market === S.newsMk);
+  const chip = (v, l) => `<button class="chip ${S.newsMk === v ? "on" : ""}" type="button" data-newsmk="${v}">${l}</button>`;
+  return `
+  <div class="shead"><div><h2 style="margin:0;font-family:var(--f-display);font-size:21px">뉴스</h2>
+    <p class="desc" style="margin:4px 0 0;color:var(--sub)">한줄평이 달린 기사가 위에 옵니다.</p></div>
+    <div class="frow">${chip("all", "전체")}${chip("us", "미국")}${chip("kr", "한국")}</div></div>
+  ${newsList(list)}`;
+}
+
+function archiveMatches() {
+  const q = S.q.trim().toLowerCase();
+  return S.index.filter(e =>
+    (S.month === "all" || e.date.startsWith(S.month)) &&
+    (S.ses === "all" || e.session === S.ses) &&
+    (!S.tag || (e.tags || []).includes(S.tag)) &&
+    (!q || [e.headline, e.summary, ...(e.tags || []), ...(e.keywords || [])].join(" ").toLowerCase().includes(q)));
+}
+
+function viewArchive() {
+  const months = [...new Set(S.index.map(e => e.date.slice(0, 7)))];
+  const tagCount = {};
+  S.index.forEach(e => (e.tags || []).forEach(t => tagCount[t] = (tagCount[t] || 0) + 1));
+  const tags = Object.entries(tagCount).sort((a, b) => b[1] - a[1]).slice(0, 16);
+  const chip = (attr, v, cur, l) => `<button class="chip ${cur === v ? "on" : ""}" type="button" data-${attr}="${esc(v)}">${l}</button>`;
+  const hits = archiveMatches();
+  return `
+  <div class="shead"><div><h2 style="margin:0;font-family:var(--f-display);font-size:21px">브리핑 아카이브</h2>
+    <p class="desc" style="margin:4px 0 0;color:var(--sub)">보관된 브리핑 ${S.index.length}건 중 ${hits.length}건</p></div></div>
+  <div class="filters">
+    <input id="archQ" type="search" placeholder="헤드라인·태그·종목명으로 찾기" value="${esc(S.q)}" aria-label="아카이브 검색">
+    <div class="frow"><span class="flbl">기간</span>${chip("month", "all", S.month, "전체")}${months.map(m => chip("month", m, S.month, `${m.slice(0, 4)}년 ${+m.slice(5)}월`)).join("")}</div>
+    <div class="frow"><span class="flbl">구분</span>${chip("ses", "all", S.ses, "전체")}${chip("ses", "morning", S.ses, "뉴욕 마감")}${chip("ses", "afternoon", S.ses, "서울 마감")}</div>
+    ${tags.length ? `<div class="frow"><span class="flbl">태그</span>${tags.map(([t, n]) => `<button class="chip ${S.tag === t ? "on" : ""}" type="button" data-tag="${esc(t)}">#${esc(t)} <span class="mono">${n}</span></button>`).join("")}</div>` : ""}
+  </div>
+  ${hits.length ? `<ul class="list">${hits.map(briefRow).join("")}</ul>` : `<p class="empty">조건에 맞는 브리핑이 없습니다. 검색어나 필터를 바꿔 보세요.</p>`}`;
+}
+
+function viewLinks() {
+  return `
+  <div class="shead"><div><h2 style="margin:0;font-family:var(--f-display);font-size:21px">바로가기</h2>
+    <p class="desc" style="margin:4px 0 0;color:var(--sub)">원 출처에서 수치와 공시를 직접 확인할 때 쓰는 사이트</p></div></div>
+  <div class="links">${LINKS.map(([g, items]) => `<section class="sec" style="margin-top:14px"><h2>${g}</h2>
+    <div class="tablewrap"><table><tbody>${items.map(([n, u, dsc]) => `<tr><td class="nm"><a href="${u}" target="_blank" rel="noopener">${n}</a></td><td class="mono" style="font-family:var(--f-body);font-size:13px">${dsc}</td></tr>`).join("")}</tbody></table></div></section>`).join("")}</div>`;
+}
+
+/* ── 렌더 ───────────────────────────────────── */
+function renderTabs() {
+  $("#tabs").innerHTML = TABS.map(([k, l]) => {
+    const cnt = k === "archive" ? `<span class="cnt">${S.index.length}</span>` : k === "news" ? `<span class="cnt">${(S.doc?.news || []).length}</span>` : "";
+    return `<button class="tab ${S.tab === k ? "on" : ""}" type="button" data-tab="${k}" ${S.tab === k ? 'aria-current="page"' : ""}>${l}${cnt}</button>`;
+  }).join("");
+}
+
+function render() {
+  renderTabs();
+  if (!S.doc) return;
+  const v = {home: viewHome, us: () => viewMarket("us"), kr: () => viewMarket("kr"), macro: viewMacro, news: viewNews, archive: viewArchive, links: viewLinks}[S.tab] || viewHome;
+  $("#view").innerHTML = v();
+  document.title = `${S.doc.headline} | 나스닥·코스피 브리핑 아카이브`;
+  const sync = $("#sync");
+  sync.className = "sync" + (S.doc.sample ? " sample" : "");
+  sync.querySelector("span").textContent = S.doc.sample ? "예시 데이터" : `${md(S.doc.date)} ${sesName(S.doc.session)} 반영`;
+  const aq = $("#archQ");
+  if (aq) aq.addEventListener("input", e => { S.q = e.target.value; const pos = e.target.selectionStart; render(); const n = $("#archQ"); n.focus(); n.setSelectionRange(pos, pos); });
+}
+
+function setTab(t) {
+  S.tab = t;
+  try { history.replaceState(null, "", t === "home" ? location.pathname + location.search : `#${t}`); } catch {}
+  render();
+  window.scrollTo({top: 0});
+}
+
+async function openBrief(key) {
+  try {
+    S.doc = await getDoc(key);
+    S.key = key;
+    $("#pick").value = key;
+    setTab("home");
+  } catch {
+    $("#view").innerHTML = `<p class="empty">그 브리핑 파일을 찾지 못했습니다.</p>`;
+  }
+}
+
+function fillPicker() {
+  $("#pick").innerHTML = `<option value="latest">최신 브리핑</option>` +
+    S.index.map(e => `<option value="${esc(e.key)}">${md(e.date)} ${sesName(e.session)}</option>`).join("");
+  $("#pick").value = S.key;
+}
+
+document.addEventListener("click", e => {
+  const t = e.target.closest("[data-tab],[data-open],[data-month],[data-ses],[data-tag],[data-tagjump],[data-newsmk]");
+  if (!t) return;
+  const ds = t.dataset;
+  if (ds.tab) return setTab(ds.tab);
+  if (ds.open) return openBrief(ds.open);
+  if (ds.month) S.month = ds.month;
+  if (ds.ses) S.ses = ds.ses;
+  if (ds.tag) S.tag = S.tag === ds.tag ? null : ds.tag;
+  if (ds.tagjump) { S.tag = ds.tagjump; S.q = ""; S.month = "all"; S.ses = "all"; return setTab("archive"); }
+  if (ds.newsmk) S.newsMk = ds.newsmk;
+  render();
+});
+$("#brand").addEventListener("click", () => openBrief("latest"));
+$("#pick").addEventListener("change", e => openBrief(e.target.value));
+$("#searchForm").addEventListener("submit", e => {
+  e.preventDefault();
+  S.q = $("#topQ").value; S.tag = null; S.month = "all"; S.ses = "all";
+  setTab("archive");
+});
+window.addEventListener("hashchange", () => {
+  const h = location.hash.slice(1);
+  if (TABS.some(([k]) => k === h) && h !== S.tab) { S.tab = h; render(); }
+});
+
+(async () => {
+  const h = location.hash.slice(1);
+  if (TABS.some(([k]) => k === h)) S.tab = h;
+  renderTabs();
+  try {
+    [S.doc, S.index] = await Promise.all([getDoc("latest"), getIndex()]);
+    fillPicker();
+    render();
+  } catch {
+    $("#view").innerHTML = `<p class="empty">최신 브리핑(data/latest.json)을 찾지 못했습니다. GitHub Actions에서 워크플로를 한 번 실행해 주세요.</p>`;
+  }
+})();
+</script>
+</body>
+</html>
