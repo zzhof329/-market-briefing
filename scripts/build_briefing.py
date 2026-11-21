@@ -44,18 +44,48 @@ INDICES = [
     ("^KQ11", "코스닥"),
 ]
 
-US_STOCKS = [
-    ("NVDA", "엔비디아"), ("AAPL", "애플"), ("MSFT", "마이크로소프트"),
-    ("AMZN", "아마존"), ("GOOGL", "알파벳"), ("META", "메타"),
-    ("TSLA", "테슬라"), ("AVGO", "브로드컴"),
+# 시가총액 상위 10개를 매번 자동으로 고르기 위한 후보군 (순위가 바뀌어도 따라감)
+# 한국은 우선주(삼성전자우 등)를 빼고 보통주 기준
+TOP_N = 10
+US_POOL = [
+    ("NVDA", "엔비디아"), ("MSFT", "마이크로소프트"), ("AAPL", "애플"), ("GOOGL", "알파벳"),
+    ("AMZN", "아마존"), ("META", "메타"), ("AVGO", "브로드컴"), ("TSLA", "테슬라"),
+    ("BRK-B", "버크셔 해서웨이"), ("LLY", "일라이 릴리"), ("JPM", "JP모건"), ("WMT", "월마트"),
+    ("ORCL", "오라클"), ("V", "비자"), ("MA", "마스터카드"), ("NFLX", "넷플릭스"),
+    ("XOM", "엑슨모빌"), ("COST", "코스트코"), ("PLTR", "팔란티어"), ("AMD", "AMD"),
+    ("UNH", "유나이티드헬스"), ("JNJ", "존슨앤드존슨"),
+]
+KR_POOL = [
+    ("005930.KS", "삼성전자"), ("000660.KS", "SK하이닉스"), ("373220.KS", "LG에너지솔루션"),
+    ("207940.KS", "삼성바이오로직스"), ("005380.KS", "현대차"), ("012450.KS", "한화에어로스페이스"),
+    ("105560.KS", "KB금융"), ("000270.KS", "기아"), ("068270.KS", "셀트리온"),
+    ("035420.KS", "NAVER"), ("329180.KS", "HD현대중공업"), ("055550.KS", "신한지주"),
+    ("034020.KS", "두산에너빌리티"), ("012330.KS", "현대모비스"), ("028260.KS", "삼성물산"),
+    ("042660.KS", "한화오션"), ("009540.KS", "HD한국조선해양"), ("005490.KS", "POSCO홀딩스"),
+    ("006400.KS", "삼성SDI"), ("032830.KS", "삼성생명"), ("402340.KS", "SK스퀘어"),
+    ("086790.KS", "하나금융지주"), ("035720.KS", "카카오"), ("010130.KS", "고려아연"),
 ]
 
-KR_STOCKS = [
-    ("005930.KS", "삼성전자"), ("000660.KS", "SK하이닉스"),
-    ("373220.KS", "LG에너지솔루션"), ("207940.KS", "삼성바이오로직스"),
-    ("005380.KS", "현대차"), ("035420.KS", "NAVER"),
-    ("105560.KS", "KB금융"), ("012450.KS", "한화에어로스페이스"),
-]
+
+def top_by_market_cap(pool: list[tuple], n: int = TOP_N) -> tuple[list[tuple], dict]:
+    """후보군의 시가총액을 조회해 상위 n개를 고른다. 조회가 안 되면 후보군 순서대로."""
+    caps = {}
+    for symbol, _ in pool:
+        for attempt in range(2):
+            try:
+                cap = yf.Ticker(symbol).fast_info["market_cap"]
+                if cap and cap > 0:
+                    caps[symbol] = float(cap)
+                break
+            except Exception as e:  # noqa: BLE001
+                if attempt:
+                    print(f"[cap] {symbol}: {e}")
+                time.sleep(1)
+    if len(caps) < n:
+        print(f"[cap] 시가총액을 {len(caps)}개만 받아 일부는 후보군 순서로 채웁니다")
+    ranked = sorted(pool, key=lambda r: -caps.get(r[0], -pool.index(r)))
+    return ranked[:n], caps
+
 
 # 미국: SPDR 섹터 ETF / 한국: KODEX 섹터 ETF (섹터 흐름의 대용치)
 US_SECTORS = [
@@ -168,6 +198,76 @@ def fetch_ecos_kr3y() -> dict | None:
 
 
 # ── 뉴스 ─────────────────────────────────────────────────────────
+# ── 오늘의 상승·하락 상위 ────────────────────────────────────────
+def us_movers(kind: str, n: int = 10) -> list[dict]:
+    """Yahoo Finance 기본 스크리너(day_gainers / day_losers): 시총 20억 달러 이상 미국 종목"""
+    quotes = []
+    try:
+        if hasattr(yf, "screen"):
+            res = yf.screen(kind, count=25)
+        else:  # 예전 yfinance
+            sc = yf.Screener()
+            sc.set_predefined_body(kind)
+            res = sc.response
+        quotes = (res or {}).get("quotes", [])
+    except Exception as e:  # noqa: BLE001
+        print(f"[movers] 미국 {kind} 실패: {e}")
+    out = []
+    for q in quotes:
+        pct = q.get("regularMarketChangePercent")
+        if pct is None or not q.get("symbol"):
+            continue
+        out.append({"symbol": q["symbol"], "name": q.get("shortName") or q.get("longName") or q["symbol"],
+                    "price": q.get("regularMarketPrice"), "pct": round(float(pct), 2), "cap": q.get("marketCap")})
+    out.sort(key=lambda r: -r["pct"] if kind == "day_gainers" else r["pct"])
+    return out[:n]
+
+
+KR_SKIP = re.compile(r"스팩|ETN|레버리지|인버스|(우|우B|우C|\d우B?)$")
+
+
+def kr_movers(kind: str, sosok: int, n: int = 10) -> list[dict]:
+    """네이버 증권 상승/하락 순위 (sosok 0=코스피, 1=코스닥). 우선주·스팩·ETN 제외"""
+    url = f"https://finance.naver.com/sise/sise_{kind}.naver?sosok={sosok}"
+    try:
+        r = requests.get(url, timeout=15, headers={"User-Agent": "Mozilla/5.0"})
+        r.encoding = "euc-kr"
+        html = r.text
+    except Exception as e:  # noqa: BLE001
+        print(f"[movers] 네이버 {kind}/{sosok} 실패: {e}")
+        return []
+    out = []
+    for tr in re.findall(r"<tr[^>]*>(.*?)</tr>", html, re.S):
+        m_name = re.search(r'class="tltle"[^>]*>(.*?)</a>', tr)
+        m_code = re.search(r"code=(\d{6})", tr)
+        if not (m_name and m_code):
+            continue
+        name = re.sub(r"<[^>]+>", "", m_name.group(1)).strip()
+        if KR_SKIP.search(name):
+            continue
+        cells = [re.sub(r"<[^>]+>|\s", "", c) for c in re.findall(r'<td class="number"[^>]*>(.*?)</td>', tr, re.S)]
+        pct_cell = next((c for c in cells if c.endswith("%")), None)
+        try:
+            price = float(cells[0].replace(",", ""))
+            pct = float(pct_cell.replace("%", "").replace("+", ""))
+        except Exception:  # noqa: BLE001
+            continue
+        out.append({"symbol": m_code.group(1), "name": name, "price": price, "pct": pct})
+        if len(out) >= n:
+            break
+    if not out:
+        print(f"[movers] 네이버 {kind}/{sosok}: 표를 읽지 못했습니다 (페이지 구조 변경 가능)")
+    return out
+
+
+def fetch_movers() -> dict:
+    return {
+        "us": {"up": us_movers("day_gainers"), "down": us_movers("day_losers")},
+        "kospi": {"up": kr_movers("rise", 0), "down": kr_movers("fall", 0)},
+        "kosdaq": {"up": kr_movers("rise", 1), "down": kr_movers("fall", 1)},
+    }
+
+
 def fetch_news(limit: int = 7) -> list[dict]:
     items, seen = [], set()
     for market, q in NEWS_QUERIES.items():
@@ -188,6 +288,8 @@ def fetch_news(limit: int = 7) -> list[dict]:
 SYSTEM = """당신은 한국 개인투자자를 위한 증권사 리서치센터의 데일리 마켓 브리핑 작성자입니다.
 주어진 시세·뉴스 데이터만 근거로 쓰고, 데이터에 없는 수치나 사실은 만들지 마세요.
 매수·매도 권유는 하지 않습니다. 문체는 간결한 '~했다/~이다' 체.
+시장 이름은 정확하게 쓰세요. '뉴욕 증시', '뉴욕장', '월가', '서울 증시', '서울장', '여의도' 같은 표현 대신
+'미국 증시'·'나스닥'·'S&P 500'·'다우', '한국 증시'·'코스피'·'코스닥'처럼 시장·지수 이름을 쓰세요.
 반드시 아래 형식의 JSON 객체 하나만 출력하세요. 설명 문장, 마크다운 코드블록, 주석(//)은 넣지 마세요.
 {
   "headline": "오늘 시장을 한 문장으로 (40자 내외)",
@@ -399,12 +501,24 @@ def main() -> None:
     session = "morning" if now.hour < 12 else "afternoon"  # 오전=뉴욕 마감, 오후=서울 마감
 
     indices = fetch_quotes(INDICES)
-    stocks = {"us": fetch_quotes(US_STOCKS), "kr": fetch_quotes(KR_STOCKS)}
+    stocks = {}
+    for mk, pool in (("us", US_POOL), ("kr", KR_POOL)):
+        top, caps = top_by_market_cap(pool)
+        rows = fetch_quotes(top)
+        for rank, r in enumerate(sorted(rows, key=lambda r: -caps.get(r["symbol"], 0)), 1):
+            r["cap"] = caps.get(r["symbol"])
+            r["rank"] = rank
+        stocks[mk] = sorted(rows, key=lambda r: r["rank"])
     sectors = {"us": fetch_quotes(US_SECTORS), "kr": fetch_quotes(KR_SECTORS)}
     macro = fetch_quotes(MACRO)
     if kr3y := fetch_ecos_kr3y():
         macro.insert(3, kr3y)
     news = fetch_news()
+    try:
+        movers = fetch_movers()
+    except Exception as e:  # noqa: BLE001
+        print(f"[movers] 실패: {e}")
+        movers = {}
 
     for job in (build_seasonality, build_calendar):
         try:
@@ -425,12 +539,14 @@ def main() -> None:
 
     payload = {
         "now_kst": now.strftime("%Y-%m-%d %H:%M"),
-        "session": "뉴욕 마감 직후" if session == "morning" else "서울 마감 직후",
+        "session": "미국 증시 마감 직후" if session == "morning" else "한국 증시 마감 직후",
         "indices": lite(indices),
         "stocks": {k: lite(v) for k, v in stocks.items()},
         "sectors": {k: lite(v) for k, v in sectors.items()},
         "macro": lite(macro),
         "news": [{"i": n, "market": x["market"], "title": x["title"]} for n, x in enumerate(news)],
+        "movers_top5": {k: {d: [f"{r['name']} {r['pct']:+.1f}%" for r in v.get(d, [])[:5]] for d in ("up", "down")}
+                        for k, v in movers.items()},
         "upcoming_events": upcoming,  # watch 항목 작성에 참고
     }
     brief = write_with_claude(payload) or fallback_briefing(indices)
@@ -449,7 +565,7 @@ def main() -> None:
         "commentary": {k: brief.get(k, "") for k in ("us", "kr", "macro")},
         "watch": brief.get("watch", []),
         "tags": [t.lstrip("#").strip() for t in brief.get("tags", []) if t.strip()][:5],
-        "indices": indices, "stocks": stocks, "sectors": sectors, "macro": macro,
+        "indices": indices, "stocks": stocks, "sectors": sectors, "macro": macro, "movers": movers,
         "news": news,
     }
     save(doc)
