@@ -35,9 +35,11 @@ KST = ZoneInfo("Asia/Seoul")
 # ── 수집 대상 (원하는 대로 수정하세요) ─────────────────────────────
 INDICES = [
     ("^IXIC", "나스닥 종합"),
+    ("^NDX", "나스닥 100"),
     ("^GSPC", "S&P 500"),
     ("^DJI", "다우존스"),
     ("^SOX", "필라델피아 반도체"),
+    ("^VIX", "VIX 변동성"),
     ("^KS11", "코스피"),
     ("^KQ11", "코스닥"),
 ]
@@ -73,7 +75,6 @@ MACRO = [
     ("DX-Y.NYB", "달러 인덱스", "idx"),
     ("^TNX", "미국채 10년", "pct"),
     ("^IRX", "미국채 3개월", "pct"),
-    ("^VIX", "VIX 변동성", "idx"),
     ("CL=F", "WTI 유가", "usd"),
     ("GC=F", "금", "usd"),
     ("BTC-USD", "비트코인", "usd"),
@@ -193,7 +194,7 @@ SYSTEM = """당신은 한국 개인투자자를 위한 증권사 리서치센터
   "us": "미국 시장 코멘트 3~4문장 (300자 이내)",
   "kr": "한국 시장 코멘트 3~4문장 (300자 이내)",
   "macro": "환율·금리·원자재 코멘트 2~3문장 (200자 이내)",
-  "watch": ["오늘/다음 거래일 체크포인트 3개"],
+  "watch": ["오늘/다음 거래일 체크포인트 3개. upcoming_events가 있으면 날짜와 함께 반영"],
   "tags": ["아카이브 분류용 주제 태그 3~5개. 짧은 명사, 예: 반도체, 환율, 금리, 실적, 2차전지, 유가"],
   "news_notes": [{"i": 0, "note": "중요한 뉴스 최대 6개에 대한 시장 관점 한줄평. i는 뉴스 번호(숫자)"}]
 }"""
@@ -251,6 +252,118 @@ def fallback_briefing(indices: list[dict]) -> dict:
     }
 
 
+
+# ── 역대 월별 등락 (시즌성) ──────────────────────────────────────
+SEASON_INDICES = [("^IXIC", "나스닥 종합"), ("^NDX", "나스닥 100"), ("^KS11", "코스피"), ("^KQ11", "코스닥")]
+
+
+def build_seasonality() -> None:
+    """지수별 월간 수익률을 연도×월 표로 저장 → docs/data/seasonality.json"""
+    out = []
+    now = dt.datetime.now(KST)
+    for symbol, name in SEASON_INDICES:
+        try:
+            h = yf.Ticker(symbol).history(period="max", interval="1mo", auto_adjust=False)
+            closes = h["Close"].dropna()
+            closes = closes[~closes.index.duplicated(keep="last")]
+            rets = closes.pct_change().dropna() * 100
+        except Exception as e:  # noqa: BLE001
+            print(f"[season] {symbol} 실패: {e}")
+            continue
+        years: dict[str, list] = {}
+        for ts, r in rets.items():
+            y, m = str(ts.year), ts.month
+            years.setdefault(y, [None] * 12)[m - 1] = round(float(r), 2)
+        # 진행 중인 이번 달은 통계에서 제외
+        cur_y, cur_m = str(now.year), now.month
+        stats = []
+        for m in range(12):
+            vals = [row[m] for y, row in years.items() if row[m] is not None and not (y == cur_y and m + 1 == cur_m)]
+            if not vals:
+                stats.append(None)
+                continue
+            vals_sorted = sorted(vals)
+            mid = len(vals_sorted) // 2
+            median = vals_sorted[mid] if len(vals_sorted) % 2 else (vals_sorted[mid - 1] + vals_sorted[mid]) / 2
+            stats.append({
+                "avg": round(sum(vals) / len(vals), 2),
+                "median": round(median, 2),
+                "up": round(sum(v > 0 for v in vals) / len(vals) * 100),
+                "n": len(vals),
+                "best": round(max(vals), 2),
+                "worst": round(min(vals), 2),
+            })
+        out.append({"symbol": symbol, "name": name, "current": f"{cur_y}-{cur_m:02d}",
+                    "years": dict(sorted(years.items())), "stats": stats})
+        print(f"[season] {name}: {min(years)}~{max(years)}년")
+    if out:
+        doc = {"updated": now.isoformat(timespec="minutes"), "indices": out}
+        (DATA_DIR / "seasonality.json").write_text(json.dumps(doc, ensure_ascii=False), "utf-8")
+
+
+# ── 경제 일정 달력 ──────────────────────────────────────────────
+CAL_SYSTEM = """당신은 한국 개인투자자를 위한 경제 일정 편집자입니다.
+웹 검색으로 확인된 공식 일정만 넣고, 확인되지 않은 날짜는 넣지 마세요. 추측 금지.
+시간은 한국시간(KST) 24시간제 "HH:MM"으로, 모르면 빈 문자열.
+반드시 아래 형식의 JSON 객체 하나만 출력하세요. 설명 문장, 코드블록, 주석 금지.
+{"events": [{"date": "YYYY-MM-DD", "time": "21:30", "country": "us 또는 kr", "title": "짧은 일정명", "importance": 1~3 숫자(3=시장 영향 큼), "note": "한 줄 설명(선택)"}]}"""
+
+CAL_PROMPT = """{month} 한 달 동안의 주요 경제 일정을 찾아 정리해 주세요.
+포함할 것:
+- 미국: FOMC 회의·의사록, 소비자물가(CPI), 생산자물가(PPI), 고용보고서, 개인소비지출(PCE), GDP, 소매판매, ISM·S&P글로벌 PMI, 미시간대·콘퍼런스보드 소비자심리, 주택지표, 주요 빅테크 실적 발표, 옵션 만기일
+- 한국: 한국은행 금융통화위원회, 수출입 동향, 소비자물가, 선물옵션 동시만기일, 주요 대형주 실적 발표
+importance 3은 FOMC 금리 결정, CPI, 고용보고서, PCE, 금통위처럼 시장을 크게 움직이는 일정에만 주세요.
+미국 발표는 한국시간으로 바꿔서 적어 주세요(서머타임 반영)."""
+
+
+def build_calendar() -> list[dict]:
+    """이번 달·다음 달 일정을 일주일에 한 번 Claude 웹 검색으로 갱신 → docs/data/calendar.json"""
+    path = DATA_DIR / "calendar.json"
+    cal = json.loads(path.read_text("utf-8")) if path.exists() else {"updated": {}, "events": []}
+    now = dt.datetime.now(KST)
+    first_next = (now.replace(day=1) + dt.timedelta(days=32)).replace(day=1)
+    months = [now.strftime("%Y-%m"), first_next.strftime("%Y-%m")]
+
+    if os.getenv("ANTHROPIC_API_KEY"):
+        from anthropic import Anthropic
+        client = Anthropic()
+        for month in months:
+            last = cal["updated"].get(month)
+            if last and (now - dt.datetime.fromisoformat(last)).days < 7:
+                continue
+            try:
+                msg = client.messages.create(
+                    model=os.getenv("CLAUDE_MODEL") or "claude-sonnet-5-5",
+                    max_tokens=8000,
+                    system=CAL_SYSTEM,
+                    tools=[{"type": "web_search_20250305", "name": "web_search", "max_uses": 8}],
+                    messages=[{"role": "user", "content": CAL_PROMPT.format(month=month)}],
+                )
+                text = "".join(b.text for b in msg.content if getattr(b, "type", "") == "text")
+                data = parse_json_loose(text[text.find('{"events"'):] if '{"events"' in text else text)
+                events = [e for e in (data or {}).get("events", [])
+                          if str(e.get("date", "")).startswith(month) and e.get("title")]
+                if not events:
+                    print(f"[calendar] {month}: 일정을 받지 못해 기존 데이터 유지")
+                    continue
+                cal["events"] = [e for e in cal["events"] if not e["date"].startswith(month)] + [
+                    {"date": e["date"], "time": str(e.get("time", ""))[:5], "country": e.get("country", "us"),
+                     "title": str(e["title"])[:40], "importance": int(e.get("importance", 1) or 1),
+                     "note": str(e.get("note", ""))[:80]} for e in events]
+                cal["updated"][month] = now.isoformat(timespec="minutes")
+                print(f"[calendar] {month}: {len(events)}건 갱신")
+            except Exception as e:  # noqa: BLE001
+                print(f"[calendar] {month} 실패: {e}")
+
+    # 석 달 지난 일정은 정리
+    cutoff = (now.replace(day=1) - dt.timedelta(days=95)).strftime("%Y-%m")
+    cal["events"] = sorted([e for e in cal["events"] if e["date"][:7] >= cutoff],
+                           key=lambda e: (e["date"], e.get("time") or "99:99"))
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(cal, ensure_ascii=False, indent=1), "utf-8")
+    return cal["events"]
+
+
 # ── 저장 ─────────────────────────────────────────────────────────
 def save(doc: dict) -> None:
     DATA_DIR.mkdir(parents=True, exist_ok=True)
@@ -293,6 +406,19 @@ def main() -> None:
         macro.insert(3, kr3y)
     news = fetch_news()
 
+    for job in (build_seasonality, build_calendar):
+        try:
+            job()
+        except Exception as e:  # noqa: BLE001
+            print(f"[{job.__name__}] 실패: {e}")
+    upcoming = []
+    try:
+        cal = json.loads((DATA_DIR / "calendar.json").read_text("utf-8"))
+        today, week = now.strftime("%Y-%m-%d"), (now + dt.timedelta(days=7)).strftime("%Y-%m-%d")
+        upcoming = [e for e in cal["events"] if today <= e["date"] <= week]
+    except Exception:  # noqa: BLE001
+        pass
+
     # 토큰 절약: Claude에는 스파크라인을 빼고 전달
     def lite(rows):
         return [{k: v for k, v in r.items() if k != "spark"} for r in rows]
@@ -305,6 +431,7 @@ def main() -> None:
         "sectors": {k: lite(v) for k, v in sectors.items()},
         "macro": lite(macro),
         "news": [{"i": n, "market": x["market"], "title": x["title"]} for n, x in enumerate(news)],
+        "upcoming_events": upcoming,  # watch 항목 작성에 참고
     }
     brief = write_with_claude(payload) or fallback_briefing(indices)
 
