@@ -306,7 +306,7 @@ CAL_SYSTEM = """당신은 한국 개인투자자를 위한 경제 일정 편집�
 웹 검색으로 확인된 공식 일정만 넣고, 확인되지 않은 날짜는 넣지 마세요. 추측 금지.
 시간은 한국시간(KST) 24시간제 "HH:MM"으로, 모르면 빈 문자열.
 반드시 아래 형식의 JSON 객체 하나만 출력하세요. 설명 문장, 코드블록, 주석 금지.
-{"events": [{"date": "YYYY-MM-DD", "time": "21:30", "country": "us 또는 kr", "title": "짧은 일정명", "importance": 1~3 숫자(3=시장 영향 큼), "note": "한 줄 설명(선택)"}]}"""
+{"events": [{"date": "YYYY-MM-DD", "time": "21:30", "country": "us 또는 kr", "title": "짧은 일정명", "short": "달력 칸용 2~6글자 약칭(예: CPI, 고용, FOMC, 금통위, 엔비디아)", "importance": 1~3 숫자(3=시장 영향 큼), "note": "한 줄 설명(선택)"}]}"""
 
 CAL_PROMPT = """{month} 한 달 동안의 주요 경제 일정을 찾아 정리해 주세요.
 포함할 것:
@@ -348,7 +348,7 @@ def build_calendar() -> list[dict]:
                     continue
                 cal["events"] = [e for e in cal["events"] if not e["date"].startswith(month)] + [
                     {"date": e["date"], "time": str(e.get("time", ""))[:5], "country": e.get("country", "us"),
-                     "title": str(e["title"])[:40], "importance": int(e.get("importance", 1) or 1),
+                     "title": str(e["title"])[:40], "short": str(e.get("short", ""))[:8], "importance": int(e.get("importance", 1) or 1),
                      "note": str(e.get("note", ""))[:80]} for e in events]
                 cal["updated"][month] = now.isoformat(timespec="minutes")
                 print(f"[calendar] {month}: {len(events)}건 갱신")
