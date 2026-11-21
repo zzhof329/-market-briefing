@@ -306,7 +306,7 @@ const md = d => d ? d.slice(5).replace("-", ".") : "";
 
 const EMBED = window.BRIEFING_EMBED || null;   // 미리보기용: 데이터가 페이지 안에 들어 있으면 그걸 사용
 const S = {tab: "home", doc: null, key: "latest", index: [], q: "", month: "all", ses: "all", tag: null, newsMk: "all", cache: {},
-  cal: null, season: null, calMonth: null, seasonIdx: 0, seasonAll: false, stockSort: "cap", krBoard: "kospi", anaMk: null};
+  cal: null, season: null, calMonth: null, seasonIdx: 0, seasonAll: false, stockSort: "cap", krBoard: "kospi", anaMk: null, krCap: "kr"};
 
 const TABS = [
   ["home", "홈"], ["us", "미국 시장"], ["kr", "한국 시장"], ["coin", "코인"], ["macro", "환율·금리"],
@@ -386,7 +386,7 @@ function stockTable(list, mk) {
   const rows = S.stockSort === "pct" ? [...list].sort((a, b) => b.pct - a.pct)
     : [...list].sort((a, b) => (a.rank || 99) - (b.rank || 99) || (b.cap || 0) - (a.cap || 0));
   return `<div class="tablewrap"><table><thead><tr><th class="n">순위</th><th>종목</th><th class="n">종가</th><th class="n">등락률</th><th class="n hide-m">시가총액</th><th class="hide-m">20일 추이</th></tr></thead><tbody>
-  ${rows.map((s, i) => { const d = dir(s.pct); return `<tr><td class="n mono">${s.rank || i + 1}</td><td class="nm">${esc(s.name)}<small>${esc(s.symbol.replace(".KS", ""))}<span class="show-m"> · ${capFmt(s.cap)}</span></small></td>
+  ${rows.map((s, i) => { const d = dir(s.pct); return `<tr><td class="n mono">${s.rank || i + 1}</td><td class="nm">${esc(s.name)}<small>${esc(s.symbol.replace(/\.K[SQ]$/, ""))}<span class="show-m"> · ${capFmt(s.cap)}</span></small></td>
     <td class="n">${fmt(s.price)}${mk === "us" ? krwSub(s.price) : ""}</td><td class="n ${d}"><b>${pct(s.pct)}</b></td><td class="n mono hide-m">${capFmt(s.cap)}</td><td class="sp hide-m">${spark(s.spark, d)}</td></tr>`; }).join("")}
   </tbody></table></div>`;
 }
@@ -587,6 +587,15 @@ function viewHome() {
   </section>`;
 }
 
+function etfTable(list, mk) {
+  if (!list?.length) return `<p class="empty">ETF 데이터는 다음 브리핑부터 채워집니다.</p>`;
+  const fmt = v => mk === "kr" ? `${nf(v, 0)}원` : `$${nf(v)}`;
+  return `<div class="tablewrap"><table><thead><tr><th>ETF</th><th class="n">종가</th><th class="n">등락률</th><th class="hide-m">20일 추이</th></tr></thead><tbody>
+  ${list.map(e => { const d = dir(e.pct); return `<tr><td class="nm">${esc(e.name)}<small>${esc(e.symbol.replace(/\.K[SQ]$/, ""))}${e.desc ? ` · ${esc(e.desc)}` : ""}</small></td>
+    <td class="n">${fmt(e.price)}${mk === "us" ? krwSub(e.price) : ""}</td><td class="n ${d}"><b>${pct(e.pct)}</b></td><td class="sp hide-m">${spark(e.spark, d)}</td></tr>`; }).join("")}
+  </tbody></table></div>`;
+}
+
 function viewMarket(mk) {
   const d = S.doc, us = mk === "us";
   return `
@@ -598,9 +607,13 @@ function viewMarket(mk) {
     <div><h2>섹터 흐름</h2><p class="desc">${us ? "SPDR 섹터 ETF" : "KODEX 섹터 ETF"} 등락률 기준</p>${sectorBars(d.sectors?.[mk])}</div>
     <div><div class="shead" style="margin-top:0;align-items:center"><h2>시가총액 상위 10</h2>
       <div class="frow"><button class="chip ${S.stockSort === "cap" ? "on" : ""}" type="button" data-stocksort="cap">시총 순</button><button class="chip ${S.stockSort === "pct" ? "on" : ""}" type="button" data-stocksort="pct">등락률 순</button></div></div>
-      <p class="desc">${us ? "미국 상장 기업" : "코스피 보통주"} 기준, 매일 순위를 새로 확인합니다</p>${stockTable(d.stocks?.[mk], mk)}</div>
+      ${us ? "" : `<div class="frow" style="margin-top:8px"><button class="chip ${S.krCap === "kr" ? "on" : ""}" type="button" data-krcap="kr">코스피</button><button class="chip ${S.krCap === "kq" ? "on" : ""}" type="button" data-krcap="kq">코스닥</button></div>`}
+      <p class="desc">${us ? "미국 상장 기업" : S.krCap === "kq" ? "코스닥" : "코스피 보통주"} 기준, 매일 순위를 새로 확인합니다</p>
+      ${us ? stockTable(d.stocks?.us, "us") : d.stocks?.[S.krCap]?.length ? stockTable(d.stocks[S.krCap], "kr") : `<p class="empty">코스닥 순위는 다음 브리핑부터 채워집니다.</p>`}</div>
   </section>
-  ${viewMovers(mk)}
+  <section class="sec"><h2>주요 ETF</h2>
+    <p class="desc">${mk === "us" ? "국내 투자자가 많이 보는 미국 상장 ETF" : "국내 상장 ETF"}. 주식·채권·금·테마 등 서로 다른 자산을 하나씩 골랐습니다</p>
+    ${etfTable(d.etfs?.[mk], mk)}</section>
   <section class="sec"><h2>관련 뉴스</h2>${newsList((d.news || []).filter(n => n.market === mk))}</section>`;
 }
 
@@ -880,7 +893,7 @@ function fillPicker() {
 }
 
 document.addEventListener("click", e => {
-  const t = e.target.closest("[data-tab],[data-open],[data-month],[data-ses],[data-tag],[data-tagjump],[data-newsmk],[data-calmove],[data-season],[data-seasonall],[data-calday],[data-stocksort],[data-krboard],[data-anamk]");
+  const t = e.target.closest("[data-tab],[data-open],[data-month],[data-ses],[data-tag],[data-tagjump],[data-newsmk],[data-calmove],[data-season],[data-seasonall],[data-calday],[data-stocksort],[data-krboard],[data-anamk],[data-krcap]");
   if (!t) return;
   const ds = t.dataset;
   if (ds.tab) return setTab(ds.tab);
@@ -896,6 +909,7 @@ document.addEventListener("click", e => {
   if (ds.stocksort) S.stockSort = ds.stocksort;
   if (ds.krboard) S.krBoard = ds.krboard;
   if (ds.anamk) S.anaMk = ds.anamk;
+  if (ds.krcap) S.krCap = ds.krcap;
   if (ds.calday) S.calDay = S.calDay === ds.calday ? null : ds.calday;
   if (ds.seasonall) S.seasonAll = !S.seasonAll;
   render();
