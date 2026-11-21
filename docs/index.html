@@ -208,6 +208,38 @@ button.cell:hover{border-color:var(--steel)}
 .heat th:first-child,.heat td:first-child{position:sticky;left:0;background:var(--surface2);z-index:1;font-family:var(--f-mono)}
 .heat td.cur{outline:2px solid var(--steel);outline-offset:-2px}
 .heat tr.sum td{font-weight:700;background:var(--surface2)}
+/* 심층 분석 */
+.ana{margin-top:20px;background:var(--surface);border:1px solid var(--line);border-top:3px solid var(--accent);border-radius:10px;padding:16px 18px}
+.ana .badge{display:inline-block;font-size:12px;font-weight:700;color:#fff;background:var(--accent);border-radius:4px;padding:2px 8px;margin-right:6px;vertical-align:2px}
+.ana .trig{font-size:13px;color:var(--sub)}
+.ana h2{margin:8px 0 6px;font-family:var(--f-display);font-size:20px;line-height:1.35;word-break:keep-all}
+.ana .sum{margin:0;word-break:keep-all}
+.ana h3{font-size:14px;margin:16px 0 6px;color:var(--sub)}
+.ana details{border-top:1px solid var(--line);padding:9px 0}
+.ana details:last-of-type{border-bottom:1px solid var(--line)}
+.ana summary{cursor:pointer;font-weight:700;list-style:none;display:flex;gap:8px;align-items:baseline}
+.ana summary::-webkit-details-marker{display:none}
+.ana summary::after{content:"＋";margin-left:auto;color:var(--sub);font-weight:400}
+.ana details[open] summary::after{content:"－"}
+.ana details p{margin:6px 0 2px;word-break:keep-all}
+.ana .w{font-size:11.5px;border-radius:4px;padding:1px 6px;white-space:nowrap;font-weight:700}
+.ana .w.high{background:var(--upbg);color:var(--up)} .ana .w.mid{background:var(--accent-soft);color:var(--accent)} .ana .w.low{background:var(--flatbg);color:var(--sub)}
+.ana ul{margin:0;padding-left:18px} .ana li{margin:3px 0;word-break:keep-all}
+.ana .src{font-size:13px;display:flex;flex-direction:column;gap:3px}
+.ana .src a{color:var(--link);text-decoration:none} .ana .src a:hover{text-decoration:underline}
+.tag.ana-t{background:var(--accent);color:#fff}
+.ana.daily{border-top-color:var(--steel)}
+.ana.daily .badge{background:var(--steel)}
+.stance{display:inline-block;font-weight:700;border-radius:6px;padding:3px 10px;font-size:14px}
+.stance.up{background:var(--upbg);color:var(--up)} .stance.down{background:var(--downbg);color:var(--down)} .stance.flat{background:var(--flatbg);color:var(--sub)}
+.ol-head{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.ol-head .mono{font-size:12.5px}
+.scen{display:grid;gap:6px;margin-top:8px}
+.scen div{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface2);word-break:keep-all}
+.scen b{white-space:nowrap}
+.scen small{color:var(--sub);font-size:12px;display:block;font-weight:400}
+.disc{margin:12px 0 0;font-size:12px;color:var(--sub)}
+.tag.st-up{background:var(--upbg);color:var(--up)} .tag.st-down{background:var(--downbg);color:var(--down)} .tag.st-flat{background:var(--flatbg);color:var(--sub)}
 .links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
 .empty{padding:24px 14px;color:var(--sub);text-align:center}
 footer{margin:40px 0 28px;padding-top:14px;border-top:1px solid var(--line);font-size:12.5px;color:var(--sub)}
@@ -407,13 +439,53 @@ function briefRow(e) {
   return `<li><button class="row ${cur ? "cur" : ""}" type="button" data-open="${esc(e.key)}">
     <span class="mono">${md(e.date)}</span>
     <span class="t"><b>${esc(e.headline)}</b>
-      <span class="meta"><span class="tag ses">${sesName(e.session)}</span>
+      <span class="meta">${e.analysis ? `<span class="tag ana-t">심층 분석</span>` : ""}${e.stance ? `<span class="tag st-${stCls(e.stance)}">전망 ${esc(e.stance)}</span>` : ""}<span class="tag ses">${sesName(e.session)}</span>
         <span class="${dir(e.us_pct)}">나스닥 ${pct(e.us_pct)}</span><span class="${dir(e.kr_pct)}">코스피 ${pct(e.kr_pct)}</span>
         ${(e.tags || []).map(t => `<span class="tag">#${esc(t)}</span>`).join("")}</span></span>
   </button></li>`;
 }
 
 /* ── 화면 ───────────────────────────────────── */
+const stCls = st => st === "상승 우위" ? "up" : st === "하락 우위" ? "down" : "flat";
+
+function viewOutlook(o) {
+  if (!o) return "";
+  return `<h3>앞으로의 방향성</h3>
+    <div class="ol-head"><span class="stance ${stCls(o.stance)}">${esc(o.stance)}</span>${o.horizon ? `<span class="mono">${esc(o.horizon)} 기준</span>` : ""}</div>
+    ${o.reason ? `<p class="sum" style="margin-top:8px">${esc(o.reason)}</p>` : ""}
+    ${o.scenarios?.length ? `<div class="scen">${o.scenarios.map(x => `<div><b>${esc(x.name)}<small>가능성 ${esc(x.likelihood || "–")}</small></b><span>${esc(x.desc)}</span></div>`).join("")}</div>` : ""}
+    ${o.levels?.length ? `<h3>볼 만한 지수 수준</h3><ul>${o.levels.map(l => `<li>${esc(l)}</li>`).join("")}</ul>` : ""}
+    <p class="disc">전망은 공개된 시세·보도를 바탕으로 한 조건부 시나리오이며, 투자 권유가 아닙니다.</p>`;
+}
+
+function viewAnalysis(a) {
+  if (!a) return "";
+  const wcls = w => w === "높음" ? "high" : w === "낮음" ? "low" : "mid";
+  const watch = a.watch || (Array.isArray(a.outlook) ? a.outlook : []);
+  return `<section class="ana" aria-label="심층 분석">
+    <div><span class="badge">심층 분석</span><span class="trig">${a.triggers.map(esc).join(" · ")}${a.reused ? " · 오늘 오전 분석" : ""}</span></div>
+    <h2>${esc(a.title || "왜 이렇게 움직였나")}</h2>
+    <p class="sum">${esc(a.summary)}</p>
+    <h3>주요 원인</h3>
+    ${a.causes.map((c, i) => `<details ${i === 0 ? "open" : ""}><summary><span class="w ${wcls(c.weight)}">영향 ${esc(c.weight)}</span>${esc(c.title)}</summary><p>${esc(c.detail)}</p></details>`).join("")}
+    ${a.reaction ? `<h3>업종·종목 반응</h3><p class="sum">${esc(a.reaction)}</p>` : ""}
+    ${a.link ? `<h3>미국·한국 증시 연결고리</h3><p class="sum">${esc(a.link)}</p>` : ""}
+    ${a.history ? `<h3>과거 비슷한 사례</h3><p class="sum">${esc(a.history)}</p>` : ""}
+    ${a.outlook && !Array.isArray(a.outlook) ? viewOutlook(a.outlook) : ""}
+    ${watch.length ? `<h3>앞으로 볼 변수</h3><ul>${watch.map(o => `<li>${esc(o)}</li>`).join("")}</ul>` : ""}
+    ${a.sources?.length ? `<h3>참고한 기사</h3><div class="src">${a.sources.map(x => `<a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.title || x.url)}</a>`).join("")}</div>` : ""}
+  </section>`;
+}
+
+function viewDaily(d) {
+  if (d.analysis || (!d.drivers?.length && !d.outlook)) return "";
+  return `<section class="ana daily" aria-label="오늘의 분석과 전망">
+    <div><span class="badge">오늘의 분석</span><span class="trig">${sesName(d.session)} 기준</span></div>
+    ${d.drivers?.length ? `<h3 style="margin-top:12px">오늘 움직인 이유</h3><ul>${d.drivers.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
+    ${viewOutlook(d.outlook)}
+  </section>`;
+}
+
 function viewHome() {
   const d = S.doc, c = d.commentary || {};
   const nas = find(d.indices, "^IXIC"), ksp = find(d.indices, "^KS11");
@@ -439,6 +511,8 @@ function viewHome() {
     </div>
   </section>
   ${d.sample ? `<div class="notice">지금 보이는 숫자와 뉴스는 화면 확인용 예시 데이터입니다. 자동 실행이 시작되면 실제 시세로 바뀝니다.</div>` : ""}
+  ${viewAnalysis(d.analysis)}
+  ${viewDaily(d)}
 
   <div class="cards">
     ${card("us", "미국", "나스닥 종합", nas, "지수·섹터·대형주 흐름")}
@@ -512,7 +586,7 @@ function archiveMatches() {
   const q = S.q.trim().toLowerCase();
   return S.index.filter(e =>
     (S.month === "all" || e.date.startsWith(S.month)) &&
-    (S.ses === "all" || e.session === S.ses) &&
+    (S.ses === "all" || (S.ses === "analysis" ? e.analysis : e.session === S.ses)) &&
     (!S.tag || (e.tags || []).includes(S.tag)) &&
     (!q || [e.headline, e.summary, ...(e.tags || []), ...(e.keywords || [])].join(" ").toLowerCase().includes(q)));
 }
@@ -530,7 +604,7 @@ function viewArchive() {
   <div class="filters">
     <input id="archQ" type="search" placeholder="헤드라인·태그·종목명으로 찾기" value="${esc(S.q)}" aria-label="아카이브 검색">
     <div class="frow"><span class="flbl">기간</span>${chip("month", "all", S.month, "전체")}${months.map(m => chip("month", m, S.month, `${m.slice(0, 4)}년 ${+m.slice(5)}월`)).join("")}</div>
-    <div class="frow"><span class="flbl">구분</span>${chip("ses", "all", S.ses, "전체")}${chip("ses", "morning", S.ses, "미국 증시 마감")}${chip("ses", "afternoon", S.ses, "한국 증시 마감")}</div>
+    <div class="frow"><span class="flbl">구분</span>${chip("ses", "all", S.ses, "전체")}${chip("ses", "morning", S.ses, "미국 증시 마감")}${chip("ses", "afternoon", S.ses, "한국 증시 마감")}${chip("ses", "analysis", S.ses, "심층 분석만")}</div>
     ${tags.length ? `<div class="frow"><span class="flbl">태그</span>${tags.map(([t, n]) => `<button class="chip ${S.tag === t ? "on" : ""}" type="button" data-tag="${esc(t)}">#${esc(t)} <span class="mono">${n}</span></button>`).join("")}</div>` : ""}
   </div>
   ${hits.length ? `<ul class="list">${hits.map(briefRow).join("")}</ul>` : `<p class="empty">조건에 맞는 브리핑이 없습니다. 검색어나 필터를 바꿔 보세요.</p>`}`;
@@ -624,7 +698,7 @@ function viewCalendar() {
   <div class="cal">${["월", "화", "수", "목", "금"].map(d => `<span class="dow">${d}</span>`).join("")}${cells.join("")}</div>
   <div class="legend"><span><i style="background:var(--down)"></i>미국</span><span><i style="background:var(--up)"></i>한국</span><span style="color:var(--accent)">★ 중요</span><span>날짜를 누르면 그날 일정이 펼쳐집니다</span></div>
   <section class="sec"><h2>${m}월 일정 목록</h2>
-    <p class="desc">일정은 일주일에 한 번 Claude가 웹 검색으로 확인해 채웁니다. 발표 직전에는 Investing.com에서 시간을 한 번 더 확인하세요.</p>
+    <p class="desc">일정은 한 달에 한 번 Claude가 웹 검색으로 확인해 채웁니다. 발표 직전에는 Investing.com에서 시간을 한 번 더 확인하세요.</p>
     ${days.length ? `<div class="list evlist">${days.map(ds => `<div class="day"><div class="dh ${ds === t ? "today" : ""}">${+ds.slice(5, 7)}월 ${+ds.slice(8)}일 (${dname(ds)})</div>${byDate[ds].sort((a, b) => (a.time || "99").localeCompare(b.time || "99")).map(evRow).join("")}</div>`).join("")}</div>`
       : `<p class="empty">이 달의 일정이 아직 없습니다. 이번 달과 다음 달 일정은 자동으로 채워집니다.</p>`}
   </section>
