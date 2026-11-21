@@ -19,6 +19,7 @@ import json
 import os
 import pathlib
 import re
+import time
 from urllib.parse import quote
 from zoneinfo import ZoneInfo
 
@@ -85,21 +86,43 @@ NEWS_QUERIES = {
 
 
 # ── 시세 ─────────────────────────────────────────────────────────
+def _closes_one(symbol: str):
+    """한 종목만 따로 받아오기 (일괄 다운로드에서 빠졌을 때 재시도용)"""
+    for attempt in range(3):
+        try:
+            h = yf.Ticker(symbol).history(period="1mo", interval="1d", auto_adjust=False)
+            closes = h["Close"].dropna()
+            if len(closes) >= 2:
+                return closes
+        except Exception as e:  # noqa: BLE001
+            print(f"[retry {attempt + 1}] {symbol}: {e}")
+        time.sleep(2 + attempt * 3)
+    return None
+
+
 def fetch_quotes(table: list[tuple]) -> list[dict]:
     tickers = [row[0] for row in table]
-    df = yf.download(
-        tickers, period="1mo", interval="1d", group_by="ticker",
-        auto_adjust=False, progress=False, threads=True,
-    )
+    try:
+        df = yf.download(
+            tickers, period="1mo", interval="1d", group_by="ticker",
+            auto_adjust=False, progress=False, threads=False,
+        )
+    except Exception as e:  # noqa: BLE001
+        print(f"[download] 일괄 다운로드 실패: {e}")
+        df = None
     out = []
     for row in table:
         symbol, name = row[0], row[1]
+        closes = None
         try:
             closes = df[symbol]["Close"].dropna()
-        except KeyError:
+        except Exception:  # noqa: BLE001
+            pass
+        if closes is None or len(closes) < 2:
+            print(f"[retry] {symbol}: 일괄 다운로드에서 빠져 따로 받아옵니다")
+            closes = _closes_one(symbol)
+        if closes is None:
             print(f"[skip] {symbol}: 데이터 없음")
-            continue
-        if len(closes) < 2:
             continue
         last, prev = float(closes.iloc[-1]), float(closes.iloc[-2])
         item = {
@@ -164,7 +187,7 @@ def fetch_news(limit: int = 7) -> list[dict]:
 SYSTEM = """당신은 한국 개인투자자를 위한 증권사 리서치센터의 데일리 마켓 브리핑 작성자입니다.
 주어진 시세·뉴스 데이터만 근거로 쓰고, 데이터에 없는 수치나 사실은 만들지 마세요.
 매수·매도 권유는 하지 않습니다. 문체는 간결한 '~했다/~이다' 체.
-반드시 아래 JSON만 출력하세요. 다른 텍스트나 마크다운 코드블록 금지.
+반드시 아래 형식의 JSON 객체 하나만 출력하세요. 설명 문장, 마크다운 코드블록, 주석(//)은 넣지 마세요.
 {
   "headline": "오늘 시장을 한 문장으로 (40자 내외)",
   "us": "미국 시장 코멘트 3~4문장",
@@ -172,7 +195,7 @@ SYSTEM = """당신은 한국 개인투자자를 위한 증권사 리서치센터
   "macro": "환율·금리·원자재 코멘트 2~3문장",
   "watch": ["오늘/다음 거래일 체크포인트 3개"],
   "tags": ["아카이브 분류용 주제 태그 3~5개. 짧은 명사, 예: 반도체, 환율, 금리, 실적, 2차전지, 유가"],
-  "news_notes": [{"i": 뉴스 번호, "note": "시장 관점 한줄평"}]  // 중요한 뉴스 최대 6개
+  "news_notes": [{"i": 0, "note": "중요한 뉴스 최대 6개에 대한 시장 관점 한줄평. i는 뉴스 번호(숫자)"}]
 }"""
 
 
@@ -189,23 +212,36 @@ def write_with_claude(payload: dict) -> dict | None:
         messages=[{"role": "user", "content": json.dumps(payload, ensure_ascii=False)}],
     )
     text = "".join(b.text for b in msg.content if b.type == "text")
-    text = re.sub(r"```(?:json)?", "", text).strip()
-    try:
-        return json.loads(text)
-    except json.JSONDecodeError:
-        print("[claude] JSON 파싱 실패, 기본 요약 사용")
+    return parse_json_loose(text)
+
+
+def parse_json_loose(text: str) -> dict | None:
+    cleaned = re.sub(r"```(?:json)?", "", text)
+    start, end = cleaned.find("{"), cleaned.rfind("}")
+    if start == -1 or end <= start:
+        print(f"[claude] JSON을 찾지 못함. 응답 앞부분: {text[:300]!r}")
         return None
+    body = cleaned[start:end + 1]
+    for candidate in (body, re.sub(r"//[^\n\"]*$", "", body, flags=re.M), re.sub(r",\s*([}\]])", r"\1", body)):
+        try:
+            return json.loads(candidate)
+        except json.JSONDecodeError:
+            continue
+    print(f"[claude] JSON 파싱 실패, 기본 요약 사용. 응답 앞부분: {text[:300]!r}")
+    return None
 
 
 def fallback_briefing(indices: list[dict]) -> dict:
     by = {i["symbol"]: i for i in indices}
-    def line(sym):
-        i = by.get(sym)
-        return f"{i['name']} {i['pct']:+.2f}%" if i else ""
+
+    def join(*syms):
+        return ", ".join(f"{by[s]['name']} {by[s]['pct']:+.2f}%" for s in syms if s in by)
+
+    us, kr = join("^IXIC", "^GSPC", "^SOX"), join("^KS11", "^KQ11")
     return {
-        "headline": f"{line('^IXIC')}, {line('^KS11')}",
-        "us": f"{line('^IXIC')}, {line('^GSPC')}, {line('^SOX')}로 마감했다.",
-        "kr": f"{line('^KS11')}, {line('^KQ11')}로 마감했다.",
+        "headline": join("^IXIC", "^KS11") or join("^GSPC", "^KS11") or "오늘의 시장 브리핑",
+        "us": f"{us}로 마감했다." if us else "",
+        "kr": f"{kr}로 마감했다." if kr else "",
         "macro": "",
         "watch": [],
         "tags": [],
