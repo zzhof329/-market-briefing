@@ -1,0 +1,328 @@
+{
+ "updated": {
+  "2026-11": "2026-11-21T17:02+09:00",
+  "2026-12": "2026-11-21T17:02+09:00"
+ },
+ "events": [
+  {
+   "date": "2026-11-01",
+   "time": "",
+   "country": "kr",
+   "title": "10월 수출입 동향",
+   "importance": 2,
+   "note": "산업부 발표 기준. 일요일 날짜로 확인됐고 발표 시각은 확인하지 못했습니다."
+  },
+  {
+   "date": "2026-11-03",
+   "time": "00:00",
+   "country": "us",
+   "title": "ISM 제조업 PMI(10월)",
+   "importance": 2,
+   "note": "미국 현지 11/2 10:00 ET 발표."
+  },
+  {
+   "date": "2026-11-03",
+   "time": "08:00",
+   "country": "kr",
+   "title": "10월 소비자물가",
+   "importance": 2,
+   "note": "통계청 발표."
+  },
+  {
+   "date": "2026-11-05",
+   "time": "00:00",
+   "country": "us",
+   "title": "ISM 서비스업 PMI(10월)",
+   "importance": 2,
+   "note": "미국 현지 11/4 10:00 ET 발표."
+  },
+  {
+   "date": "2026-11-06",
+   "time": "22:30",
+   "country": "us",
+   "title": "10월 고용보고서(비농업 고용·실업률)",
+   "importance": 3,
+   "note": "미국 서머타임 11/1 종료로 8:30 ET가 22:30 KST입니다."
+  },
+  {
+   "date": "2026-11-07",
+   "time": "00:00",
+   "country": "us",
+   "title": "미시간대 소비자심리지수(11월 잠정)",
+   "importance": 2,
+   "note": "미국 현지 11/6 10:00 ET 발표."
+  },
+  {
+   "date": "2026-11-10",
+   "time": "22:30",
+   "country": "us",
+   "title": "10월 소비자물가(CPI)",
+   "importance": 3,
+   "note": "BLS 발표."
+  },
+  {
+   "date": "2026-11-10",
+   "time": "",
+   "country": "kr",
+   "title": "금통위 10월 회의 의사록 공개",
+   "importance": 1,
+   "note": "10/22 통화정책방향 회의 의사록."
+  },
+  {
+   "date": "2026-11-12",
+   "time": "",
+   "country": "kr",
+   "title": "코스피200 옵션 만기일",
+   "importance": 2,
+   "note": "11월은 월간 옵션 만기일입니다. 선물·옵션 동시만기는 분기(3·6·9·12월)에 있습니다."
+  },
+  {
+   "date": "2026-11-13",
+   "time": "22:30",
+   "country": "us",
+   "title": "10월 생산자물가(PPI)",
+   "importance": 2,
+   "note": "BLS 발표."
+  },
+  {
+   "date": "2026-11-17",
+   "time": "22:30",
+   "country": "us",
+   "title": "10월 소매판매",
+   "importance": 2,
+   "note": "센서스국 발표."
+  },
+  {
+   "date": "2026-11-18",
+   "time": "22:30",
+   "country": "us",
+   "title": "10월 주택착공·건축허가",
+   "importance": 1,
+   "note": "센서스국 발표."
+  },
+  {
+   "date": "2026-11-18",
+   "time": "",
+   "country": "us",
+   "title": "엔비디아 3분기 실적 발표",
+   "importance": 2,
+   "note": "미국 현지 11/17 장 마감 후 발표라 한국시간으로는 18일 오전입니다. 정확한 시각은 확인하지 못했습니다."
+  },
+  {
+   "date": "2026-11-19",
+   "time": "04:00",
+   "country": "us",
+   "title": "FOMC 10월 회의 의사록 공개",
+   "importance": 2,
+   "note": "미국 현지 11/18 14:00 ET 공개. 11월에는 FOMC 정례회의가 없고 다음 금리 결정은 12/9입니다."
+  },
+  {
+   "date": "2026-11-20",
+   "time": "",
+   "country": "us",
+   "title": "미국 월간 옵션 만기일",
+   "importance": 2,
+   "note": "11월 셋째 금요일."
+  },
+  {
+   "date": "2026-11-21",
+   "time": "00:00",
+   "country": "us",
+   "title": "미시간대 소비자심리지수(11월 확정)",
+   "importance": 1,
+   "note": "미국 현지 11/20 10:00 ET 발표."
+  },
+  {
+   "date": "2026-11-23",
+   "time": "23:45",
+   "country": "us",
+   "title": "S&P글로벌 PMI 잠정치(11월)",
+   "importance": 2,
+   "note": "제조업 PMI 등. 미국 현지 09:45 ET 발표."
+  },
+  {
+   "date": "2026-11-23",
+   "time": "",
+   "country": "kr",
+   "title": "11월 1~20일 수출 동향",
+   "importance": 2,
+   "note": "관세청 발표. 발표 시각은 확인하지 못했습니다."
+  },
+  {
+   "date": "2026-11-25",
+   "time": "00:00",
+   "country": "us",
+   "title": "콘퍼런스보드 소비자신뢰지수(11월)",
+   "importance": 2,
+   "note": "미국 현지 11/24 10:00 ET 발표."
+  },
+  {
+   "date": "2026-11-25",
+   "time": "22:30",
+   "country": "us",
+   "title": "10월 개인소비지출(PCE) 물가",
+   "importance": 3,
+   "note": "BEA 발표. GDP 2차 추정치와 같은 시각입니다."
+  },
+  {
+   "date": "2026-11-25",
+   "time": "22:30",
+   "country": "us",
+   "title": "3분기 GDP 2차 추정치",
+   "importance": 2,
+   "note": "BEA 발표."
+  },
+  {
+   "date": "2026-11-26",
+   "time": "00:00",
+   "country": "us",
+   "title": "10월 신규주택판매",
+   "importance": 1,
+   "note": "미국 현지 11/25 10:00 ET 발표."
+  },
+  {
+   "date": "2026-11-26",
+   "time": "09:00",
+   "country": "kr",
+   "title": "한국은행 금융통화위원회(기준금리 결정)",
+   "importance": 3,
+   "note": "올해 마지막 금통위로 현재 기준금리는 3.00%입니다. 09:00은 회의 시작 시각이며 결정 발표 시각은 확인하지 못했습니다. 성장률·물가 수정"
+  },
+  {
+   "date": "2026-11-26",
+   "time": "",
+   "country": "us",
+   "title": "추수감사절 미국 증시 휴장",
+   "importance": 1,
+   "note": "27일에는 조기 폐장합니다."
+  },
+  {
+   "date": "2026-12-02",
+   "time": "00:00",
+   "country": "us",
+   "title": "ISM 제조업 PMI (11월)",
+   "importance": 2,
+   "note": "현지 12/1 10:00 ET 발표"
+  },
+  {
+   "date": "2026-12-04",
+   "time": "00:00",
+   "country": "us",
+   "title": "ISM 서비스업 PMI (11월)",
+   "importance": 2,
+   "note": "현지 12/3 10:00 ET 발표"
+  },
+  {
+   "date": "2026-12-04",
+   "time": "22:30",
+   "country": "us",
+   "title": "11월 고용보고서(비농업 고용·실업률)",
+   "importance": 3,
+   "note": "12월 FOMC 직전에 나오는 마지막 고용지표"
+  },
+  {
+   "date": "2026-12-08",
+   "time": "08:00",
+   "country": "kr",
+   "title": "10월 국제수지(잠정)",
+   "importance": 1,
+   "note": "한국은행 월간통계 공표일정"
+  },
+  {
+   "date": "2026-12-09",
+   "time": "08:00",
+   "country": "kr",
+   "title": "3분기 국민소득(잠정)",
+   "importance": 2,
+   "note": "한국은행 월간통계 공표일정"
+  },
+  {
+   "date": "2026-12-10",
+   "time": "04:00",
+   "country": "us",
+   "title": "FOMC 금리 결정(12/8~9 회의)",
+   "importance": 3,
+   "note": "현지 12/9 14:00 ET 성명 발표, 점도표(SEP) 공개. 기자회견은 04:30 KST"
+  },
+  {
+   "date": "2026-12-10",
+   "time": "22:30",
+   "country": "us",
+   "title": "11월 소비자물가지수(CPI)",
+   "importance": 3,
+   "note": "FOMC 결정 다음 날 발표"
+  },
+  {
+   "date": "2026-12-10",
+   "time": "",
+   "country": "kr",
+   "title": "선물옵션 동시만기일(쿼드러플 위칭)",
+   "importance": 2,
+   "note": "12월 둘째 목요일 규칙 기준. 거래소 공시로 재확인 필요"
+  },
+  {
+   "date": "2026-12-15",
+   "time": "22:30",
+   "country": "us",
+   "title": "11월 생산자물가지수(PPI)",
+   "importance": 2,
+   "note": ""
+  },
+  {
+   "date": "2026-12-16",
+   "time": "22:30",
+   "country": "us",
+   "title": "11월 소매판매",
+   "importance": 2,
+   "note": "미국 상무부 센서스국 발표"
+  },
+  {
+   "date": "2026-12-17",
+   "time": "22:30",
+   "country": "us",
+   "title": "11월 주택착공·건축허가",
+   "importance": 1,
+   "note": ""
+  },
+  {
+   "date": "2026-12-18",
+   "time": "",
+   "country": "us",
+   "title": "12월 옵션 만기일(쿼드러플 위칭)",
+   "importance": 2,
+   "note": "12월 셋째 금요일 규칙 기준. 거래소 공시로 재확인 필요"
+  },
+  {
+   "date": "2026-12-23",
+   "time": "22:30",
+   "country": "us",
+   "title": "3분기 GDP(3차 추정)",
+   "importance": 2,
+   "note": ""
+  },
+  {
+   "date": "2026-12-23",
+   "time": "22:30",
+   "country": "us",
+   "title": "11월 개인소비지출(PCE) 물가지수",
+   "importance": 3,
+   "note": "BEA 개인소득·지출 보고서에 포함"
+  },
+  {
+   "date": "2026-12-24",
+   "time": "00:00",
+   "country": "us",
+   "title": "11월 신규주택판매",
+   "importance": 1,
+   "note": "현지 12/23 10:00 ET 발표"
+  },
+  {
+   "date": "2026-12-31",
+   "time": "04:00",
+   "country": "us",
+   "title": "FOMC 의사록(12/8~9 회의)",
+   "importance": 2,
+   "note": "현지 12/30 14:00 ET. 회의 3주 뒤 공개하는 관행에 따른 일정"
+  }
+ ]
+}
