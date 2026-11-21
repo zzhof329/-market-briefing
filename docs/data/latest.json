@@ -1,18 +1,18 @@
 {
- "generated_at": "2026-11-21T18:31+09:00",
+ "generated_at": "2026-11-21T18:59+09:00",
  "date": "2026-11-21",
  "session": "afternoon",
  "sample": false,
- "headline": "나스닥 5%대 폭락, 코스피 4,900선 붕괴",
+ "headline": "미국 기술주 급락에 코스피 4,870선…반도체 직격탄",
  "commentary": {
-  "us": "20일 미국 증시는 기술주 매도로 급락했다. 나스닥 종합은 5.28% 내린 22,617.73, S&P 500은 3.70%, 다우는 1.93% 하락했다. 필라델피아 반도체지수는 10.73% 폭락했고 엔비디아(-14.01%)와 브로드컴(-12.19%)이 낙폭을 키웠다. VIX는 35.89로 26.2% 급등했다. 11개 섹터 중 필수소비재만 올랐다.",
-  "kr": "20일 코스피는 5.21% 내린 4,869.96으로 마감해 4,900선을 내줬다. 코스닥도 5.71% 하락한 645.68이었다. 미국 반도체주 급락 여파로 반도체 업종이 9.52% 떨어졌고 삼성전자는 7.01%, SK하이닉스는 5.92% 하락했다. 코스피 하락률 상위에는 이수페타시스(-17.5%), 대덕전자(-14.6%) 등 반도체 관련주가 올랐다.",
-  "macro": "원/달러 환율은 1,334.79원으로 0.33% 올랐다. 미국채 10년 금리는 4.912%로 2.77% 내려 채권으로 자금이 이동했다. 금은 4.62% 내린 3,515.40달러, WTI는 0.93% 오른 83.98달러, 비트코인은 1.58% 내린 57,869달러였다."
+  "us": "나스닥은 5.28% 급락한 22,617.73에 마감했고 S&P 500은 3.70%, 다우는 1.93% 하락했다. 필라델피아 반도체지수가 10.73% 떨어졌고 엔비디아(-14.01%)와 브로드컴(-12.19%)의 낙폭이 컸다. VIX는 35.89로 26.2% 올랐다. 11개 업종 중 기술이 7.27% 내렸고, 필수소비재(+0.67%)만 올랐다.",
+  "kr": "코스피는 5.21% 하락한 4,869.96, 코스닥은 5.71% 하락한 645.68에 마감했다. 코스피는 4,900선을 내줬고 올해 1월 수준으로 돌아갔다. 삼성전자가 7.01%, SK하이닉스가 5.92%, SK스퀘어가 8.39% 내렸고 반도체 업종은 9.52% 하락했다. 건설(-6.09%)과 에너지화학(-4.32%)도 약했다. 은행(-0.31%)과 헬스케어(-1.28%)는 낙폭이 작았다.",
+  "macro": "원/달러 환율은 1,334.79원으로 0.33% 올랐다. 미국채 10년 금리는 4.912%로 하루 0.14%p 내렸다. 금은 4.62% 하락한 3,515.4달러, WTI는 0.93% 오른 83.98달러였다. 비트코인은 1.5% 내린 57,915달러 안팎이다."
  },
  "watch": [
-  "11/23(월) 한국 11월 1~20일 수출 동향과 23:45 미국 S&P글로벌 PMI 잠정치 발표. 반도체 급락 이후 한국 증시의 낙폭 반응을 확인할 필요가 있다.",
-  "11/25(수) 22:30 미국 10월 PCE 물가와 3분기 GDP 2차 추정치 발표. 변동성 지수(VIX)와 금리 반응이 관건이다.",
-  "11/26(목) 09:00 한국은행 금통위(현재 기준금리 3.00%) 개최. 같은 날 미국 증시는 추수감사절로 휴장하고, 27일은 조기 폐장한다."
+  "11/23(월) 한국 11월 1~20일 수출 동향과 23:45 미국 S&P글로벌 PMI 잠정치. 급락 이후 반도체 업황과 경기 지표 확인",
+  "11/25(화) 22:30 미국 10월 PCE 물가와 3분기 GDP 2차 추정치. 금리와 기술주 변동성에 미칠 영향 점검",
+  "11/26(수) 09:00 한국은행 금통위(현재 기준금리 3.00%). 같은 날 미국 증시는 추수감사절로 휴장하고 27일은 조기 폐장"
  ],
  "tags": [
   "반도체",
@@ -1585,9 +1585,9 @@
   {
    "symbol": "BTC-USD",
    "name": "비트코인",
-   "price": 57869.1406,
-   "change": -929.8398,
-   "pct": -1.58,
+   "price": 57915.3086,
+   "change": -883.6719,
+   "pct": -1.5,
    "date": "2026-11-21",
    "spark": [
     76677.2969,
@@ -1609,7 +1609,7 @@
     62987.2656,
     61901.8203,
     58798.9805,
-    57869.1406
+    57915.3086
    ],
    "unit": "usd"
   }
@@ -1651,7 +1651,7 @@
     },
     {
      "symbol": "HDB",
-     "name": "HDFC 은행",
+     "name": "HDFC뱅크",
      "price": 27.42,
      "pct": 4.5,
      "cap": 141064077312,
@@ -1667,7 +1667,7 @@
     },
     {
      "symbol": "KVYO",
-     "name": "클라비요",
+     "name": "클래비요",
      "price": 22.24,
      "pct": 4.41,
      "cap": 6261946880,
@@ -1675,7 +1675,7 @@
     },
     {
      "symbol": "BGSI",
-     "name": "보이드 그룹 서비시스",
+     "name": "보이드 그룹 서비스",
      "price": 73.62,
      "pct": 4.25,
      "cap": 2037022208,
@@ -1783,7 +1783,14 @@
    "src": "yahoo"
   },
   "kospi": {
-   "up": [],
+   "up": [
+    {
+     "symbol": "055550",
+     "name": "신한지주",
+     "price": 86200.0,
+     "pct": 0.7
+    }
+   ],
    "down": [
     {
      "symbol": "014990",
@@ -1846,7 +1853,11 @@
      "pct": -13.09
     }
    ],
-   "src": "naver"
+   "src": "pool",
+   "src_detail": {
+    "up": "pool",
+    "down": "naver"
+   }
   },
   "kosdaq": {
    "up": [
@@ -1973,7 +1984,11 @@
      "pct": -21.27
     }
    ],
-   "src": "naver"
+   "src": "naver",
+   "src_detail": {
+    "up": "naver",
+    "down": "naver"
+   }
   }
  },
  "news": [
@@ -1983,7 +1998,7 @@
    "link": "https://news.google.com/rss/articles/CBMiW0FVX3lxTFBnVVZsZm5TYkNqNjhpUHlQamVYZTdGMVZSVVEtQ2dkeEJBM3lYNVc3cGNudFFDLXJPTWhuWFBjWnhoZDFFWF9vcy14Ukp5YTZPMGl6V0NvVmJFOTA?oc=5",
    "source": "KBS 뉴스",
    "published": "Fri, 20 Nov 2026 21:23:00 GMT",
-   "note": "S&P 500의 하락 기간이 6년 사이 가장 길어졌다는 보도다. 하루 급락에 앞서 조정이 누적돼 있었다는 뜻이다."
+   "note": "나스닥 5%대 급락에 S&P 500의 연속 하락 기간이 길어지며 위험회피 분위기가 커졌다."
   },
   {
    "market": "us",
@@ -2005,15 +2020,14 @@
    "link": "https://news.google.com/rss/articles/CBMie0FVX3lxTE1JakhwY0ItSUU4cnR1c1JyLWJZLTZILXE5em9xUXczcTBTMU92ZmVvV3JqUGxPT2ROT3h5TXlyMW0xSWlLaFRVaWJmaWJ1akpzbmJ5cGpEM0pGVW5SWkJBOXVOeml2amN1NmJiZF9NWk4zM2ZuSUgwNzVkONIBgAFBVV95cUxObDNpcldTclJNMG41WHRmZHBjbUp1QTk0VGxqMjFRbjRNc0tjT01kN3E4emhjYVNhMDEzSHhoN3ZNMzlRc0J4bm5mczRfNDhIcjV6bjNKeC1xNzY3MFJBekFOZGkyOUt6dXFaVVMwcGhxaFU3SXpjV0RtV2hKZFFkUQ?oc=5",
    "source": "뉴데일리",
    "published": "Fri, 20 Nov 2026 20:34:00 GMT",
-   "note": "반도체지수 10% 급락이 한국 반도체 대형주에 직접적인 부담으로 작용했다."
+   "note": "필라델피아 반도체지수 10% 급락이 삼성전자·SK하이닉스 등 한국 반도체주의 부담으로 이어졌다."
   },
   {
    "market": "us",
    "title": "[뉴욕마켓워치] 나스닥, 코로나 이후 최악의 한주…증시 패닉 속 채권↑달러↓",
    "link": "https://news.google.com/rss/articles/CBMicEFVX3lxTE1IdEtnRk94djJMSHhRNHRZZzZzSGM2QjA4UUpRVWs3S1ZWT2NJVXNuSWlZeUNfRUMzYTdWelZIUXZONUhaMndPdWxkUGgtVnI1MWFZVE16VGhDVUs0YU9QWFBURGpGbHdhN0d1U3VOckc?oc=5",
    "source": "연합인포맥스",
-   "published": "Sat, 21 Nov 2026 00:04:58 GMT",
-   "note": "주가가 급락하는 가운데 채권은 올랐고 달러는 내렸다. 금리 하락으로 위험회피 성향이 나타났다."
+   "published": "Sat, 21 Nov 2026 00:04:58 GMT"
   },
   {
    "market": "us",
@@ -2034,15 +2048,8 @@
    "title": "‘4869.96’ 올해 1월 수준 돌아간 코스피…고점 대비 3400조 증발",
    "link": "https://news.google.com/rss/articles/CBMiZ0FVX3lxTE1GR2d1M1dqY1JuV0I3OEpDcldiOVJKOEx2cUNnRzZzZjBHcDMyX2t3MnNpa2tTdk1WRUx1ZmQydS1Rd0lORVM5emtWT2tBSzM5Wk5GMHE2MGh4aXdqODdxWl9IQXoxVms?oc=5",
    "source": "한겨레",
-   "published": "Sat, 21 Nov 2026 09:07:51 GMT",
-   "note": "코스피가 올해 1월 수준으로 돌아가면서 그동안의 상승분을 대부분 반납했다."
-  },
-  {
-   "market": "kr",
-   "title": "코스피와 따로 가는 달러-원…하반기 들어 역상관 약화",
-   "link": "https://news.google.com/rss/articles/CBMicEFVX3lxTE5qNkpsSThuS29SR3BvcGNRQUI3NHpLU0pXcG1ZQy1jaEI2MVFqeW9XSEJTSjZYVEllRUF4WnVtaWs2RVUzYjlSR2ZzdWhhZVM0RWY0YXA1Tm8xOEVCYUpDRzNubHBfQUhMeE5xZWs1OUQ?oc=5",
-   "source": "연합인포맥스",
-   "published": "Sat, 21 Nov 2026 04:01:45 GMT"
+   "published": "Sat, 21 Nov 2026 09:24:00 GMT",
+   "note": "코스피는 4,869.96으로 올해 1월 수준까지 되돌려졌고, 고점 대비 시가총액 감소 폭이 부각됐다."
   },
   {
    "market": "kr",
@@ -2050,7 +2057,15 @@
    "link": "https://news.google.com/rss/articles/CBMidkFVX3lxTE4xeGVFMFoyMlU1TWZnZ1QzZlRWejFrZkZWQ0RGVE1HTkhGc3FLUjVsYWVQLTJsM3dkS0VNWVhsd2JaNmtaME9QSlNUdTg2RG53OE11X0VHT2NRTDBYMjVxYnpQT0FTRFJfUUJuMi1hWkdWMzJtRHc?oc=5",
    "source": "YTN",
    "published": "Sat, 21 Nov 2026 06:04:00 GMT",
-   "note": "다음 주 미국 물가 지표와 금통위가 4,900선 이탈 이후 시장의 방향을 가를 변수로 지목됐다."
+   "note": "4,900선 이탈 이후 다음 주 미국 물가 지표와 금통위가 방향성의 변수다."
+  },
+  {
+   "market": "kr",
+   "title": "코스피와 따로 가는 달러-원…하반기 들어 역상관 약화",
+   "link": "https://news.google.com/rss/articles/CBMicEFVX3lxTE5qNkpsSThuS29SR3BvcGNRQUI3NHpLU0pXcG1ZQy1jaEI2MVFqeW9XSEJTSjZYVEllRUF4WnVtaWs2RVUzYjlSR2ZzdWhhZVM0RWY0YXA1Tm8xOEVCYUpDRzNubHBfQUhMeE5xZWs1OUQ?oc=5",
+   "source": "연합인포맥스",
+   "published": "Sat, 21 Nov 2026 04:01:45 GMT",
+   "note": "코스피 급락에도 원/달러 환율은 0.33% 상승에 그쳐 주가와 환율의 연동성이 약해진 모습이다."
   },
   {
    "market": "kr",
@@ -2058,7 +2073,7 @@
    "link": "https://news.google.com/rss/articles/CBMiaEFVX3lxTE5BNkVNWl9aTHB2c2ZFWDMwUjZieU52UENhRi1naWNjR1F4VkFERXNxcDdLMWRrQlJVSkNRR3VVWk5hOXp4VGFobmNMRXgtaG1vTWIwTzRJX1NkUnU5V2VmX3NYdTRXM1It0gFuQVVfeXFMTmxQcDZDVDJGeHJnZDNvYjIxZWpGeHhiM2xtVlZfOUdOZmQxWUsxbF9XUldzb3NSSVdxYzJ2TGdmbmtyTGdCMU16MHhGaFRTLTRZZVJURXZPVGI2Umd1UW53aFlUNXo4WjhseHpFdmc?oc=5",
    "source": "머니투데이",
    "published": "Sat, 21 Nov 2026 04:58:03 GMT",
-   "note": "앤트로픽 IPO와 AMD 악재가 겹치면서 한국 증시의 AI·반도체 관련 불안이 커졌다는 분석이다."
+   "note": "앤트로픽 IPO와 AMD 관련 악재가 겹치며 AI 반도체 밸류체인 전반의 불안 심리가 커졌다."
   },
   {
    "market": "kr",
