@@ -353,6 +353,7 @@ def fetch_news(limit: int = 7) -> list[dict]:
 SYSTEM = """당신은 한국 개인투자자를 위한 증권사 리서치센터의 데일리 마켓 브리핑 작성자입니다.
 주어진 시세·뉴스 데이터만 근거로 쓰고, 데이터에 없는 수치나 사실은 만들지 마세요.
 매수·매도 권유는 하지 않습니다. 문체는 간결한 '~했다/~이다' 체.
+전망(outlook)은 확정적 예측이 아니라 조건부 시나리오로 쓰고, 근거가 약하면 '중립'으로 두세요.
 시장 이름은 정확하게 쓰세요. '뉴욕 증시', '뉴욕장', '월가', '서울 증시', '서울장', '여의도' 같은 표현 대신
 '미국 증시'·'나스닥'·'S&P 500'·'다우', '한국 증시'·'코스피'·'코스닥'처럼 시장·지수 이름을 쓰세요.
 반드시 아래 형식의 JSON 객체 하나만 출력하세요. 설명 문장, 마크다운 코드블록, 주석(//)은 넣지 마세요.
@@ -362,6 +363,12 @@ SYSTEM = """당신은 한국 개인투자자를 위한 증권사 리서치센터
   "kr": "한국 시장 코멘트 3~4문장 (300자 이내)",
   "macro": "환율·금리·원자재 코멘트 2~3문장 (200자 이내)",
   "watch": ["오늘/다음 거래일 체크포인트 3개. upcoming_events가 있으면 날짜와 함께 반영"],
+  "drivers": ["오늘 시장이 움직인 이유 2~3개. 각 1문장, 근거(지표·뉴스·수급) 포함"],
+  "outlook": {"stance": "상승 우위 또는 중립 또는 하락 우위", "horizon": "다음 거래일~1주",
+              "reason": "그렇게 판단한 근거 2~3문장 (technicals·일정·뉴스 근거)",
+              "scenarios": [{"name": "기본", "likelihood": "높음 또는 중간 또는 낮음", "desc": "어떤 조건에서 어떤 흐름인지 1~2문장"},
+                            {"name": "상방", "likelihood": "...", "desc": "..."}, {"name": "하방", "likelihood": "...", "desc": "..."}],
+              "levels": ["볼 만한 지수 수준 1~3개. technicals의 20일 고점·저점·이동평균 근거, 예: 코스피 20일 이동평균 5,050선"]},
   "tags": ["아카이브 분류용 주제 태그 3~5개. 짧은 명사, 예: 반도체, 환율, 금리, 실적, 2차전지, 유가"],
   "ko_names": {"티커": "us_movers_names에 있는 미국 종목의 한국어 회사명. 국내 언론 표기 기준, 짧게(예: GAP→갭, GPN→글로벌 페이먼츠)"},
   "news_notes": [{"i": 0, "note": "중요한 뉴스 최대 6개에 대한 시장 관점 한줄평. i는 뉴스 번호(숫자)"}]
@@ -470,6 +477,128 @@ def build_seasonality() -> None:
 
 
 # ── 경제 일정 달력 ──────────────────────────────────────────────
+# ── 지수 위치(20일 기준) ──
+def technicals(indices: list[dict]) -> list[dict]:
+    out = []
+    for i in indices:
+        if i["symbol"] not in ("^IXIC", "^NDX", "^SOX", "^KS11", "^KQ11"):
+            continue
+        sp = i.get("spark") or []
+        if len(sp) < 10:
+            continue
+        last, hi, lo = sp[-1], max(sp), min(sp)
+        ma20, ma5 = sum(sp) / len(sp), sum(sp[-5:]) / 5
+        out.append({"name": i["name"], "close": round(last, 2), "high20": round(hi, 2), "low20": round(lo, 2),
+                    "ma20": round(ma20, 2), "ma5": round(ma5, 2),
+                    "from_high20_pct": round((last / hi - 1) * 100, 2), "vs_ma20_pct": round((last / ma20 - 1) * 100, 2),
+                    "ret5_pct": round((last / sp[-6] - 1) * 100, 2) if len(sp) >= 6 else None})
+    return out
+
+
+# ── 큰 변동일 심층 분석 ──────────────────────────────────────────
+ANALYSIS_INDEX_MOVE = 2.0   # 지수 ±2% 이상
+ANALYSIS_VIX_JUMP = 15.0    # VIX +15% 이상
+ANALYSIS_SYSTEM = """당신은 한국 개인투자자를 위한 증권사 시황 애널리스트입니다.
+오늘 시장이 크게 움직인 이유를 웹 검색으로 실제 보도를 확인해 분석합니다.
+- 원인은 최소 3개 이상, 서로 다른 축(펀더멘털·정책/금리·수급/포지션·심리)에서 찾고, 웹 검색을 충분히 해서 근거를 확인하세요.
+- 전망은 조건부 시나리오로 쓰고 확정적 예측은 하지 마세요.
+- 확인된 사실(발표, 실적, 지표, 발언)과 시장의 해석을 구분해서 쓰세요. 해석은 '시장에서는 ~로 받아들였다'처럼 쓰세요.
+- 주어진 시세 데이터와 맞지 않는 수치를 만들지 마세요. 확인 안 된 내용은 빼세요.
+- 시장 이름은 '미국 증시'·'나스닥'·'한국 증시'·'코스피'처럼 정확하게. 매수·매도 권유 금지. 문체는 '~했다/~이다'.
+반드시 아래 형식의 JSON 객체 하나만 출력하세요. 설명 문장, 코드블록, 주석 금지.
+{"title": "분석 제목(35자 이내)",
+ "summary": "핵심 원인 요약 2문장",
+ "causes": [{"title": "원인(20자 이내)", "weight": "높음 또는 중간 또는 낮음", "detail": "근거가 되는 사건·수치와 영향 2~4문장"}],
+ "reaction": "업종·종목별 반응 2~3문장",
+ "history": "과거 비슷한 급등락 사례와 이후 흐름 2~3문장 (검색으로 확인된 것만, 없으면 빈 문자열)",
+ "link": "미국 증시와 한국 증시가 서로 미치는 영향 경로 2문장",
+ "watch": ["앞으로 확인할 변수 3~4개, 날짜가 있으면 함께"],
+ "outlook": {"stance": "상승 우위 또는 중립 또는 하락 우위", "horizon": "1~2주", "reason": "근거 2~3문장",
+             "scenarios": [{"name": "기본", "likelihood": "높음/중간/낮음", "desc": "조건과 흐름"}, {"name": "상방", "likelihood": "", "desc": ""}, {"name": "하방", "likelihood": "", "desc": ""}],
+             "levels": ["볼 만한 지수 수준 1~3개 (technicals 근거)"]},
+ "sources": [{"title": "기사 제목", "url": "https://..."}]}"""
+
+
+def clean_outlook(o) -> dict | None:
+    if not isinstance(o, dict) or not o.get("stance"):
+        return None
+    stance = str(o["stance"])
+    stance = "상승 우위" if "상승" in stance else "하락 우위" if "하락" in stance else "중립"
+    return {"stance": stance, "horizon": str(o.get("horizon", ""))[:20], "reason": str(o.get("reason", ""))[:500],
+            "scenarios": [{"name": str(x.get("name", ""))[:6], "likelihood": str(x.get("likelihood", ""))[:4],
+                           "desc": str(x.get("desc", ""))[:300]} for x in (o.get("scenarios") or [])[:3] if x.get("desc")],
+            "levels": [str(x)[:80] for x in (o.get("levels") or [])[:3]]}
+
+
+def analysis_triggers(indices: list[dict], session: str) -> list[str]:
+    """오전(미국 증시 마감)은 미국 지수·VIX, 오후(한국 증시 마감)는 한국 지수만 본다"""
+    by = {i["symbol"]: i for i in indices}
+    syms = ("^IXIC", "^NDX") if session == "morning" else ("^KS11", "^KQ11")
+    out = []
+    for sym in syms:
+        i = by.get(sym)
+        if i and abs(i["pct"]) >= ANALYSIS_INDEX_MOVE:
+            out.append(f"{i['name']} {i['pct']:+.2f}%")
+    vix = by.get("^VIX")
+    if session == "morning" and vix and vix["pct"] >= ANALYSIS_VIX_JUMP:
+        out.append(f"VIX {vix['pct']:+.1f}%")
+    return out
+
+
+def todays_analysis(date: str) -> dict | None:
+    """오늘 이미 쓴 심층 분석이 있으면 돌려준다 (하루 한 번 제한)"""
+    for ses in ("morning", "afternoon"):
+        f = ARCHIVE_DIR / f"{date}-{ses}.json"
+        try:
+            a = json.loads(f.read_text("utf-8")).get("analysis")
+            if a and not a.get("reused"):
+                return a
+        except Exception:  # noqa: BLE001
+            continue
+    return None
+
+
+def write_analysis(payload: dict, triggers: list[str]) -> dict | None:
+    if not os.getenv("ANTHROPIC_API_KEY"):
+        return None
+    from anthropic import Anthropic
+    try:
+        msg = Anthropic().messages.create(
+            model=os.getenv("CLAUDE_MODEL") or "claude-sonnet-5-5",
+            max_tokens=8000,
+            system=ANALYSIS_SYSTEM,
+            tools=[{"type": "web_search_20250305", "name": "web_search", "max_uses": 10}],
+            messages=[{"role": "user", "content":
+                       f"크게 움직인 지표: {', '.join(triggers)}\n왜 이렇게 움직였는지 분석해 주세요.\n시세·뉴스 데이터:\n"
+                       + json.dumps(payload, ensure_ascii=False)}],
+        )
+        text = "".join(b.text for b in msg.content if getattr(b, "type", "") == "text")
+        data = parse_json_loose(text[text.find('{"title"'):] if '{"title"' in text else text)
+    except Exception as e:  # noqa: BLE001
+        print(f"[analysis] 실패: {e}")
+        return None
+    if not data or not data.get("causes"):
+        print("[analysis] 분석 결과를 받지 못했습니다")
+        return None
+    clean = {
+        "triggers": triggers,
+        "title": str(data.get("title", ""))[:60],
+        "summary": str(data.get("summary", ""))[:400],
+        "causes": [{"title": str(c.get("title", ""))[:40], "weight": str(c.get("weight", "중간"))[:4],
+                    "detail": str(c.get("detail", ""))[:600]} for c in data["causes"][:5] if c.get("title")],
+        "reaction": str(data.get("reaction", ""))[:500],
+        "history": str(data.get("history", ""))[:500],
+        "link": str(data.get("link", ""))[:400],
+        "watch": [str(o)[:120] for o in (data.get("watch") or [])[:4]],
+        "outlook": clean_outlook(data.get("outlook")),
+        "sources": [{"title": str(x.get("title", ""))[:100], "url": x["url"]} for x in data.get("sources", [])[:6]
+                    if str(x.get("url", "")).startswith("http")],
+    }
+    print(f"[analysis] {clean['title']} (원인 {len(clean['causes'])}개, 출처 {len(clean['sources'])}개)")
+    return clean
+
+
+CAL_REFRESH_DAYS = 30  # 달력 일정 다시 검색하는 간격(일): 각 달은 "다음 달"일 때와 "이번 달"일 때 두 번 확인됨
 CAL_SYSTEM = """당신은 한국 개인투자자를 위한 경제 일정 편집자입니다.
 웹 검색으로 확인된 공식 일정만 넣고, 확인되지 않은 날짜는 넣지 마세요. 추측 금지.
 시간은 한국시간(KST) 24시간제 "HH:MM"으로, 모르면 빈 문자열.
@@ -485,7 +614,7 @@ importance 3은 FOMC 금리 결정, CPI, 고용보고서, PCE, 금통위처럼 �
 
 
 def build_calendar() -> list[dict]:
-    """이번 달·다음 달 일정을 일주일에 한 번 Claude 웹 검색으로 갱신 → docs/data/calendar.json"""
+    """이번 달·다음 달 일정을 한 달에 한 번 Claude 웹 검색으로 갱신 → docs/data/calendar.json"""
     path = DATA_DIR / "calendar.json"
     cal = json.loads(path.read_text("utf-8")) if path.exists() else {"updated": {}, "events": []}
     now = dt.datetime.now(KST)
@@ -497,7 +626,7 @@ def build_calendar() -> list[dict]:
         client = Anthropic()
         for month in months:
             last = cal["updated"].get(month)
-            if last and (now - dt.datetime.fromisoformat(last)).days < 7:
+            if last and (now - dt.datetime.fromisoformat(last)).days < CAL_REFRESH_DAYS:
                 continue
             try:
                 msg = client.messages.create(
@@ -554,7 +683,9 @@ def save(doc: dict) -> None:
         "headline": doc["headline"], "tags": doc.get("tags", []),
         "us_pct": pct_of("^IXIC"), "kr_pct": pct_of("^KS11"),
         "summary": " ".join(doc["commentary"].values())[:300],
-        "keywords": [s["name"] for s in movers[:4]],
+        "keywords": [s["name"] for s in movers[:4]] + ([doc["analysis"]["title"]] if doc.get("analysis") else []),
+        "analysis": bool(doc.get("analysis")) and not doc["analysis"].get("reused"),
+        "stance": ((doc.get("analysis") or {}).get("outlook") or doc.get("outlook") or {}).get("stance"),
     }
     index = [e for e in index if e["key"] != key]
     index.insert(0, entry)
@@ -616,8 +747,19 @@ def main() -> None:
         "movers_top5": {k: {d: [f"{r['name']} {r['pct']:+.1f}%" for r in v.get(d, [])[:5]] for d in ("up", "down")}
                         for k, v in movers.items()},
         "upcoming_events": upcoming,  # watch 항목 작성에 참고
+        "technicals": technicals(indices),  # 전망·지수 수준 근거
     }
     brief = write_with_claude(payload) or fallback_briefing(indices)
+    analysis = None
+    if triggers := analysis_triggers(indices, session):
+        earlier = todays_analysis(now.strftime("%Y-%m-%d"))
+        if earlier and session == "afternoon":
+            # 하루 한 번만 작성: 오전에 쓴 분석을 그대로 보여주고 새로 검색하지 않음
+            print(f"[analysis] 큰 변동: {', '.join(triggers)} → 오늘 이미 분석이 있어 다시 쓰지 않습니다")
+            analysis = dict(earlier, reused=True)
+        else:
+            print(f"[analysis] 큰 변동: {', '.join(triggers)} → 심층 분석 작성")
+            analysis = write_analysis(payload, triggers)
 
     ko = brief.get("ko_names") or {}
     for d in ("up", "down"):
@@ -641,6 +783,9 @@ def main() -> None:
         "tags": [t.lstrip("#").strip() for t in brief.get("tags", []) if t.strip()][:5],
         "indices": indices, "stocks": stocks, "sectors": sectors, "macro": macro, "movers": movers,
         "news": news,
+        "analysis": analysis,
+        "drivers": [str(x)[:200] for x in (brief.get("drivers") or [])[:3]],
+        "outlook": clean_outlook(brief.get("outlook")),
     }
     save(doc)
     print(f"저장 완료: {doc['date']} {session} / {doc['headline']}")
