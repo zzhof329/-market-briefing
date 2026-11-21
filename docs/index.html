@@ -239,6 +239,11 @@ button.cell:hover{border-color:var(--steel)}
 .scen b{white-space:nowrap}
 .scen small{color:var(--sub);font-size:12px;display:block;font-weight:400}
 .disc{margin:12px 0 0;font-size:12px;color:var(--sub)}
+.dir{display:inline-block;font-size:12px;font-weight:700;border-radius:4px;padding:1px 6px;margin-top:4px;white-space:nowrap}
+.dir.up{background:var(--upbg);color:var(--up)} .dir.down{background:var(--downbg);color:var(--down)} .dir.flat{background:var(--flatbg);color:var(--sub)}
+.fng{display:flex;align-items:center;gap:10px}
+.fng .bar{flex:1;height:8px;border-radius:4px;background:linear-gradient(90deg,var(--down),#9aa3ad,var(--up));position:relative}
+.fng .bar i{position:absolute;top:-4px;width:4px;height:16px;border-radius:2px;background:var(--ink)}
 .tag.st-up{background:var(--upbg);color:var(--up)} .tag.st-down{background:var(--downbg);color:var(--down)} .tag.st-flat{background:var(--flatbg);color:var(--sub)}
 .links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
 .empty{padding:24px 14px;color:var(--sub);text-align:center}
@@ -303,7 +308,7 @@ const S = {tab: "home", doc: null, key: "latest", index: [], q: "", month: "all"
   cal: null, season: null, calMonth: null, seasonIdx: 0, seasonAll: false, stockSort: "cap", krBoard: "kospi", anaMk: null};
 
 const TABS = [
-  ["home", "홈"], ["us", "미국 시장"], ["kr", "한국 시장"], ["macro", "환율·금리"],
+  ["home", "홈"], ["us", "미국 시장"], ["kr", "한국 시장"], ["macro", "환율·금리"], ["coin", "코인"],
   ["calendar", "달력"], ["news", "뉴스"], ["archive", "아카이브"], ["links", "바로가기"],
 ];
 const US_IDX = ["^IXIC", "^NDX", "^GSPC", "^DJI", "^SOX", "^VIX"], KR_IDX = ["^KS11", "^KQ11"];
@@ -446,6 +451,16 @@ function briefRow(e) {
 }
 
 /* ── 화면 ───────────────────────────────────── */
+const DIR_LABEL = {up: "↗ 상승", flat: "→ 등락", down: "↘ 하락"};
+function scenDir(x) {
+  if (["up", "flat", "down"].includes(x.direction)) return x.direction;
+  const d = x.desc || "";
+  if (/상방/.test(x.name)) return "up";
+  if (/하방/.test(x.name)) return "down";
+  if (/반등|상승|회복/.test(d) && !/하락|약세|투매|이탈/.test(d)) return "up";
+  if (/하락|약세|투매|이탈|붕괴/.test(d) && !/반등|회복/.test(d)) return "down";
+  return "flat";
+}
 const stCls = st => st === "상승 우위" ? "up" : st === "하락 우위" ? "down" : "flat";
 
 function viewOutlook(o) {
@@ -453,7 +468,7 @@ function viewOutlook(o) {
   return `<h3>앞으로의 방향성</h3>
     <div class="ol-head"><span class="stance ${stCls(o.stance)}">${esc(o.stance)}</span>${o.horizon ? `<span class="mono">${esc(o.horizon)} 기준</span>` : ""}</div>
     ${o.reason ? `<p class="sum" style="margin-top:8px">${esc(o.reason)}</p>` : ""}
-    ${o.scenarios?.length ? `<div class="scen">${o.scenarios.map(x => `<div><b>${esc(x.name)}<small>가능성 ${esc(x.likelihood || "–")}</small></b><span>${esc(x.desc)}</span></div>`).join("")}</div>` : ""}
+    ${o.scenarios?.length ? `<div class="scen">${o.scenarios.map(x => { const dr = scenDir(x); return `<div><b>${esc(x.name)}<small>가능성 ${esc(x.likelihood || "–")}</small><span class="dir ${dr}">${DIR_LABEL[dr]}</span></b><span>${esc(x.desc)}</span></div>`; }).join("")}</div>` : ""}
     ${o.levels?.length ? `<h3>볼 만한 지수 수준</h3><ul>${o.levels.map(l => `<li>${esc(l)}</li>`).join("")}</ul>` : ""}
     <p class="disc">전망은 공개된 시세·보도를 바탕으로 한 조건부 시나리오이며, 투자 권유가 아닙니다.</p>`;
 }
@@ -580,6 +595,38 @@ function viewMacro() {
     <p class="desc" style="margin:4px 0 0;color:var(--sub)">금리는 bp(0.01%p), 나머지는 전일 대비 등락률</p></div></div>
   <div class="memo"><p>${esc(d.commentary?.macro || "코멘트 없음")}</p></div>
   <section class="sec">${macroTable(d.macro)}</section>`;
+}
+
+function viewCoin() {
+  const c = S.doc.crypto;
+  const head = `<div class="shead"><div><h2 style="margin:0;font-family:var(--f-display);font-size:21px">코인</h2>
+    <p class="desc" style="margin:4px 0 0;color:var(--sub)">원화 가격은 업비트, 달러 가격과 등락률은 해외 시세 기준</p></div></div>`;
+  if (!c?.coins?.length) return head + `<p class="empty">코인 데이터가 아직 없습니다. 다음 브리핑부터 채워집니다.</p>`;
+  const btc = c.coins.find(x => x.symbol === "BTC");
+  const won = v => v >= 1e8 ? `${nf(v / 1e8, 2)}억 원` : `${nf(v, v >= 100 ? 0 : v >= 10 ? 1 : 2)}원`;
+  const usd = v => `$${nf(v, v >= 100 ? 0 : v >= 1 ? 2 : 4)}`;
+  const prem = v => v == null ? "" : `김프 ${v > 0 ? "+" : ""}${nf(v)}%`;
+  const fng = c.fng;
+  return head + `
+  ${S.doc.commentary?.crypto ? `<div class="memo"><p>${esc(S.doc.commentary.crypto)}</p></div>` : ""}
+  <div class="season-sum">
+    ${btc ? `<div class="fact"><b>${usd(btc.price)}</b><span>비트코인 (달러)</span></div>
+    <div class="fact"><b>${btc.krw ? won(btc.krw) : btc.krw_est ? won(btc.krw_est) : "–"}</b><span>비트코인 (원화${btc.krw ? ", 업비트" : ", 환산"})</span></div>
+    <div class="fact"><b class="${btc.premium == null ? "" : dir(btc.premium)}">${btc.premium == null ? "–" : (btc.premium > 0 ? "+" : "") + nf(btc.premium) + "%"}</b><span>김치 프리미엄</span></div>` : ""}
+    ${fng ? `<div class="fact"><b>${fng.value} <small style="font-size:13px;font-weight:600">${esc(fng.label)}</small></b>
+      <div class="fng" style="margin-top:6px"><div class="bar"><i style="left:calc(${fng.value}% - 2px)"></i></div></div><span>공포·탐욕 지수${fng.prev != null ? ` (전일 ${fng.prev})` : ""}</span></div>` : ""}
+  </div>
+  <section class="sec"><h2>주요 코인</h2>
+    <p class="desc">김치 프리미엄은 업비트 원화 가격이 해외 가격(환율 환산)보다 얼마나 비싼지를 뜻합니다</p>
+    <div class="tablewrap"><table><thead><tr><th>코인</th><th class="n">원화 가격</th><th class="n">등락률</th><th class="n hide-m">달러 가격</th><th class="hide-m">20일 추이</th></tr></thead><tbody>
+    ${c.coins.map(x => { const d = dir(x.pct); return `<tr>
+      <td class="nm">${esc(x.name)}<small>${esc(x.symbol)}${x.premium != null ? ` · ${prem(x.premium)}` : ""}</small></td>
+      <td class="n">${x.krw ? won(x.krw) : x.krw_est ? `<span class="mono">약</span> ${won(x.krw_est)}` : "–"}<small class="show-m" style="display:block;color:var(--sub);font-size:12px">${usd(x.price)}</small></td>
+      <td class="n ${d}"><b>${pct(x.pct)}</b></td>
+      <td class="n hide-m">${usd(x.price)}</td><td class="sp hide-m">${spark(x.spark, d)}</td></tr>`; }).join("")}
+    </tbody></table></div>
+    <p class="disc">코인은 24시간 거래되어 등락률은 일봉(해외 시세) 기준입니다. 바이낸스코인은 업비트에 없어 환율로 환산한 가격입니다.</p>
+  </section>`;
 }
 
 function viewNews() {
@@ -769,12 +816,16 @@ function renderTabs() {
     const cnt = k === "archive" ? `<span class="cnt">${S.index.length}</span>` : k === "news" ? `<span class="cnt">${(S.doc?.news || []).length}</span>` : "";
     return `<button class="tab ${S.tab === k ? "on" : ""}" type="button" data-tab="${k}" ${S.tab === k ? 'aria-current="page"' : ""}>${l}${cnt}</button>`;
   }).join("");
+  // 선택한 탭이 탭줄 밖에 있으면 보이도록 옆으로 밀기
+  const on = $("#tabs .tab.on"), bar = $("#tabs");
+  if (on && (on.offsetLeft < bar.scrollLeft || on.offsetLeft + on.offsetWidth > bar.scrollLeft + bar.clientWidth))
+    bar.scrollLeft = on.offsetLeft - (bar.clientWidth - on.offsetWidth) / 2;
 }
 
 function render() {
   renderTabs();
   if (!S.doc) return;
-  const v = {home: viewHome, us: () => viewMarket("us"), kr: () => viewMarket("kr"), macro: viewMacro, calendar: viewCalendar, news: viewNews, archive: viewArchive, links: viewLinks}[S.tab] || viewHome;
+  const v = {home: viewHome, us: () => viewMarket("us"), kr: () => viewMarket("kr"), macro: viewMacro, coin: viewCoin, calendar: viewCalendar, news: viewNews, archive: viewArchive, links: viewLinks}[S.tab] || viewHome;
   $("#view").innerHTML = v();
   document.title = `${S.doc.headline} | 나스닥·코스피 브리핑 아카이브`;
   const sync = $("#sync");
