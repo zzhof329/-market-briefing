@@ -313,16 +313,23 @@ def pool_movers(pool: list[tuple], n: int = 10) -> dict:
 def fetch_movers() -> dict:
     result = {"us": {"up": us_movers("day_gainers"), "down": us_movers("day_losers"), "src": "yahoo"}}
     for key, market, sosok, pool in (("kospi", "KOSPI", 0, KR_POOL), ("kosdaq", "KOSDAQ", 1, KOSDAQ_POOL)):
-        up, down, src = kr_movers_api("up", market), kr_movers_api("down", market), "naver"
-        if not up and not down:
-            up, down = kr_movers("rise", sosok), kr_movers("fall", sosok)
-        if not up and not down:
-            print(f"[movers] {market}: 네이버에서 받지 못해 대형주 기준으로 대체합니다")
-            result[key] = pool_movers(pool)
-            continue
-        result[key] = {"up": up, "down": down, "src": src}
+        board, srcs, pool_rows = {}, {}, None
+        # 상승·하락을 따로 시도: 네이버 앱 데이터 → 네이버 웹페이지 → 대형주 기준
+        for side, api_kind, web_kind in (("up", "up", "rise"), ("down", "down", "fall")):
+            rows, src = kr_movers_api(api_kind, market), "naver"
+            if not rows:
+                rows = kr_movers(web_kind, sosok)
+            if not rows:
+                if pool_rows is None:
+                    print(f"[movers] {market} {side}: 네이버에서 받지 못해 대형주 기준으로 대체합니다")
+                    pool_rows = pool_movers(pool)
+                rows, src = pool_rows[side], "pool"
+            board[side], srcs[side] = rows, src
+        board["src"] = "pool" if "pool" in srcs.values() else "naver"
+        board["src_detail"] = srcs
+        result[key] = board
     for k, v in result.items():
-        print(f"[movers] {k}: 상승 {len(v['up'])}개, 하락 {len(v['down'])}개 ({v.get('src')})")
+        print(f"[movers] {k}: 상승 {len(v['up'])}개, 하락 {len(v['down'])}개 ({v.get('src_detail', v.get('src'))})")
     return result
 
 
