@@ -67,6 +67,48 @@ KR_POOL = [
 ]
 
 
+KOSDAQ_POOL = [
+    ("247540.KQ", "에코프로비엠"), ("086520.KQ", "에코프로"), ("196170.KQ", "알테오젠"), ("028300.KQ", "HLB"),
+    ("277810.KQ", "레인보우로보틱스"), ("141080.KQ", "리가켐바이오"), ("298380.KQ", "에이비엘바이오"),
+    ("087010.KQ", "펩트론"), ("000250.KQ", "삼천당제약"), ("214450.KQ", "파마리서치"), ("145020.KQ", "휴젤"),
+    ("214150.KQ", "클래시스"), ("058470.KQ", "리노공업"), ("039030.KQ", "이오테크닉스"), ("263750.KQ", "펄어비스"),
+    ("357780.KQ", "솔브레인"), ("403870.KQ", "HPSP"), ("095340.KQ", "ISC"), ("240810.KQ", "원익IPS"),
+    ("293490.KQ", "카카오게임즈"), ("035900.KQ", "JYP Ent."), ("041510.KQ", "에스엠"), ("066970.KQ", "엘앤에프"),
+    ("237690.KQ", "에스티팜"), ("950160.KQ", "코오롱티슈진"), ("310210.KQ", "보로노이"), ("108490.KQ", "로보티즈"),
+    ("064760.KQ", "티씨케이"), ("189300.KQ", "인텔리안테크"), ("214370.KQ", "케어젠"),
+]
+
+# 주요 ETF: (티커, 이름, 무엇을 따라가는지)
+# 같은 지수를 따라가는 상품은 하나만, 레버리지·인버스는 제외, 서로 다른 자산·테마로 10개씩
+US_ETFS = [
+    ("VOO", "뱅가드 S&P 500", "S&P 500 (대형주)"), ("QQQ", "인베스코 QQQ", "나스닥 100 (기술주)"),
+    ("DIA", "SPDR 다우존스", "다우존스 30 (우량주)"), ("IWM", "아이셰어즈 러셀 2000", "러셀 2000 (소형주)"),
+    ("SCHD", "슈왑 미국 배당", "배당 성장주"), ("SOXX", "아이셰어즈 반도체", "반도체"),
+    ("JEPI", "JP모건 프리미엄 인컴", "커버드콜 (월배당)"), ("TLT", "아이셰어즈 미국 장기채", "미국 20년+ 국채"),
+    ("GLD", "SPDR 금", "금"), ("IBIT", "아이셰어즈 비트코인", "비트코인 현물"),
+]
+KR_ETFS = [
+    ("069500.KS", "KODEX 200", "코스피 200"), ("229200.KS", "KODEX 코스닥150", "코스닥 150"),
+    ("360750.KS", "TIGER 미국S&P500", "S&P 500"), ("133690.KS", "TIGER 미국나스닥100", "나스닥 100"),
+    ("458730.KS", "TIGER 미국배당다우존스", "미국 배당 성장주"),
+    ("381180.KS", "TIGER 미국필라델피아반도체나스닥", "미국 반도체"),
+    ("453850.KS", "ACE 미국30년국채액티브(H)", "미국 장기 국채 (환헤지)"), ("411060.KS", "ACE KRX금현물", "금 현물"),
+    ("459580.KS", "KODEX CD금리액티브(합성)", "CD 금리 (파킹용)"), ("371460.KS", "TIGER 차이나전기차SOLACTIVE", "중국 전기차"),
+]
+
+
+def fetch_etfs() -> dict:
+    out = {}
+    for mk, table in (("us", US_ETFS), ("kr", KR_ETFS)):
+        rows = fetch_quotes([(t, n) for t, n, _ in table])
+        desc = {t: d for t, _, d in table}
+        for r in rows:
+            r["desc"] = desc.get(r["symbol"], "")
+        out[mk] = rows
+        print(f"[etf] {mk}: {len(rows)}/{len(table)}개")
+    return out
+
+
 def top_by_market_cap(pool: list[tuple], n: int = TOP_N) -> tuple[list[tuple], dict]:
     """후보군의 시가총액을 조회해 상위 n개를 고른다. 조회가 안 되면 후보군 순서대로."""
     caps = {}
@@ -307,13 +349,6 @@ def kr_movers(kind: str, sosok: int, n: int = 10) -> list[dict]:
     return out
 
 
-KOSDAQ_POOL = [
-    ("247540.KQ", "에코프로비엠"), ("086520.KQ", "에코프로"), ("196170.KQ", "알테오젠"), ("028300.KQ", "HLB"),
-    ("277810.KQ", "레인보우로보틱스"), ("141080.KQ", "리가켐바이오"), ("298380.KQ", "에이비엘바이오"),
-    ("145020.KQ", "휴젤"), ("214150.KQ", "클래시스"), ("058470.KQ", "리노공업"), ("039030.KQ", "이오테크닉스"),
-    ("263750.KQ", "펄어비스"), ("357780.KQ", "솔브레인"), ("403870.KQ", "HPSP"), ("095340.KQ", "ISC"),
-    ("240810.KQ", "원익IPS"), ("293490.KQ", "카카오게임즈"), ("035900.KQ", "JYP Ent."),
-]
 
 
 def _num(v):
@@ -418,7 +453,6 @@ SYSTEM = """당신은 한국 개인투자자를 위한 증권사 리서치센터
                             {"name": "상방", "likelihood": "...", "desc": "..."}, {"name": "하방", "likelihood": "...", "desc": "..."}],
               "levels": ["볼 만한 지수 수준 1~3개. technicals의 20일 고점·저점·이동평균 근거, 예: 코스피 20일 이동평균 5,050선"]},
   "tags": ["아카이브 분류용 주제 태그 3~5개. 짧은 명사, 예: 반도체, 환율, 금리, 실적, 2차전지, 유가"],
-  "ko_names": {"티커": "us_movers_names에 있는 미국 종목의 한국어 회사명. 국내 언론 표기 기준, 짧게(예: GAP→갭, GPN→글로벌 페이먼츠)"},
   "news_notes": [{"i": 0, "note": "중요한 뉴스 최대 6개에 대한 시장 관점 한줄평. i는 뉴스 번호(숫자)"}]
 }"""
 
@@ -796,7 +830,7 @@ def main() -> None:
 
     indices = fetch_quotes(INDICES)
     stocks = {}
-    for mk, pool in (("us", US_POOL), ("kr", KR_POOL)):
+    for mk, pool in (("us", US_POOL), ("kr", KR_POOL), ("kq", KOSDAQ_POOL)):
         top, caps = top_by_market_cap(pool)
         rows = fetch_quotes(top)
         for rank, r in enumerate(sorted(rows, key=lambda r: -caps.get(r["symbol"], 0)), 1):
@@ -807,6 +841,11 @@ def main() -> None:
     macro = fetch_quotes(MACRO)
     usdkrw = next((m["price"] for m in macro if m["symbol"] == "KRW=X"), None)
     try:
+        etfs = fetch_etfs()
+    except Exception as e:  # noqa: BLE001
+        print(f"[etf] 실패: {e}")
+        etfs = {}
+    try:
         crypto = fetch_crypto(usdkrw)
     except Exception as e:  # noqa: BLE001
         print(f"[crypto] 실패: {e}")
@@ -814,11 +853,7 @@ def main() -> None:
     if kr3y := fetch_ecos_kr3y():
         macro.insert(3, kr3y)
     news = fetch_news()
-    try:
-        movers = fetch_movers()
-    except Exception as e:  # noqa: BLE001
-        print(f"[movers] 실패: {e}")
-        movers = {}
+    movers = {}  # 상승·하락 상위 목록은 사용하지 않음 (fetch_movers()로 다시 켤 수 있음)
 
     for job in (build_seasonality, build_calendar):
         try:
@@ -845,10 +880,6 @@ def main() -> None:
         "sectors": {k: lite(v) for k, v in sectors.items()},
         "macro": lite(macro),
         "news": [{"i": n, "market": x["market"], "title": x["title"]} for n, x in enumerate(news)],
-        "us_movers_names": [{"symbol": r["symbol"], "name": r["name"]}
-                            for r in movers.get("us", {}).get("up", []) + movers.get("us", {}).get("down", [])],
-        "movers_top5": {k: {d: [f"{r['name']} {r['pct']:+.1f}%" for r in v.get(d, [])[:5]] for d in ("up", "down")}
-                        for k, v in movers.items()},
         "upcoming_events": upcoming,  # watch 항목 작성에 참고
         "technicals": technicals(indices),  # 전망·지수 수준 근거
         "crypto": {"coins": [{k: v for k, v in c.items() if k != "spark"} for c in crypto["coins"]],
@@ -889,6 +920,7 @@ def main() -> None:
         "headline": brief.get("headline", ""),
         "commentary": {k: brief.get(k, "") for k in ("us", "kr", "macro", "crypto")},
         "crypto": crypto,
+        "etfs": etfs,
         "watch": brief.get("watch", []),
         "tags": [t.lstrip("#").strip() for t in brief.get("tags", []) if t.strip()][:5],
         "indices": indices, "stocks": stocks, "sectors": sectors, "macro": macro, "movers": movers,
