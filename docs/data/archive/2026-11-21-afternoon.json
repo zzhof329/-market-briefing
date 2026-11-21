@@ -1,16 +1,26 @@
 {
- "generated_at": "2026-11-21T16:16+09:00",
+ "generated_at": "2026-11-21T16:21+09:00",
  "date": "2026-11-21",
  "session": "afternoon",
  "sample": false,
- "headline": "나스닥 종합 -5.28%, 코스피 -5.21%",
+ "headline": "미국發 기술주 패닉에 코스피 4,900선 붕괴",
  "commentary": {
-  "us": "나스닥 종합 -5.28%, S&P 500 -3.70%, 필라델피아 반도체 -10.73%로 마감했다.",
-  "kr": "코스피 -5.21%, 코스닥 -5.71%로 마감했다.",
-  "macro": ""
+  "us": "나스닥은 5.28% 하락한 22,617.73, S&P500은 3.70% 하락한 6,910.39로 마감했다. 필라델피아 반도체지수가 10.73% 급락했고 엔비디아(-14.01%)와 브로드컴(-12.19%)이 낙폭을 키웠다. 기술 섹터 ETF(XLK)는 7.27% 내렸고 필수소비재(+0.67%)만 올랐다. VIX는 35.89로 26.2% 급등했다.",
+  "kr": "코스피는 5.21% 내린 4,869.96으로 4,900선을 내줬고 코스닥은 5.71% 하락한 645.68에 마감했다. 삼성전자(-7.01%)와 SK하이닉스(-5.92%) 등 반도체 업종이 9.52% 급락하며 하락을 주도했다. 건설(-6.09%)과 에너지화학(-4.32%)도 약했고 은행(-0.31%)과 KB금융(-0.33%)은 낙폭이 작았다.",
+  "macro": "원/달러 환율은 1,334.79원으로 0.33% 올랐다. 미국채 10년 금리는 4.912%로 내렸고 달러인덱스는 103.81로 소폭 하락했다. WTI는 83.98달러로 0.93% 올랐지만 금은 4.62% 하락한 3,515.40달러를 기록했다."
  },
- "watch": [],
- "tags": [],
+ "watch": [
+  "미국 증시 급락과 반도체 약세가 다음 거래일 한국 증시에 어떻게 반영되는지",
+  "다음 주 미국 물가 지표와 한국은행 금융통화위원회 결과",
+  "VIX와 원/달러 환율의 변동성 확대 여부"
+ ],
+ "tags": [
+  "반도체",
+  "기술주",
+  "변동성",
+  "환율",
+  "금리"
+ ],
  "indices": [
   {
    "symbol": "^IXIC",
@@ -1386,9 +1396,9 @@
   {
    "symbol": "BTC-USD",
    "name": "비트코인",
-   "price": 58055.8008,
-   "change": -743.1797,
-   "pct": -1.26,
+   "price": 58168.3203,
+   "change": -630.6602,
+   "pct": -1.07,
    "date": "2026-11-21",
    "spark": [
     76677.2969,
@@ -1410,7 +1420,7 @@
     62987.2656,
     61901.8203,
     58798.9805,
-    58055.8008
+    58168.3203
    ],
    "unit": "usd"
   }
@@ -1421,7 +1431,8 @@
    "title": "나스닥, 기술주 매도에 5.3% 폭락…“S&P500도 6년 사이 최장 하락”",
    "link": "https://news.google.com/rss/articles/CBMiW0FVX3lxTFBnVVZsZm5TYkNqNjhpUHlQamVYZTdGMVZSVVEtQ2dkeEJBM3lYNVc3cGNudFFDLXJPTWhuWFBjWnhoZDFFWF9vcy14Ukp5YTZPMGl6V0NvVmJFOTA?oc=5",
    "source": "KBS 뉴스",
-   "published": "Fri, 20 Nov 2026 21:23:00 GMT"
+   "published": "Fri, 20 Nov 2026 21:23:00 GMT",
+   "note": "나스닥뿐 아니라 S&P500 등 대형주 지수까지 하락이 번졌다는 점에서 부담이 크다."
   },
   {
    "market": "us",
@@ -1442,14 +1453,16 @@
    "title": "[뉴욕마켓워치] 나스닥, 코로나 이후 최악의 한주…증시 패닉 속 채권↑달러↓",
    "link": "https://news.google.com/rss/articles/CBMicEFVX3lxTE1IdEtnRk94djJMSHhRNHRZZzZzSGM2QjA4UUpRVWs3S1ZWT2NJVXNuSWlZeUNfRUMzYTdWelZIUXZONUhaMndPdWxkUGgtVnI1MWFZVE16VGhDVUs0YU9QWFBURGpGbHdhN0d1U3VOckc?oc=5",
    "source": "연합인포맥스",
-   "published": "Sat, 21 Nov 2026 00:04:58 GMT"
+   "published": "Sat, 21 Nov 2026 00:04:58 GMT",
+   "note": "주가 급락 속에 미국채 금리가 내려 채권 강세 흐름이 나타났다."
   },
   {
    "market": "us",
    "title": "나스닥 '준공황', 반도체지수 10% 폭락 … 韓 증시 '중대 위기'",
    "link": "https://news.google.com/rss/articles/CBMie0FVX3lxTE1JakhwY0ItSUU4cnR1c1JyLWJZLTZILXE5em9xUXczcTBTMU92ZmVvV3JqUGxPT2ROT3h5TXlyMW0xSWlLaFRVaWJmaWJ1akpzbmJ5cGpEM0pGVW5SWkJBOXVOeml2amN1NmJiZF9NWk4zM2ZuSUgwNzVkONIBgAFBVV95cUxObDNpcldTclJNMG41WHRmZHBjbUp1QTk0VGxqMjFRbjRNc0tjT01kN3E4emhjYVNhMDEzSHhoN3ZNMzlRc0J4bm5mczRfNDhIcjV6bjNKeC1xNzY3MFJBekFOZGkyOUt6dXFaVVMwcGhxaFU3SXpjV0RtV2hKZFFkUQ?oc=5",
    "source": "뉴데일리",
-   "published": "Fri, 20 Nov 2026 20:34:00 GMT"
+   "published": "Fri, 20 Nov 2026 20:34:00 GMT",
+   "note": "반도체지수 10.73% 급락은 반도체 비중이 큰 한국 증시에 부담 요인이다."
   },
   {
    "market": "us",
@@ -1467,17 +1480,19 @@
   },
   {
    "market": "kr",
-   "title": "4,900선 무너진 코스피...다음 주 미국 물가·금통위 주목",
-   "link": "https://news.google.com/rss/articles/CBMiX0FVX3lxTE9QSGVuWDV4OEhyZVZCZVRKWnU0MVpUbjhNMXU4bThyR1E0UDBVeFdaZTBzc3FkQnVXOXUxcmhtUlFVbU5mSE1qQWI1Z1dvQjEwUklFV1JjUnRLb1Z6LVVz?oc=5",
-   "source": "YTN",
-   "published": "Sat, 21 Nov 2026 06:04:00 GMT"
-  },
-  {
-   "market": "kr",
    "title": "코스피와 따로 가는 달러-원…하반기 들어 역상관 약화",
    "link": "https://news.google.com/rss/articles/CBMicEFVX3lxTE5qNkpsSThuS29SR3BvcGNRQUI3NHpLU0pXcG1ZQy1jaEI2MVFqeW9XSEJTSjZYVEllRUF4WnVtaWs2RVUzYjlSR2ZzdWhhZVM0RWY0YXA1Tm8xOEVCYUpDRzNubHBfQUhMeE5xZWs1OUQ?oc=5",
    "source": "연합인포맥스",
-   "published": "Sat, 21 Nov 2026 04:01:45 GMT"
+   "published": "Sat, 21 Nov 2026 04:01:45 GMT",
+   "note": "이날은 환율이 소폭 오르고 코스피가 급락해 두 지표가 같은 방향으로 움직이지 않았다."
+  },
+  {
+   "market": "kr",
+   "title": "4,900선 무너진 코스피...다음 주 미국 물가·금통위 주목",
+   "link": "https://news.google.com/rss/articles/CBMiXkFVX3lxTE5tVDRZT0xPbnYtbXFGVGdWRlRHUEFucUdQRDBFOG5wN05QUWRYY0VLdGhwdU5fNWs3Y3JNdWIyTUhVVlVqYWFRZDA4WUJOY2lMMlZyMHBzVmVyNG0wT0E?oc=5",
+   "source": "YTN",
+   "published": "Sat, 21 Nov 2026 06:04:00 GMT",
+   "note": "다음 주 미국 물가 지표와 금통위가 변동성 국면의 주요 변수다."
   },
   {
    "market": "kr",
@@ -1505,7 +1520,8 @@
    "title": "9000→4900 추락, 다음은…코스피, 바닥은 있나? 반전은 있나?",
    "link": "https://news.google.com/rss/articles/CBMiTkFVX3lxTFA2ZlVIaVhTT1pwb25BQzMxMWhsSHpjeERMNTZTQ2RZSVNud3pQblNYR0lZcTlibzJoNHUxU3JBWnVvbHlsX0dfSlhwUHRyUQ?oc=5",
    "source": "전자신문",
-   "published": "Sat, 21 Nov 2026 02:40:00 GMT"
+   "published": "Sat, 21 Nov 2026 02:40:00 GMT",
+   "note": "코스피 4,900선 하회는 종가 4,869.96으로 확인된다. 바닥 논쟁은 수급과 미국 증시 흐름을 더 봐야 한다."
   },
   {
    "market": "kr",
