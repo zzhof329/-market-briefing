@@ -102,6 +102,10 @@ KR_SECTORS = [
 # unit: 화면 표시 방식 (krw, pct=금리, usd, idx)
 MACRO = [
     ("KRW=X", "원/달러 환율", "krw"),
+    ("JPYKRW=X", "원/엔 (100엔)", "krw100"),
+    ("EURKRW=X", "원/유로", "krw"),
+    ("CNYKRW=X", "원/위안", "krw"),
+    ("JPY=X", "엔/달러", "jpy"),
     ("DX-Y.NYB", "달러 인덱스", "idx"),
     ("^TNX", "미국채 10년", "pct"),
     ("^IRX", "미국채 3개월", "pct"),
@@ -116,8 +120,11 @@ NEWS_QUERIES = {
 
 
 # ── 코인 ─────────────────────────────────────────────────────────
-COINS = [("BTC", "비트코인"), ("ETH", "이더리움"), ("XRP", "엑스알피(리플)"),
-         ("SOL", "솔라나"), ("BNB", "바이낸스코인"), ("DOGE", "도지코인")]
+# 스테이블코인(USDT·USDC 등)은 가격이 1달러에 고정돼 있어 제외
+COINS = [("BTC", "비트코인"), ("ETH", "이더리움"), ("XRP", "엑스알피(리플)"), ("BNB", "바이낸스코인"),
+         ("SOL", "솔라나"), ("DOGE", "도지코인"), ("TRX", "트론"), ("ADA", "에이다"),
+         ("LINK", "체인링크"), ("AVAX", "아발란체")]
+UPBIT_MISSING = {"BNB"}  # 업비트 원화 시장에 없는 코인
 
 
 def fetch_crypto(usdkrw: float | None) -> dict:
@@ -125,7 +132,7 @@ def fetch_crypto(usdkrw: float | None) -> dict:
     rows = fetch_quotes([(f"{c}-USD", name) for c, name in COINS])
     krw = {}
     try:
-        markets = ",".join(f"KRW-{c}" for c, _ in COINS if c != "BNB")  # 업비트에 없는 코인 제외
+        markets = ",".join(f"KRW-{c}" for c, _ in COINS if c not in UPBIT_MISSING)
         r = requests.get(f"https://api.upbit.com/v1/ticker?markets={markets}", timeout=15)
         for t in r.json():
             krw[t["market"].split("-")[1]] = {"price": t["trade_price"], "pct": round(t["signed_change_rate"] * 100, 2)}
@@ -545,6 +552,7 @@ ANALYSIS_VIX_JUMP = 15.0    # VIX +15% 이상
 ANALYSIS_SYSTEM = """당신은 한국 개인투자자를 위한 증권사 시황 애널리스트입니다.
 시장이 크게 움직인 이유를 웹 검색으로 실제 보도를 확인해 분석합니다.
 - triggers에 있는 시장(us=미국 증시, kr=한국 증시)마다 parts를 하나씩 쓰세요. 미국은 가장 최근(전날 밤) 거래일, 한국은 가장 최근 거래일 기준입니다.
+- 코인(market "crypto") 파트는 항상 하나 쓰세요. 비트코인 중심으로, 주식시장 급변과의 연관성·김치 프리미엄·공포탐욕지수를 반영하고, 움직임이 작으면 원인은 2개로 간단히.
 - 원인은 시장마다 3개 이상, 서로 다른 축(펀더멘털·정책/금리·수급/포지션·심리)에서 찾고, 웹 검색을 충분히 해서 근거를 확인하세요.
 - 전망은 조건부 시나리오로 쓰고 확정적 예측은 하지 마세요.
 - 확인된 사실(발표, 실적, 지표, 발언)과 시장의 해석을 구분해서 쓰세요. 해석은 '시장에서는 ~로 받아들였다'처럼 쓰세요.
@@ -554,7 +562,7 @@ ANALYSIS_SYSTEM = """당신은 한국 개인투자자를 위한 증권사 시황
 반드시 아래 형식의 JSON 객체 하나만 출력하세요. 설명 문장, 코드블록, 주석 금지.
 {"title": "전체 분석 제목(35자 이내)",
  "summary": "전체 핵심 요약 2문장",
- "parts": [{"market": "us 또는 kr", "title": "이 시장 분석 제목(30자 이내)", "summary": "2문장",
+ "parts": [{"market": "us 또는 kr 또는 crypto", "title": "이 시장 분석 제목(30자 이내)", "summary": "2문장",
             "causes": [{"title": "원인(20자 이내)", "weight": "높음 또는 중간 또는 낮음", "detail": "근거가 되는 사건·수치와 영향 2~4문장"}],
             "reaction": "업종·종목별 반응 2~3문장",
             "outlook": {"stance": "상승 우위 또는 중립 또는 하락 우위", "horizon": "1~2주", "reason": "근거 2~3문장",
@@ -594,10 +602,16 @@ def clean_outlook(o) -> dict | None:
             "levels": [str(x)[:80] for x in (o.get("levels") or [])[:3]]}
 
 
-def analysis_triggers(indices: list[dict]) -> dict:
-    """크게 움직인 지표를 시장별로: us(나스닥·나스닥100·VIX), kr(코스피·코스닥)"""
+ANALYSIS_BTC_MOVE = 5.0  # 비트코인 ±5% 이상
+
+
+def analysis_triggers(indices: list[dict], crypto: dict | None = None) -> dict:
+    """크게 움직인 지표를 시장별로: us(나스닥·나스닥100·VIX), kr(코스피·코스닥), crypto(비트코인)"""
     by = {i["symbol"]: i for i in indices}
-    out = {"us": [], "kr": []}
+    out = {"us": [], "kr": [], "crypto": []}
+    btc = next((c for c in (crypto or {}).get("coins", []) if c["symbol"] == "BTC"), None)
+    if btc and abs(btc["pct"]) >= ANALYSIS_BTC_MOVE:
+        out["crypto"].append(f"비트코인 {btc['pct']:+.2f}%")
     for mk, syms in (("us", ("^IXIC", "^NDX")), ("kr", ("^KS11", "^KQ11"))):
         for sym in syms:
             i = by.get(sym)
@@ -622,8 +636,13 @@ def todays_analysis(date: str) -> dict | None:
     return None
 
 
+def market_key(m) -> str:
+    m = str(m or "").lower()
+    return "crypto" if m.startswith(("crypto", "coin", "코인", "btc")) else "kr" if m.startswith(("k", "한")) else "us"
+
+
 def write_analysis(payload: dict, trig: dict) -> dict | None:
-    triggers = trig["us"] + trig["kr"]
+    triggers = trig["us"] + trig["kr"] + trig["crypto"]
     if not os.getenv("ANTHROPIC_API_KEY"):
         return None
     from anthropic import Anthropic
@@ -657,19 +676,20 @@ def write_analysis(payload: dict, trig: dict) -> dict | None:
         "trig": trig,
         "title": str(data.get("title", ""))[:60],
         "summary": CITE_RE.sub("", str(data.get("summary", "")))[:400],
-        "parts": [{"market": "kr" if str(x.get("market", "")).lower().startswith("k") else "us",
+        "parts": [{"market": market_key(x.get("market")),
                    "title": str(x.get("title", ""))[:50],
                    "summary": CITE_RE.sub("", str(x.get("summary", "")))[:400],
                    "causes": clean_causes(x.get("causes")),
                    "reaction": CITE_RE.sub("", str(x.get("reaction", "")))[:500],
-                   "outlook": clean_outlook(x.get("outlook"))} for x in parts_in[:2]],
+                   "outlook": clean_outlook(x.get("outlook"))} for x in parts_in[:3]],
         "link": CITE_RE.sub("", str(data.get("link", "")))[:400],
         "history": CITE_RE.sub("", str(data.get("history", "")))[:500],
         "watch": [CITE_RE.sub("", str(o))[:120] for o in (data.get("watch") or [])[:4]],
         "sources": [{"title": str(x.get("title", ""))[:100], "url": x["url"]} for x in data.get("sources", [])[:8]
                     if str(x.get("url", "")).startswith("http")],
     }
-    clean["parts"].sort(key=lambda x: x["market"] != "us")  # 미국 먼저
+    order = {"us": 0, "kr": 1, "crypto": 2}
+    clean["parts"].sort(key=lambda x: order.get(x["market"], 9))  # 미국 → 한국 → 코인
     print(f"[analysis] {clean['title']} (시장 {[x['market'] for x in clean['parts']]}, 출처 {len(clean['sources'])}개)")
     return clean
 
@@ -836,14 +856,14 @@ def main() -> None:
     }
     brief = write_with_claude(payload) or fallback_briefing(indices)
     analysis = None
-    trig = analysis_triggers(indices)
+    trig = analysis_triggers(indices, crypto)
     earlier = todays_analysis(now.strftime("%Y-%m-%d"))
     manual = os.getenv("GITHUB_EVENT_NAME") == "workflow_dispatch"
     if earlier and earlier.get("parts"):
         # 하루 한 번: 오늘 이미 쓴 분석은 그대로 보여줌
         analysis = dict(earlier, reused=True)
         print("[analysis] 오늘 이미 쓴 심층 분석을 다시 보여줍니다")
-    elif trig["us"] or trig["kr"]:
+    elif trig["us"] or trig["kr"] or trig["crypto"]:
         if session == "morning" or manual:
             print(f"[analysis] 큰 변동: {trig} → 심층 분석 작성")
             analysis = write_analysis(payload, trig)
