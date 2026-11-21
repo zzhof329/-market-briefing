@@ -66,7 +66,14 @@ button,input,select{font:inherit;color:inherit}
 .sync.sample i{background:#e8a94a}
 
 /* 탭 */
-.tabs{display:flex;gap:4px;overflow-x:auto;margin-top:14px;border-bottom:2px solid var(--line);scrollbar-width:thin}
+.tabs{display:flex;gap:4px;overflow-x:auto;border-bottom:2px solid var(--line);scrollbar-width:thin;
+  position:sticky;top:calc(env(safe-area-inset-top,0px) + var(--topH,56px));z-index:4;background:var(--bg);
+  padding-top:14px;margin-left:-4px;margin-right:-4px;padding-left:4px;padding-right:4px}
+/* 휴대폰: 제목·검색 바는 스크롤과 함께 올라가고 탭만 맨 위에 고정 */
+@media (max-width:820px){
+  .top{position:relative;top:auto}
+  .tabs{top:env(safe-area-inset-top,0px);padding-top:8px;box-shadow:0 6px 8px -8px rgba(0,0,0,.25)}
+}
 .tab{flex:0 0 auto;padding:9px 14px 8px;cursor:pointer;border:0;background:transparent;color:var(--sub);font-family:var(--f-display);font-weight:600;border-bottom:3px solid transparent;margin-bottom:-2px}
 .tab.on{color:var(--ink);border-bottom-color:var(--accent)}
 .tab .cnt{font-family:var(--f-mono);font-weight:400;font-size:11.5px;margin-left:5px;color:var(--sub)}
@@ -340,7 +347,7 @@ function stockTable(list, mk) {
 }
 
 function moverTable(list, mk, title) {
-  if (!list?.length) return `<div><h3 style="margin:0;font-size:15px">${title}</h3><p class="empty">오늘은 데이터를 받지 못했습니다.</p></div>`;
+  if (!list?.length) return `<div><h3 style="margin:0;font-size:15px">${title}</h3><p class="empty">해당 종목이 없거나 데이터를 받지 못했습니다.</p></div>`;
   const fmt = v => v == null ? "–" : mk === "us" ? `$${nf(v)}` : `${nf(v, 0)}원`;
   return `<div><h3 style="margin:0;font-size:15px">${title}</h3><div class="tablewrap"><table><thead><tr><th class="n">#</th><th>종목</th><th class="n">종가</th><th class="n">등락률</th></tr></thead><tbody>
     ${list.map((r, i) => `<tr><td class="n mono">${i + 1}</td><td class="nm">${esc(r.name)}<small>${esc(r.symbol)}${r.name_en ? `<span class="hide-m"> · ${esc(r.name_en)}</span>` : ""}</small></td><td class="n">${fmt(r.price)}</td><td class="n ${dir(r.pct)}"><b>${pct(r.pct)}</b></td></tr>`).join("")}
@@ -357,7 +364,7 @@ function viewMovers(mk) {
   return `<section class="sec">
     <div class="shead" style="margin-top:0"><div><h2>오늘의 상승·하락 상위</h2>
       <p class="desc">${mk === "us" ? "시가총액 20억 달러 이상 미국 종목, Yahoo Finance 기준"
-        : board.src === "pool" ? "오늘은 전체 순위를 받지 못해 대형주 안에서 정렬했습니다" : "우선주·스팩·ETN 제외, 네이버 증권 기준"}</p></div>
+        : board.src === "pool" ? `우선주·스팩·ETN 제외. ${board.src_detail?.up === "pool" && board.src_detail?.down === "pool" ? "오늘은" : board.src_detail?.up === "pool" ? "상승 쪽은" : "하락 쪽은"} 전체 순위를 받지 못해 대형주 안에서 정렬했습니다` : "우선주·스팩·ETN 제외, 네이버 증권 기준"}</p></div>
       ${mk === "kr" ? `<div class="frow">${chip("kospi", "코스피")}${chip("kosdaq", "코스닥")}</div>` : ""}</div>
     <div class="cols" style="margin-top:10px">${moverTable(board.up, mk === "us" ? "us" : "kr", "상승 상위")}${moverTable(board.down, mk === "us" ? "us" : "kr", "하락 상위")}</div>
   </section>`;
@@ -695,7 +702,8 @@ function setTab(t) {
   S.tab = t;
   try { history.replaceState(null, "", t === "home" ? location.pathname + location.search : `#${t}`); } catch {}
   render();
-  window.scrollTo({top: 0});
+  const tabsTop = $("#tabs").offsetTop - (window.matchMedia("(max-width:820px)").matches ? 0 : $(".top").offsetHeight) - 2;
+  if (window.scrollY > tabsTop) window.scrollTo({top: Math.max(tabsTop, 0)});
 }
 
 async function openBrief(key) {
@@ -756,6 +764,9 @@ window.addEventListener("hashchange", () => {
   const h = location.hash.slice(1);
   if (TABS.some(([k]) => k === h) && h !== S.tab) { S.tab = h; render(); }
 });
+
+const setTopH = () => document.documentElement.style.setProperty("--topH", $(".top").offsetHeight + "px");
+setTopH(); window.addEventListener("resize", setTopH);
 
 (async () => {
   const h = location.hash.slice(1);
