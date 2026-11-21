@@ -5,6 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>나스닥·코스피 브리핑 아카이브</title>
 <meta name="description" content="매일 아침 뉴욕 마감, 매일 오후 서울 마감 브리핑을 쌓아두는 아카이브">
+<!-- 홈 화면 앱 설정 -->
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="시장 브리핑">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#24415f" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1b3049" media="(prefers-color-scheme: dark)">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@500;600;700&family=Noto+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -497,6 +507,16 @@ $("#searchForm").addEventListener("submit", e => {
   e.preventDefault();
   S.q = $("#topQ").value; S.tag = null; S.month = "all"; S.ses = "all";
   setTab("archive");
+});
+// 홈 화면 앱은 오래 켜져 있으니, 다시 화면에 돌아오면 최신 브리핑을 확인
+document.addEventListener("visibilitychange", async () => {
+  if (document.visibilityState !== "visible" || EMBED || S.key !== "latest") return;
+  try {
+    const fresh = await getJSON("data/latest.json");
+    if (fresh.generated_at !== S.doc?.generated_at) {
+      S.cache.latest = fresh; S.doc = fresh; S.index = await getIndex(); fillPicker(); render();
+    }
+  } catch {}
 });
 window.addEventListener("hashchange", () => {
   const h = location.hash.slice(1);
