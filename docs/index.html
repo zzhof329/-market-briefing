@@ -111,13 +111,13 @@ button,input,select{font:inherit;color:inherit}
 /* 표 */
 .tablewrap{overflow-x:auto;margin-top:10px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
 table{width:100%;border-collapse:collapse;font-size:14px}
-th{background:var(--surface2);text-align:left;font-weight:600;color:var(--sub);font-size:12.5px;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
-td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+th{background:var(--surface2);text-align:center;font-weight:600;color:var(--sub);font-size:12.5px;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:middle;text-align:center}
 tr:last-child td{border-bottom:0}
-td.n,th.n{text-align:right;white-space:nowrap}
+td.n,th.n{text-align:center;white-space:nowrap}
 td.nm{font-weight:700;white-space:nowrap}
 td.nm small{display:block;font-weight:400;color:var(--sub);font-family:var(--f-mono);font-size:11.5px}
-td.sp svg{width:90px;height:26px;display:block}
+td.sp svg{width:90px;height:26px;display:block;margin:0 auto}
 .mono{font-family:var(--f-mono);font-size:12.5px;color:var(--sub)}
 .up{color:var(--up)} .down{color:var(--down)} .flat{color:var(--flat)}
 
@@ -246,6 +246,25 @@ button.cell:hover{border-color:var(--steel)}
 .fng .bar i{position:absolute;top:-4px;width:4px;height:16px;border-radius:2px;background:var(--ink)}
 .tag.st-up{background:var(--upbg);color:var(--up)} .tag.st-down{background:var(--downbg);color:var(--down)} .tag.st-flat{background:var(--flatbg);color:var(--sub)}
 small.krw{display:block;color:var(--sub);font-size:12px;font-weight:400;white-space:nowrap}
+/* 월별 등락 */
+.mchart{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 8px 8px;margin-top:10px}
+.mcol{display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:0;padding:4px 0;border-radius:6px;cursor:pointer;color:inherit;font:inherit;min-width:0}
+.mcol:hover{background:var(--surface2)}
+.mcol.sel{background:var(--accent-soft);outline:2px solid var(--accent);outline-offset:-2px}
+.mcol .v{font-size:10.5px;font-weight:700;white-space:nowrap}
+.mcol .area{position:relative;width:100%;height:120px}
+.mcol .area::before{content:"";position:absolute;left:0;right:0;top:50%;height:1px;background:var(--line)}
+.mcol .b{position:absolute;left:22%;right:22%;border-radius:2px}
+.mcol .m{font-size:12px;font-weight:700;white-space:nowrap}
+.mcol .u{font-size:10.5px;color:var(--sub);white-space:nowrap}
+.yrs{display:grid;gap:5px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-top:10px}
+.yr{display:grid;grid-template-columns:44px 1fr 62px;align-items:center;gap:8px;font-size:13px}
+.yr .track{position:relative;height:14px}
+.yr .track::before{content:"";position:absolute;left:50%;top:-3px;bottom:-3px;width:1px;background:var(--line)}
+.yr .fill{position:absolute;top:1px;height:12px;border-radius:2px}
+.yr .v{text-align:right;font-weight:700}
+.heatwrap summary{cursor:pointer;font-weight:700;margin-top:22px}
+@media (max-width:480px){ .mchart{gap:2px;padding:10px 4px 6px} .mcol .v{font-size:9px;letter-spacing:-.04em} .mcol .u{font-size:9px;letter-spacing:-.03em} .mcol .m{font-size:10.5px;letter-spacing:-.04em} .mcol .area{height:100px} }
 .links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
 .empty{padding:24px 14px;color:var(--sub);text-align:center}
 footer{margin:40px 0 28px;padding-top:14px;border-top:1px solid var(--line);font-size:12.5px;color:var(--sub)}
@@ -306,11 +325,11 @@ const md = d => d ? d.slice(5).replace("-", ".") : "";
 
 const EMBED = window.BRIEFING_EMBED || null;   // 미리보기용: 데이터가 페이지 안에 들어 있으면 그걸 사용
 const S = {tab: "home", doc: null, key: "latest", index: [], q: "", month: "all", ses: "all", tag: null, newsMk: "all", cache: {},
-  cal: null, season: null, calMonth: null, seasonIdx: 0, seasonAll: false, stockSort: "cap", krBoard: "kospi", anaMk: null, krCap: "kr"};
+  cal: null, season: null, calMonth: null, seasonIdx: 0, seasonAll: false, stockSort: "cap", krBoard: "kospi", anaMk: null, krCap: "kr", seasonMon: null, seasonWin: "all"};
 
 const TABS = [
   ["home", "홈"], ["us", "미국 시장"], ["kr", "한국 시장"], ["coin", "코인"], ["macro", "환율·금리"],
-  ["calendar", "달력"], ["news", "뉴스"], ["archive", "아카이브"], ["links", "바로가기"],
+  ["calendar", "달력"], ["season", "월별 등락"], ["news", "뉴스"], ["archive", "아카이브"], ["links", "바로가기"],
 ];
 const US_IDX = ["^IXIC", "^NDX", "^GSPC", "^DJI", "^SOX", "^VIX"], KR_IDX = ["^KS11", "^KQ11"];
 
@@ -791,47 +810,92 @@ function viewCalendar() {
     ${days.length ? `<div class="list evlist">${days.map(ds => `<div class="day"><div class="dh ${ds === t ? "today" : ""}">${+ds.slice(5, 7)}월 ${+ds.slice(8)}일 (${dname(ds)})</div>${byDate[ds].sort((a, b) => (a.time || "99").localeCompare(b.time || "99")).map(evRow).join("")}</div>`).join("")}</div>`
       : `<p class="empty">이 달의 일정이 아직 없습니다. 이번 달과 다음 달 일정은 자동으로 채워집니다.</p>`}
   </section>
-  ${viewSeason()}`;
+  `;
 }
 
 function viewSeason() {
+  const head = `<div class="shead"><div><h2 style="margin:0;font-family:var(--f-display);font-size:21px">월별 등락</h2>
+    <p class="desc" style="margin:4px 0 0;color:var(--sub)">달마다 역사적으로 얼마나 오르고 내렸는지 (월말 종가 기준)</p></div></div>`;
   const list = S.season?.indices || [];
-  if (!list.length) return `<section class="sec"><h2>역대 월별 등락</h2><p class="empty">아직 데이터가 없습니다. 다음 자동 실행 때 채워집니다.</p></section>`;
+  if (!list.length) return head + `<p class="empty">아직 데이터가 없습니다. 다음 자동 실행 때 채워집니다.</p>`;
   const ix = list[Math.min(S.seasonIdx, list.length - 1)];
   const [cy, cm] = ix.current.split("-").map(Number);
-  const mon = S.calMonth ? +S.calMonth.slice(5) : cm;
-  const st = ix.stats[mon - 1];
+  const mon = S.seasonMon || cm;
+  // 기간 선택: 전체 / 최근 10년 / 최근 5년 (진행 중인 이번 달은 제외)
+  const win = S.seasonWin;
+  const stats = win === "all" ? ix.stats : [...Array(12)].map((_, i) => {
+    const vals = Object.keys(ix.years).sort().reverse()
+      .filter(y => !(+y === cy && i + 1 === cm) && ix.years[y][i] != null)
+      .slice(0, +win).map(y => ix.years[y][i]);
+    if (!vals.length) return null;
+    const so = [...vals].sort((a, b) => a - b), mid = so.length >> 1;
+    return {avg: +(vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(2),
+      median: +(so.length % 2 ? so[mid] : (so[mid - 1] + so[mid]) / 2).toFixed(2),
+      up: Math.round(vals.filter(v => v > 0).length / vals.length * 100), n: vals.length,
+      best: Math.max(...vals), worst: Math.min(...vals)};
+  });
+  const winLabel = win === "all" ? `${Object.keys(ix.years).sort()[0]}년부터 전체` : `최근 ${win}년`;
+  const st = stats[mon - 1];
   const cls = v => v == null ? "" : dir(v);
-  const heatBg = v => {
-    if (v == null) return "";
-    const a = Math.min(Math.abs(v) / 10, 1) * .55 + .06;
-    return `background:${v >= 0 ? `rgba(207,46,62,${a})` : `rgba(31,95,198,${a})`}`;
-  };
   const yrs = Object.keys(ix.years).sort().reverse();
-  const shown = S.seasonAll ? yrs : yrs.slice(0, 15);
+  const first = yrs[yrs.length - 1];
+
+  // 12개월 평균 막대
+  const maxAvg = Math.max(...stats.map(x => x ? Math.abs(x.avg) : 0), .5);
+  const chart = stats.map((x, i) => {
+    const m = i + 1, v = x ? x.avg : 0, h = Math.abs(v) / maxAvg * 50;
+    const pos = v >= 0 ? `bottom:50%;height:${h}%` : `top:50%;height:${h}%`;
+    return `<button type="button" class="mcol ${m === mon ? "sel" : ""}" data-seasonmon="${m}" aria-label="${m}월 평균 ${x ? pct(x.avg) : "없음"}">
+      <span class="v ${cls(v)}">${x ? (v > 0 ? "+" : "") + v.toFixed(1) : ""}</span>
+      <span class="area"><span class="b" style="${pos};background:var(--${dir(v)})"></span></span>
+      <span class="m">${m}월</span><span class="u">${x ? x.up + "%" : ""}</span></button>`;
+  }).join("");
+
+  // 선택한 달의 연도별 기록
+  const monRows = yrs.map(y => [y, ix.years[y][mon - 1]]).filter(([, v]) => v != null);
+  const shownRows = S.seasonAll ? monRows : monRows.slice(0, 15);
+  const maxY = Math.max(...monRows.map(([, v]) => Math.abs(v)), 1);
+  const yearBars = shownRows.map(([y, v]) => { const w = Math.abs(v) / maxY * 50;
+    return `<div class="yr"><span class="mono">${y}${+y === cy && mon === cm ? "*" : ""}</span><div class="track"><div class="fill" style="${v >= 0 ? `left:50%;width:${w}%` : `left:${50 - w}%;width:${w}%`};background:var(--${dir(v)})"></div></div><span class="v ${dir(v)}">${pct(v)}</span></div>`; }).join("");
+
   const M = [...Array(12)].map((_, i) => i + 1);
-  return `
-  <section class="sec">
-    <div class="shead" style="margin-top:0"><div><h2>역대 월별 등락</h2>
-      <p class="desc">${esc(ix.name)} ${yrs[yrs.length - 1]}년부터의 월간 수익률(월말 종가 기준). 이번 달은 진행 중이라 통계에서 뺐습니다.</p></div>
-      <div class="frow">${list.map((x, i) => `<button class="chip ${i === S.seasonIdx ? "on" : ""}" type="button" data-season="${i}">${esc(x.name)}</button>`).join("")}</div></div>
-    ${S.season?.sample ? `<div class="notice">아래 수익률은 화면 확인용 예시 숫자입니다. 자동 실행 후 실제 과거 데이터로 바뀝니다.</div>` : ""}
+  const heatBg = v => { if (v == null) return ""; const a = Math.min(Math.abs(v) / 10, 1) * .55 + .06;
+    return `background:${v >= 0 ? `rgba(207,46,62,${a})` : `rgba(31,95,198,${a})`}`; };
+
+  return head + `
+  <div class="frow" style="margin-top:12px">${list.map((x, i) => `<button class="chip ${i === S.seasonIdx ? "on" : ""}" type="button" data-season="${i}">${esc(x.name)}</button>`).join("")}</div>
+  ${S.season?.sample ? `<div class="notice">아래 수익률은 화면 확인용 예시 숫자입니다. 자동 실행 후 실제 과거 데이터로 바뀝니다.</div>` : ""}
+
+  <div class="frow" style="margin-top:8px"><span class="flbl">기간</span>${[["all", "전체"], ["10", "최근 10년"], ["5", "최근 5년"]].map(([v, l]) => `<button class="chip ${win === v ? "on" : ""}" type="button" data-seasonwin="${v}">${l}</button>`).join("")}</div>
+
+  <section class="sec"><h2>월별 평균 수익률</h2>
+    <p class="desc">${esc(ix.name)} · ${winLabel}. 막대 아래 숫자는 그 달에 오른 해의 비율입니다. 막대를 누르면 그 달을 자세히 봅니다</p>
+    <div class="mchart">${chart}</div></section>
+
+  <section class="sec"><h2>${mon}월은 어땠나 <span class="mono" style="font-size:13px;font-weight:400">${winLabel}</span></h2>
     ${st ? `<div class="season-sum">
-      <div class="fact"><b class="${cls(st.avg)}">${pct(st.avg)}</b><span>${mon}월 평균</span></div>
-      <div class="fact"><b>${st.up}%</b><span>${mon}월 상승 확률 (${st.n}년)</span></div>
-      <div class="fact"><b class="up">${pct(st.best)}</b><span>${mon}월 최고</span></div>
-      <div class="fact"><b class="down">${pct(st.worst)}</b><span>${mon}월 최저</span></div></div>` : ""}
-    <div class="tablewrap"><table><thead><tr><th>월</th><th class="n">평균</th><th class="n">중앙값</th><th class="n">상승 확률</th><th class="n">최고</th><th class="n">최저</th></tr></thead><tbody>
-      ${ix.stats.map((s2, i) => s2 ? `<tr ${i + 1 === mon ? 'style="background:var(--accent-soft)"' : ""}><td class="nm">${i + 1}월</td><td class="n ${cls(s2.avg)}"><b>${pct(s2.avg)}</b></td><td class="n ${cls(s2.median)}">${pct(s2.median)}</td>
-        <td class="n">${s2.up}% <span class="mono">${s2.n}년</span></td><td class="n up">${pct(s2.best)}</td><td class="n down">${pct(s2.worst)}</td></tr>` : "").join("")}
+      <div class="fact"><b class="${cls(st.avg)}">${pct(st.avg)}</b><span>평균</span></div>
+      <div class="fact"><b>${st.up}%</b><span>상승 확률 (${st.n}년 중 ${Math.round(st.up * st.n / 100)}번)</span></div>
+      <div class="fact"><b class="up">${pct(st.best)}</b><span>가장 좋았던 해</span></div>
+      <div class="fact"><b class="down">${pct(st.worst)}</b><span>가장 나빴던 해</span></div></div>` : ""}
+    <h3 style="margin:16px 0 0;font-size:15px">역대 ${mon}월 기록</h3>
+    <p class="desc">${mon === cm ? "올해(*)는 이번 달이 진행 중이라 지금까지의 수익률입니다" : "최근 연도부터"}</p>
+    <div class="yrs">${yearBars || `<p class="empty">기록 없음</p>`}</div>
+    ${monRows.length > 15 ? `<button class="more" type="button" data-seasonall="1">${S.seasonAll ? "최근 15년만 보기" : `전체 ${monRows.length}년 보기`}</button>` : ""}
+  </section>
+
+  <section class="sec"><h2>월별 통계 <span class="mono" style="font-size:13px;font-weight:400">${winLabel}</span></h2>
+    <div class="tablewrap"><table><thead><tr><th>월</th><th class="n">평균</th><th class="n hide-m">중앙값</th><th class="n">상승 확률</th><th class="n">최고</th><th class="n">최저</th></tr></thead><tbody>
+      ${stats.map((s2, i) => s2 ? `<tr ${i + 1 === mon ? 'style="background:var(--accent-soft)"' : ""}><td class="nm">${i + 1}월</td><td class="n ${cls(s2.avg)}"><b>${pct(s2.avg)}</b></td><td class="n hide-m ${cls(s2.median)}">${pct(s2.median)}</td>
+        <td class="n">${s2.up}%</td><td class="n up">${pct(s2.best)}</td><td class="n down">${pct(s2.worst)}</td></tr>` : "").join("")}
     </tbody></table></div>
-    <h2 style="margin-top:22px;font-size:16px">연도별 월간 수익률</h2>
+  </section>
+
+  <details class="heatwrap"><summary>연도별 전체 표 보기 (${yrs.length}년)</summary>
     <div class="tablewrap"><table class="heat"><thead><tr><th>연도</th>${M.map(i => `<th>${i}월</th>`).join("")}</tr></thead><tbody>
-      ${shown.map(y => `<tr><td>${y}</td>${ix.years[y].map((v, i) => `<td class="${+y === cy && i + 1 === cm ? "cur" : ""}" style="${heatBg(v)}">${v == null ? "" : (v > 0 ? "+" : "") + v.toFixed(1)}</td>`).join("")}</tr>`).join("")}
+      ${yrs.map(y => `<tr><td>${y}</td>${ix.years[y].map((v, i) => `<td class="${+y === cy && i + 1 === cm ? "cur" : ""}" style="${heatBg(v)}">${v == null ? "" : (v > 0 ? "+" : "") + v.toFixed(1)}</td>`).join("")}</tr>`).join("")}
       <tr class="sum"><td>평균</td>${ix.stats.map(s2 => `<td class="${s2 ? cls(s2.avg) : ""}">${s2 ? (s2.avg > 0 ? "+" : "") + s2.avg.toFixed(1) : ""}</td>`).join("")}</tr>
-    </tbody></table></div>
-    ${yrs.length > 15 ? `<button class="more" type="button" data-seasonall="1">${S.seasonAll ? "최근 15년만 보기" : `전체 ${yrs.length}년 보기`}</button>` : ""}
-  </section>`;
+    </tbody></table></div></details>`;
 }
 
 function viewLinks() {
@@ -857,7 +921,7 @@ function renderTabs() {
 function render() {
   renderTabs();
   if (!S.doc) return;
-  const v = {home: viewHome, us: () => viewMarket("us"), kr: () => viewMarket("kr"), macro: viewMacro, coin: viewCoin, calendar: viewCalendar, news: viewNews, archive: viewArchive, links: viewLinks}[S.tab] || viewHome;
+  const v = {home: viewHome, us: () => viewMarket("us"), kr: () => viewMarket("kr"), macro: viewMacro, coin: viewCoin, calendar: viewCalendar, season: viewSeason, news: viewNews, archive: viewArchive, links: viewLinks}[S.tab] || viewHome;
   $("#view").innerHTML = v();
   document.title = `${S.doc.headline} | 나스닥·코스피 브리핑 아카이브`;
   const sync = $("#sync");
@@ -893,7 +957,7 @@ function fillPicker() {
 }
 
 document.addEventListener("click", e => {
-  const t = e.target.closest("[data-tab],[data-open],[data-month],[data-ses],[data-tag],[data-tagjump],[data-newsmk],[data-calmove],[data-season],[data-seasonall],[data-calday],[data-stocksort],[data-krboard],[data-anamk],[data-krcap]");
+  const t = e.target.closest("[data-tab],[data-open],[data-month],[data-ses],[data-tag],[data-tagjump],[data-newsmk],[data-calmove],[data-season],[data-seasonall],[data-calday],[data-stocksort],[data-krboard],[data-anamk],[data-krcap],[data-seasonmon],[data-seasonwin]");
   if (!t) return;
   const ds = t.dataset;
   if (ds.tab) return setTab(ds.tab);
@@ -910,6 +974,8 @@ document.addEventListener("click", e => {
   if (ds.krboard) S.krBoard = ds.krboard;
   if (ds.anamk) S.anaMk = ds.anamk;
   if (ds.krcap) S.krCap = ds.krcap;
+  if (ds.seasonwin) S.seasonWin = ds.seasonwin;
+  if (ds.seasonmon) { S.seasonMon = +ds.seasonmon; S.seasonAll = false; }
   if (ds.calday) S.calDay = S.calDay === ds.calday ? null : ds.calday;
   if (ds.seasonall) S.seasonAll = !S.seasonAll;
   render();
