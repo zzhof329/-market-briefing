@@ -93,6 +93,7 @@ button,input,select{font:inherit;color:inherit}
 .fact small{display:block;font-size:11px;color:var(--sub);margin-top:1px}
 .closeline{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:baseline;margin:12px 0 0;font-size:13px;color:var(--sub)}
 .closeline b{color:var(--ink);margin-right:4px}
+.livebadge{display:inline-block;font-size:11.5px;font-weight:700;color:#fff;background:var(--up);border-radius:4px;padding:1px 7px;margin-right:6px;vertical-align:1px}
 .closeline .cl-l{font-size:11.5px;font-weight:700;color:#fff;background:var(--steel);border-radius:4px;padding:1px 7px}
 .notice{margin-top:14px;background:var(--accent-soft);border:1px solid var(--line);border-radius:8px;padding:9px 13px;font-size:13.5px}
 
@@ -327,7 +328,7 @@ const dir = v => v > 0 ? "up" : v < 0 ? "down" : "flat";
 const arrow = v => v > 0 ? "▲" : v < 0 ? "▼" : "–";
 const nf = (v, d = 2) => Number(v).toLocaleString("ko-KR", {minimumFractionDigits: d, maximumFractionDigits: d});
 const pct = v => v == null ? "–" : `${v > 0 ? "+" : ""}${nf(v)}%`;
-const sesName = s => s === "morning" ? "미국 증시 마감" : "한국 증시 마감";
+const sesName = s => s === "morning" ? "미국 증시 마감" : s === "intraday" ? "장중" : "한국 증시 마감";
 const md = d => d ? d.slice(5).replace("-", ".") : "";
 
 const EMBED = window.BRIEFING_EMBED || null;   // 미리보기용: 데이터가 페이지 안에 들어 있으면 그걸 사용
@@ -484,7 +485,7 @@ function newsList(list, limit) {
 function briefRow(e) {
   const cur = e.key === S.key || (S.key === "latest" && e.key === `${S.doc?.date}-${S.doc?.session}`);
   return `<li><button class="row ${cur ? "cur" : ""}" type="button" data-open="${esc(e.key)}">
-    <span class="mono">${md(e.date)}</span>
+    <span class="mono">${md(e.date)}${e.session === "intraday" && e.time ? `<br>${esc(e.time)}` : ""}</span>
     <span class="t"><b>${esc(e.headline)}</b>
       <span class="meta">${e.analysis ? `<span class="tag ana-t">심층 분석</span>` : ""}${e.stance ? `<span class="tag st-${stCls(e.stance)}">전망 ${esc(e.stance)}</span>` : ""}<span class="tag ses">${sesName(e.session)}</span>
         <span class="${dir(e.us_pct)}">나스닥 ${pct(e.us_pct)}</span><span class="${dir(e.kr_pct)}">코스피 ${pct(e.kr_pct)}</span>
@@ -504,6 +505,11 @@ const mdw = d => `${d.getUTCMonth() + 1}/${d.getUTCDate()}(${WD[d.getUTCDay()]})
 function closeInfo(market, ds) {
   if (!ds) return null;
   const day = new Date(ds + "T00:00:00Z");
+  const live = S.doc?.intraday;
+  if (live?.[market]) {  // 장중 브리핑: 아직 마감 전 가격
+    const t = `${mdw(day)} ${live.at} 현재`;
+    return {local: t, kst: t, short: `${mdw(day)} ${live.at} 장중`, live: true};
+  }
   if (market === "kr") return {local: `${mdw(day)} 15:30`, kst: `${mdw(day)} 15:30`, short: `${mdw(day)} 마감`};
   // 미국: 뉴욕 16:00 → 한국 다음날 06:00 (서머타임 05:00)
   const kst = new Date(Date.UTC(day.getUTCFullYear(), day.getUTCMonth(), day.getUTCDate(), 16 + (usDST(ds) ? 4 : 5) + 9));
@@ -513,8 +519,9 @@ function closeLine(which) {
   const d = S.doc, ix = s => (d.indices || []).find(i => i.symbol === s);
   const us = closeInfo("us", ix("^IXIC")?.date || ix("^GSPC")?.date), kr = closeInfo("kr", ix("^KS11")?.date);
   const parts = [];
-  if (us && which !== "kr") parts.push(`<span><b>미국</b> ${us.local} <span class="mono">=</span> ${us.kst}${us.dst ? " (서머타임)" : ""}</span>`);
-  if (kr && which !== "us") parts.push(`<span><b>한국</b> ${kr.local} 마감</span>`);
+  if (us && which !== "kr") parts.push(us.live ? `<span><b>미국</b> ${us.kst} 한국시간 (장중)</span>`
+    : `<span><b>미국</b> ${us.local} <span class="mono">=</span> ${us.kst}${us.dst ? " (서머타임)" : ""}</span>`);
+  if (kr && which !== "us") parts.push(kr.live ? `<span><b>한국</b> ${kr.local} (장중)</span>` : `<span><b>한국</b> ${kr.local} 마감</span>`);
   return parts.length ? `<p class="closeline"><span class="cl-l">기준 시점</span>${parts.join("")}</p>` : "";
 }
 
@@ -592,9 +599,10 @@ function viewHome() {
   return `
   <section class="hero">
     <div>
-      <p class="when"><b>${sesName(d.session)} 브리핑</b><span class="mono">작성 ${esc(d.generated_at.replace("T", " ").slice(0, 16))} KST</span></p>
+      <p class="when">${d.session === "intraday" ? `<span class="livebadge">LIVE</span>` : ""}<b>${sesName(d.session)} 브리핑</b><span class="mono">작성 ${esc(d.generated_at.replace("T", " ").slice(0, 16))} KST</span></p>
       <h1>${esc(d.headline)}</h1>
       ${closeLine()}
+      ${d.session === "intraday" ? `<p class="desc" style="margin:6px 0 0">직접 실행한 장중 브리핑이라 마감 전 가격입니다. 정해진 시간에 마감 브리핑이 따로 올라옵니다.</p>` : ""}
       <p class="lede">${esc((c.us || "").split(/(?<=다\.)\s/)[0])} ${esc((c.kr || "").split(/(?<=다\.)\s/)[0])}</p>
     </div>
     <div class="facts">
@@ -747,7 +755,7 @@ function viewArchive() {
   <div class="filters">
     <input id="archQ" type="search" placeholder="헤드라인·태그·종목명으로 찾기" value="${esc(S.q)}" aria-label="아카이브 검색">
     <div class="frow"><span class="flbl">기간</span>${chip("month", "all", S.month, "전체")}${months.map(m => chip("month", m, S.month, `${m.slice(0, 4)}년 ${+m.slice(5)}월`)).join("")}</div>
-    <div class="frow"><span class="flbl">구분</span>${chip("ses", "all", S.ses, "전체")}${chip("ses", "morning", S.ses, "미국 증시 마감")}${chip("ses", "afternoon", S.ses, "한국 증시 마감")}${chip("ses", "analysis", S.ses, "심층 분석만")}</div>
+    <div class="frow"><span class="flbl">구분</span>${chip("ses", "all", S.ses, "전체")}${chip("ses", "morning", S.ses, "미국 증시 마감")}${chip("ses", "afternoon", S.ses, "한국 증시 마감")}${chip("ses", "intraday", S.ses, "장중")}${chip("ses", "analysis", S.ses, "심층 분석만")}</div>
     ${tags.length ? `<div class="frow"><span class="flbl">태그</span>${tags.map(([t, n]) => `<button class="chip ${S.tag === t ? "on" : ""}" type="button" data-tag="${esc(t)}">#${esc(t)} <span class="mono">${n}</span></button>`).join("")}</div>` : ""}
   </div>
   ${hits.length ? `<ul class="list">${hits.map(briefRow).join("")}</ul>` : `<p class="empty">조건에 맞는 브리핑이 없습니다. 검색어나 필터를 바꿔 보세요.</p>`}`;
@@ -987,7 +995,7 @@ async function openBrief(key) {
 
 function fillPicker() {
   $("#pick").innerHTML = `<option value="latest">최신 브리핑</option>` +
-    S.index.map(e => `<option value="${esc(e.key)}">${md(e.date)} ${sesName(e.session)}</option>`).join("");
+    S.index.map(e => `<option value="${esc(e.key)}">${md(e.date)} ${sesName(e.session)}${e.session === "intraday" && e.time ? " " + esc(e.time) : ""}</option>`).join("");
   $("#pick").value = S.key;
 }
 
