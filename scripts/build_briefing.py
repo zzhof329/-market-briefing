@@ -662,17 +662,24 @@ def analysis_triggers(indices: list[dict], crypto: dict | None = None) -> dict:
     return out
 
 
-def todays_analysis(date: str) -> dict | None:
-    """오늘 이미 쓴 심층 분석이 있으면 돌려준다 (하루 한 번 제한)"""
+def todays_analysis(date: str) -> tuple[dict | None, str | None]:
+    """오늘 이미 쓴 심층 분석과, 그 분석을 처음 쓴 브리핑(key)을 돌려준다 (하루 한 번 제한)"""
+    found = []
     for ses in ("morning", "afternoon"):
-        f = ARCHIVE_DIR / f"{date}-{ses}.json"
+        key = f"{date}-{ses}"
         try:
-            a = json.loads(f.read_text("utf-8")).get("analysis")
-            if a and not a.get("reused"):
-                return a
+            a = json.loads((ARCHIVE_DIR / f"{key}.json").read_text("utf-8")).get("analysis")
         except Exception:  # noqa: BLE001
             continue
-    return None
+        if a:
+            found.append((a, key))
+    for a, key in found:  # 원본(다른 데서 빌려오지 않은 것) 우선
+        if a.get("origin") == key or (not a.get("origin") and not a.get("reused")):
+            return a, key
+    if found:  # 예전 버그로 모두 '빌려온 분석'으로 표시된 경우: 기록된 원본, 없으면 그 파일을 원본으로
+        a, key = found[0]
+        return a, a.get("origin") or key
+    return None, None
 
 
 def market_key(m) -> str:
@@ -797,6 +804,35 @@ def build_calendar() -> list[dict]:
 
 
 # ── 저장 ─────────────────────────────────────────────────────────
+def repair_index(index: list[dict]) -> None:
+    """예전 버그로 '심층 분석' 표시가 빠진 날을 보관 파일을 보고 바로잡는다"""
+    by_date: dict[str, list[dict]] = {}
+    for e in index:
+        by_date.setdefault(e["date"], []).append(e)
+    for date, entries in by_date.items():
+        docs = {}
+        for e in entries:
+            try:
+                a = json.loads((ARCHIVE_DIR / f"{e['key']}.json").read_text("utf-8")).get("analysis")
+            except Exception:  # noqa: BLE001
+                a = None
+            docs[e["key"]] = a
+        with_a = [k for k, a in docs.items() if a]
+        if not with_a:
+            continue
+        orig = next((k for k in with_a if docs[k].get("origin") == k
+                     or (not docs[k].get("origin") and not docs[k].get("reused"))), None)
+        orig = orig or docs[with_a[0]].get("origin") or with_a[0]
+        for e in entries:
+            is_orig = e["key"] == orig
+            if bool(e.get("analysis")) != is_orig:
+                print(f"[archive] {e['key']}: 심층 분석 표시 {'복구' if is_orig else '정리'}")
+            e["analysis"] = is_orig
+            if is_orig and docs.get(e["key"]):
+                e["analysis_title"] = docs[e["key"]].get("title")
+                e["analysis_triggers"] = docs[e["key"]].get("triggers")
+
+
 def save(doc: dict) -> None:
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     ARCHIVE_DIR.mkdir(parents=True, exist_ok=True)
@@ -820,12 +856,15 @@ def save(doc: dict) -> None:
         "summary": " ".join(doc["commentary"].values())[:300],
         "keywords": [s["name"] for s in movers[:4]] + ([doc["analysis"]["title"]] if doc.get("analysis") else []),
         "analysis": bool(doc.get("analysis")) and not doc["analysis"].get("reused"),
+        "analysis_title": (doc.get("analysis") or {}).get("title") if doc.get("analysis") and not doc["analysis"].get("reused") else None,
+        "analysis_triggers": (doc.get("analysis") or {}).get("triggers") if doc.get("analysis") and not doc["analysis"].get("reused") else None,
         "stance": ((((doc.get("analysis") or {}).get("parts") or [{}])[0].get("outlook"))
                    or doc.get("outlook") or {}).get("stance"),
     }
     index = [e for e in index if e["key"] != key]
     index.insert(0, entry)
     index.sort(key=lambda e: (e["date"], e["session"] == "afternoon"), reverse=True)
+    repair_index(index)
     index_path.write_text(json.dumps(index[:500], ensure_ascii=False, indent=1), "utf-8")
 
 
@@ -893,21 +932,34 @@ def main() -> None:
     brief = write_with_claude(payload) or fallback_briefing(indices)
     analysis = None
     trig = analysis_triggers(indices, crypto)
-    earlier = todays_analysis(now.strftime("%Y-%m-%d"))
+    key_now = f"{now.strftime('%Y-%m-%d')}-{session}"
+    earlier, origin = todays_analysis(now.strftime("%Y-%m-%d"))
+
+    def shown(a: dict) -> dict:
+        """같은 브리핑에서 쓴 분석이면 원본 그대로, 다른 브리핑(아침→오후)에서 가져오면 reused 표시"""
+        a = dict(a, origin=origin)
+        if origin == key_now:
+            a.pop("reused", None)
+        else:
+            a["reused"] = True
+        return a
+
     manual = os.getenv("GITHUB_EVENT_NAME") == "workflow_dispatch"
     has_crypto = any(x.get("market") == "crypto" for x in (earlier or {}).get("parts", []))
     if earlier and earlier.get("parts") and not (manual and crypto and not has_crypto):
         # 하루 한 번: 오늘 이미 쓴 분석은 그대로 보여줌
-        analysis = dict(earlier, reused=True)
-        print("[analysis] 오늘 이미 쓴 심층 분석을 다시 보여줍니다")
+        analysis = shown(earlier)
+        print(f"[analysis] 오늘 이미 쓴 심층 분석을 다시 보여줍니다 (처음 쓴 브리핑: {origin})")
     elif trig["us"] or trig["kr"] or trig["crypto"]:
         if session == "morning" or manual:
             print(f"[analysis] 큰 변동: {trig} → 심층 분석 작성")
             analysis = write_analysis(payload, trig)
+            if analysis:
+                analysis["origin"] = key_now
         else:
             print(f"[analysis] 큰 변동: {trig} → 심층 분석은 다음 날 아침 브리핑에서 작성합니다")
     if analysis is None and earlier:
-        analysis = dict(earlier, reused=True)  # 새로 쓰기에 실패하면 오늘 쓴 분석이라도 보여줌
+        analysis = shown(earlier)  # 새로 쓰기에 실패하면 오늘 쓴 분석이라도 보여줌
 
     ko = brief.get("ko_names") or {}
     for d in ("up", "down"):
