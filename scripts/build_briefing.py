@@ -440,6 +440,7 @@ def fetch_news(limit: int = 7) -> list[dict]:
 SYSTEM = """당신은 한국 개인투자자를 위한 증권사 리서치센터의 데일리 마켓 브리핑 작성자입니다.
 주어진 시세·뉴스 데이터만 근거로 쓰고, 데이터에 없는 수치나 사실은 만들지 마세요.
 매수·매도 권유는 하지 않습니다. 문체는 간결한 '~했다/~이다' 체.
+session이 '장중'이면 열려 있는 시장은 아직 마감 전입니다. '마감했다' 대신 '○시 현재 ~% 하락 중'처럼 쓰고, 마감 결과처럼 쓰지 마세요.
 전망(outlook)은 확정적 예측이 아니라 조건부 시나리오로 쓰고, 근거가 약하면 '중립'으로 두세요.
 시장 이름은 정확하게 쓰세요. '뉴욕 증시', '뉴욕장', '월가', '서울 증시', '서울장', '여의도' 같은 표현 대신
 '미국 증시'·'나스닥'·'S&P 500'·'다우', '한국 증시'·'코스피'·'코스닥'처럼 시장·지수 이름을 쓰세요.
@@ -839,7 +840,7 @@ def save(doc: dict) -> None:
     blob = json.dumps(doc, ensure_ascii=False, indent=1)
     (DATA_DIR / "latest.json").write_text(blob, encoding="utf-8")
 
-    key = f"{doc['date']}-{doc['session']}"
+    key = doc.get("key") or f"{doc['date']}-{doc['session']}"
     (ARCHIVE_DIR / f"{key}.json").write_text(blob, encoding="utf-8")
 
     index_path = ARCHIVE_DIR / "index.json"
@@ -850,7 +851,7 @@ def save(doc: dict) -> None:
     # 아카이브 검색용: 그날 크게 움직인 종목 이름도 함께 저장
     movers = sorted(doc["stocks"]["us"] + doc["stocks"]["kr"], key=lambda s: -abs(s["pct"]))
     entry = {
-        "key": key, "date": doc["date"], "session": doc["session"],
+        "key": key, "date": doc["date"], "session": doc["session"], "time": doc["generated_at"][11:16],
         "headline": doc["headline"], "tags": doc.get("tags", []),
         "us_pct": pct_of("^IXIC"), "kr_pct": pct_of("^KS11"),
         "summary": " ".join(doc["commentary"].values())[:300],
@@ -863,14 +864,23 @@ def save(doc: dict) -> None:
     }
     index = [e for e in index if e["key"] != key]
     index.insert(0, entry)
-    index.sort(key=lambda e: (e["date"], e["session"] == "afternoon"), reverse=True)
+    default_time = {"morning": "07:10", "afternoon": "15:50"}
+    index.sort(key=lambda e: (e["date"], e.get("time") or default_time.get(e["session"], "12:00")), reverse=True)
     repair_index(index)
     index_path.write_text(json.dumps(index[:500], ensure_ascii=False, indent=1), "utf-8")
 
 
 def main() -> None:
     now = dt.datetime.now(KST)
-    session = "morning" if now.hour < 12 else "afternoon"  # 오전=뉴욕 마감, 오후=서울 마감
+    manual = os.getenv("GITHUB_EVENT_NAME") == "workflow_dispatch"
+    et = now.astimezone(ZoneInfo("America/New_York"))
+    kr_open = now.weekday() < 5 and dt.time(9, 0) <= now.time() < dt.time(15, 30)
+    us_open = et.weekday() < 5 and dt.time(9, 30) <= et.time() < dt.time(16, 0)
+    if manual and (kr_open or us_open):
+        session = "intraday"  # 직접 실행했는데 장이 열려 있으면 장중 브리핑 (마감 브리핑과 따로 저장)
+    else:
+        session = "morning" if now.hour < 12 else "afternoon"  # 오전=미국 증시 마감, 오후=한국 증시 마감
+    print(f"[session] {session} (직접 실행={manual}, 한국장 열림={kr_open}, 미국장 열림={us_open})")
 
     indices = fetch_quotes(INDICES)
     stocks = {}
@@ -918,7 +928,8 @@ def main() -> None:
 
     payload = {
         "now_kst": now.strftime("%Y-%m-%d %H:%M"),
-        "session": "미국 증시 마감 직후" if session == "morning" else "한국 증시 마감 직후",
+        "session": (f"장중 ({now:%H:%M} 기준, 열려 있는 시장: {', '.join(x for x, o in (('한국 증시', kr_open), ('미국 증시', us_open)) if o)})"
+                    if session == "intraday" else "미국 증시 마감 직후" if session == "morning" else "한국 증시 마감 직후"),
         "indices": lite(indices),
         "stocks": {k: lite(v) for k, v in stocks.items()},
         "sectors": {k: lite(v) for k, v in sectors.items()},
@@ -944,9 +955,10 @@ def main() -> None:
             a["reused"] = True
         return a
 
-    manual = os.getenv("GITHUB_EVENT_NAME") == "workflow_dispatch"
     has_crypto = any(x.get("market") == "crypto" for x in (earlier or {}).get("parts", []))
-    if earlier and earlier.get("parts") and not (manual and crypto and not has_crypto):
+    if session == "intraday":
+        analysis = shown(earlier) if earlier else None  # 장중 브리핑은 심층 분석을 새로 쓰지 않음
+    elif earlier and earlier.get("parts") and not (manual and crypto and not has_crypto):
         # 하루 한 번: 오늘 이미 쓴 분석은 그대로 보여줌
         analysis = shown(earlier)
         print(f"[analysis] 오늘 이미 쓴 심층 분석을 다시 보여줍니다 (처음 쓴 브리핑: {origin})")
@@ -976,6 +988,11 @@ def main() -> None:
         "generated_at": now.isoformat(timespec="minutes"),
         "date": now.strftime("%Y-%m-%d"),
         "session": session,
+        "key": f"{now:%Y-%m-%d}-intraday-{now:%H%M}" if session == "intraday" else f"{now:%Y-%m-%d}-{session}",
+        "intraday": {"at": f"{now:%H:%M}",
+                     "kr": kr_open and any(i["symbol"] == "^KS11" and i["date"] == now.strftime("%Y-%m-%d") for i in indices),
+                     "us": us_open and any(i["symbol"] == "^IXIC" and i["date"] == et.strftime("%Y-%m-%d") for i in indices)}
+                    if session == "intraday" else None,
         "sample": False,
         "headline": brief.get("headline", ""),
         "commentary": {k: brief.get(k, "") for k in ("us", "kr", "macro", "crypto")},
