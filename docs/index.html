@@ -90,6 +90,10 @@ button,input,select{font:inherit;color:inherit}
 .fact{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 12px;min-width:104px}
 .fact b{display:block;font-family:var(--f-display);font-size:20px;line-height:1.3}
 .fact span{font-size:12px;color:var(--sub)}
+.fact small{display:block;font-size:11px;color:var(--sub);margin-top:1px}
+.closeline{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:baseline;margin:12px 0 0;font-size:13px;color:var(--sub)}
+.closeline b{color:var(--ink);margin-right:4px}
+.closeline .cl-l{font-size:11.5px;font-weight:700;color:#fff;background:var(--steel);border-radius:4px;padding:1px 7px}
 .notice{margin-top:14px;background:var(--accent-soft);border:1px solid var(--line);border-radius:8px;padding:9px 13px;font-size:13.5px}
 
 .cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:20px}
@@ -265,6 +269,9 @@ small.krw{display:block;color:var(--sub);font-size:12px;font-weight:400;white-sp
 .yr .v{text-align:right;font-weight:700}
 .heatwrap summary{cursor:pointer;font-weight:700;margin-top:22px}
 @media (max-width:480px){ .mchart{gap:2px;padding:10px 4px 6px} .mcol .v{font-size:9px;letter-spacing:-.04em} .mcol .u{font-size:9px;letter-spacing:-.03em} .mcol .m{font-size:10.5px;letter-spacing:-.04em} .mcol .area{height:100px} }
+.analist .row .t b{display:block}
+.analist .open{padding:4px 12px 14px}
+.analist .open .ana{margin-top:6px}
 .links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
 .empty{padding:24px 14px;color:var(--sub);text-align:center}
 footer{margin:40px 0 28px;padding-top:14px;border-top:1px solid var(--line);font-size:12.5px;color:var(--sub)}
@@ -481,8 +488,34 @@ function briefRow(e) {
     <span class="t"><b>${esc(e.headline)}</b>
       <span class="meta">${e.analysis ? `<span class="tag ana-t">심층 분석</span>` : ""}${e.stance ? `<span class="tag st-${stCls(e.stance)}">전망 ${esc(e.stance)}</span>` : ""}<span class="tag ses">${sesName(e.session)}</span>
         <span class="${dir(e.us_pct)}">나스닥 ${pct(e.us_pct)}</span><span class="${dir(e.kr_pct)}">코스피 ${pct(e.kr_pct)}</span>
-        ${(e.tags || []).map(t => `<span class="tag">#${esc(t)}</span>`).join("")}</span></span>
+        ${(e.tags || []).map(t => `<span class="tag">#${esc(t)}</span>`).join("")}</span>
+      ${e.analysis && e.analysis_title ? `<span class="meta" style="color:var(--accent);font-weight:600">심층 분석 · ${esc(e.analysis_title)}</span>` : ""}</span>
   </button></li>`;
+}
+
+/* ── 장 마감 시점 ─────────────────────────────── */
+const WD = ["일", "월", "화", "수", "목", "금", "토"];
+function nthSunday(y, m, n) { const d = new Date(Date.UTC(y, m, 1)); d.setUTCDate(1 + (7 - d.getUTCDay()) % 7 + 7 * (n - 1)); return d; }
+function usDST(ds) {  // 미국 서머타임: 3월 둘째 일요일 ~ 11월 첫째 일요일
+  const d = new Date(ds + "T12:00:00Z"), y = d.getUTCFullYear();
+  return d >= nthSunday(y, 2, 2) && d < nthSunday(y, 10, 1);
+}
+const mdw = d => `${d.getUTCMonth() + 1}/${d.getUTCDate()}(${WD[d.getUTCDay()]})`;
+function closeInfo(market, ds) {
+  if (!ds) return null;
+  const day = new Date(ds + "T00:00:00Z");
+  if (market === "kr") return {local: `${mdw(day)} 15:30`, kst: `${mdw(day)} 15:30`, short: `${mdw(day)} 마감`};
+  // 미국: 뉴욕 16:00 → 한국 다음날 06:00 (서머타임 05:00)
+  const kst = new Date(Date.UTC(day.getUTCFullYear(), day.getUTCMonth(), day.getUTCDate(), 16 + (usDST(ds) ? 4 : 5) + 9));
+  return {local: `${mdw(day)} 16:00 뉴욕`, kst: `${mdw(kst)} ${String(kst.getUTCHours()).padStart(2, "0")}:00 한국`, short: `${mdw(day)} 마감`, dst: usDST(ds)};
+}
+function closeLine(which) {
+  const d = S.doc, ix = s => (d.indices || []).find(i => i.symbol === s);
+  const us = closeInfo("us", ix("^IXIC")?.date || ix("^GSPC")?.date), kr = closeInfo("kr", ix("^KS11")?.date);
+  const parts = [];
+  if (us && which !== "kr") parts.push(`<span><b>미국</b> ${us.local} <span class="mono">=</span> ${us.kst}${us.dst ? " (서머타임)" : ""}</span>`);
+  if (kr && which !== "us") parts.push(`<span><b>한국</b> ${kr.local} 마감</span>`);
+  return parts.length ? `<p class="closeline"><span class="cl-l">기준 시점</span>${parts.join("")}</p>` : "";
 }
 
 /* ── 화면 ───────────────────────────────────── */
@@ -550,7 +583,7 @@ function viewHome() {
   const d = S.doc, c = d.commentary || {};
   const nas = find(d.indices, "^IXIC"), ksp = find(d.indices, "^KS11");
   const fx = find(d.macro, "KRW=X"), tnx = find(d.macro, "^TNX");
-  const fact = (v, lbl, cls = "") => `<div class="fact"><b class="${cls}">${v}</b><span>${lbl}</span></div>`;
+  const fact = (v, lbl, cls = "", when = "") => `<div class="fact"><b class="${cls}">${v}</b><span>${lbl}</span>${when ? `<small>${when}</small>` : ""}</div>`;
   const card = (tab, lbl, title, item, desc) => `<button class="card" type="button" data-tab="${tab}">
     <span class="lbl">${lbl}</span><h3>${title}</h3>
     ${item ? `<span class="big">${nf(item.price)} <small class="${dir(item.pct)}">${arrow(item.pct)} ${pct(item.pct)}</small></span>${spark(item.spark, dir(item.pct), 200, 30)}` : ""}
@@ -559,15 +592,16 @@ function viewHome() {
   return `
   <section class="hero">
     <div>
-      <p class="when"><b>${sesName(d.session)} 브리핑</b><span class="mono">${esc(d.generated_at.replace("T", " ").slice(0, 16))} KST</span></p>
+      <p class="when"><b>${sesName(d.session)} 브리핑</b><span class="mono">작성 ${esc(d.generated_at.replace("T", " ").slice(0, 16))} KST</span></p>
       <h1>${esc(d.headline)}</h1>
+      ${closeLine()}
       <p class="lede">${esc((c.us || "").split(/(?<=다\.)\s/)[0])} ${esc((c.kr || "").split(/(?<=다\.)\s/)[0])}</p>
     </div>
     <div class="facts">
-      ${nas ? fact(pct(nas.pct), "나스닥", dir(nas.pct)) : ""}
-      ${ksp ? fact(pct(ksp.pct), "코스피", dir(ksp.pct)) : ""}
-      ${fx ? fact(nf(fx.price, 1), "원/달러") : ""}
-      ${tnx ? fact(nf(tnx.price, 2) + "%", "미국채 10년") : ""}
+      ${nas ? fact(pct(nas.pct), "나스닥", dir(nas.pct), closeInfo("us", nas.date)?.short) : ""}
+      ${ksp ? fact(pct(ksp.pct), "코스피", dir(ksp.pct), closeInfo("kr", ksp.date)?.short) : ""}
+      ${fx ? fact(nf(fx.price, 1), "원/달러", "", fx.date ? `${mdw(new Date(fx.date + "T00:00:00Z"))} 기준` : "") : ""}
+      ${tnx ? fact(nf(tnx.price, 2) + "%", "미국채 10년", "", closeInfo("us", tnx.date)?.short) : ""}
     </div>
   </section>
   ${d.sample ? `<div class="notice">지금 보이는 숫자와 뉴스는 화면 확인용 예시 데이터입니다. 자동 실행이 시작되면 실제 시세로 바뀝니다.</div>` : ""}
@@ -620,6 +654,7 @@ function viewMarket(mk) {
   return `
   <div class="shead"><div><h2 class="sec" style="margin:0;font-family:var(--f-display);font-size:21px">${us ? "미국 시장" : "한국 시장"}</h2>
     <p class="desc" style="margin:4px 0 0;color:var(--sub)">${us ? "나스닥·S&P 500·다우·반도체 지수와 대형 기술주" : "코스피·코스닥과 시가총액 상위 종목"}</p></div></div>
+  ${closeLine(mk)}
   <div class="memo"><p>${esc(d.commentary?.[mk] || "코멘트 없음")}</p></div>
   <section class="sec"><h2>지수</h2>${idxTable(pick(us ? US_IDX : KR_IDX))}</section>
   <section class="sec cols">
