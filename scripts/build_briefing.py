@@ -1028,12 +1028,16 @@ def main() -> None:
         return a
 
     has_crypto = any(x.get("market") == "crypto" for x in (earlier or {}).get("parts", []))
+    # 각 브리핑에는 그 브리핑에서 쓴 심층 분석만 보여준다. 다른 브리핑(아침)의 분석은 링크만 단다.
+    analysis_ref = None
     if session == "intraday":
-        analysis = shown(earlier) if earlier else None  # 장중 브리핑은 심층 분석을 새로 쓰지 않음
-    elif earlier and earlier.get("parts") and not (manual and crypto and not has_crypto):
-        # 하루 한 번: 오늘 이미 쓴 분석은 그대로 보여줌
-        analysis = shown(earlier)
-        print(f"[analysis] 오늘 이미 쓴 심층 분석을 다시 보여줍니다 (처음 쓴 브리핑: {origin})")
+        analysis_ref = origin if earlier else None  # 장중 브리핑은 심층 분석을 쓰지 않음
+    elif earlier and origin == key_now and earlier.get("parts") and not (manual and crypto and not has_crypto):
+        analysis = shown(earlier)  # 같은 브리핑을 다시 실행: 쓴 분석 그대로
+        print("[analysis] 이 브리핑에서 이미 쓴 심층 분석을 그대로 둡니다")
+    elif earlier and origin != key_now:
+        analysis_ref = origin  # 하루 한 번: 오늘 다른 브리핑에서 이미 씀 → 링크만
+        print(f"[analysis] 오늘 심층 분석은 {origin} 브리핑에 있어 링크만 겁니다")
     elif trig["us"] or trig["kr"] or trig["crypto"]:
         if session == "morning" or manual:
             print(f"[analysis] 큰 변동: {trig} → 심층 분석 작성")
@@ -1042,8 +1046,8 @@ def main() -> None:
                 analysis["origin"] = key_now
         else:
             print(f"[analysis] 큰 변동: {trig} → 심층 분석은 다음 날 아침 브리핑에서 작성합니다")
-    if analysis is None and earlier:
-        analysis = shown(earlier)  # 새로 쓰기에 실패하면 오늘 쓴 분석이라도 보여줌
+    if analysis is None and earlier and origin == key_now:
+        analysis = shown(earlier)  # 다시 쓰기에 실패하면 이 브리핑에서 쓴 분석이라도 보여줌
 
     ko = brief.get("ko_names") or {}
     for d in ("up", "down"):
@@ -1075,6 +1079,7 @@ def main() -> None:
         "indices": indices, "stocks": stocks, "sectors": sectors, "macro": macro, "movers": movers,
         "news": news,
         "analysis": analysis,
+        "analysis_ref": analysis_ref,
         "drivers": [str(x)[:200] for x in (brief.get("drivers") or [])[:3]],
         "outlook": clean_outlook(brief.get("outlook")),
     }
