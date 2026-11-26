@@ -588,7 +588,7 @@ function viewAnalysis(a) {
   const mkName = m => m === "kr" ? "한국 증시" : m === "crypto" ? "코인" : "미국 증시";
   const watch = a.watch || (Array.isArray(a.outlook) ? a.outlook : []);
   return `<section class="ana" aria-label="심층 분석">
-    <div><span class="badge">심층 분석</span><span class="trig">${a.triggers.map(esc).join(" · ")}${a.reused ? " · 오늘 아침 분석" : ""}${a.legacyFrom ? " · 다음 날 아침 작성" : ""}</span></div>
+    <div><span class="badge">심층 분석</span><span class="trig">${a.triggers.map(esc).join(" · ")}${a.reused ? " · 오늘 아침 분석" : ""}${a.legacyFrom ? ` · ${esc(a.legacyFrom)}` : ""}</span></div>
     <h2>${esc(a.title || "왜 이렇게 움직였나")}</h2>
     <p class="sum">${esc(a.summary)}</p>
     ${parts.length > 1 ? `<div class="frow" style="margin-top:14px">${parts.map(x => `<button class="chip ${x.market === mk ? "on" : ""}" type="button" data-anamk="${x.market}">${mkName(x.market)}</button>`).join("")}</div>`
@@ -1038,18 +1038,26 @@ async function loadMarketDocs() {
 // 예전(시장 구분 전) 미국 브리핑에 들어 있던 한국 분석 → 그 장을 다룬 한국 마감 브리핑에서 보여줌
 const entryTime = e => `${e.date}T${e.time || (e.session === "morning" ? "07:10" : e.session === "afternoon" ? "15:50" : "12:00")}`;
 // 아카이브 목록의 '심층 분석' 표시도 화면과 같은 기준으로: 예전 미국 브리핑에 들어 있던 한국 분석은 해당 한국 마감 줄로
+// 예전(시장 구분 전) 아침 브리핑의 한국 분석 → 분석에 적힌 코스피 등락률과 같은 한국 마감 브리핑을 찾음 (없으면 붙이지 않음)
+const kospiOf = trg => { const m = (trg || []).join(" ").match(/코스피 ([+-]?\d+(?:\.\d+)?)%/); return m ? +m[1] : null; };
+function legacyTarget(e) {
+  if (!e.analysis || e.focus || e.session !== "morning") return null;
+  const v = kospiOf(e.analysis_triggers);
+  if (v == null) return null;
+  return S.index.find(x => focusOf(x) === "kr" && x.session === "afternoon" && x.kr_pct != null
+    && Math.abs(x.kr_pct - v) < 0.006 && entryTime(x) < entryTime(e)) || null;
+}
+
 function normalizeIndex() {
   const isKr = t => /코스피|코스닥/.test(t), isUs = t => !isKr(t) && !/비트코인/.test(t);
   S.index.forEach(e => { e._ana = !!e.analysis; e._anaTitle = e.analysis_title; });
   S.index.forEach(e => {
     if (!e.analysis || e.focus || e.session !== "morning") return;  // 시장별로 나눈 뒤의 브리핑은 그대로
     const trg = e.analysis_triggers || [];
-    const hasKr = trg.length ? trg.some(isKr) : /코스피|코스닥/.test(e.analysis_title || "");
-    const hasUs = trg.length ? trg.some(isUs) : !hasKr;
+    const hasKr = trg.some(isKr), hasUs = trg.some(isUs);
     if (!hasKr) return;
-    const prev = S.index.filter(x => focusOf(x) === "kr" && x.session === "afternoon" && entryTime(x) < entryTime(e))
-      .sort((a, b) => entryTime(a) < entryTime(b) ? 1 : -1)[0];
-    if (prev && !prev._ana) { prev._ana = true; prev._anaTitle = e.analysis_title; }
+    const target = legacyTarget(e);
+    if (target && !target._ana) { target._ana = true; target._anaTitle = e.analysis_title; }
     if (!hasUs) { e._ana = false; e._anaTitle = null; }
   });
 }
@@ -1058,17 +1066,16 @@ async function loadLegacyKr() {
   S.legacyAna = null;
   const d = S.doc;
   if (focusOf(d) !== "kr" || d.session === "intraday" || analysisFor(d)) return;
-  const t = (d.generated_at || "").slice(0, 16);
-  // 이 한국 브리핑 다음에 나온 첫 아침(미국) 브리핑, 단 다음 한국 브리핑보다 앞
-  const later = S.index.filter(e => entryTime(e) > t && e.session !== "intraday").sort((a, b) => entryTime(a) < entryTime(b) ? -1 : 1);
-  const next = later[0];
-  if (!next || focusOf(next) !== "us" || next.session !== "morning") return;
+  const key = d.key || `${d.date}-${d.session}`;
+  const src = S.index.find(e => legacyTarget(e)?.key === key);
+  if (!src) return;
   try {
-    const nd = await getDoc(next.key), a = nd.analysis;
-    const kr = a && !a.reused && (a.parts || []).find(x => x.market === "kr");
-    if (!kr || (a.parts || []).some(x => x.market === "us") && nd.focus) return;
+    const a = (await getDoc(src.key)).analysis;
+    const kr = a && (a.parts || []).find(x => x.market === "kr");
+    if (!kr) return;
     S.legacyAna = {...a, parts: [kr], title: kr.title || a.title, summary: kr.summary || "", link: "",
-      triggers: (a.trig?.kr?.length ? a.trig.kr : a.triggers.filter(x => /코스피|코스닥/.test(x))), legacyFrom: next.key};
+      triggers: (a.trig?.kr?.length ? a.trig.kr : a.triggers.filter(x => /코스피|코스닥/.test(x))),
+      legacyFrom: `${+src.date.slice(5, 7)}/${+src.date.slice(8)} 아침 작성`};
   } catch {}
 }
 
