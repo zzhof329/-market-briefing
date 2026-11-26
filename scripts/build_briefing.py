@@ -292,6 +292,69 @@ def fetch_ecos_kr3y() -> dict | None:
 
 
 # ── 뉴스 ─────────────────────────────────────────────────────────
+# ── 데이터 신선도 점검 ──────────────────────────────────────────
+def load_previous() -> dict:
+    try:
+        return json.loads((DATA_DIR / "latest.json").read_text("utf-8"))
+    except Exception:  # noqa: BLE001
+        return {}
+
+
+def no_regress(rows: list[dict], prev_rows: list[dict] | None, label: str) -> list[dict]:
+    """새로 받은 숫자가 이전 브리핑보다 오래된 날짜면, 이전의 더 최신 숫자를 그대로 쓴다"""
+    prev = {r["symbol"]: r for r in (prev_rows or []) if isinstance(r, dict) and r.get("symbol")}
+    out, seen = [], set()
+    for r in rows:
+        p = prev.get(r["symbol"])
+        if p and p.get("date", "") > r.get("date", ""):
+            print(f"[fresh] {label} {r['symbol']}: 받은 데이터({r.get('date')})가 이전({p.get('date')})보다 오래돼 이전 값 유지")
+            r = {**p, **{k: v for k, v in r.items() if k in ("name", "desc", "unit")}}
+        out.append(r)
+        seen.add(r["symbol"])
+    return out
+
+
+def naver_index(code: str) -> dict | None:
+    """네이버 증권 지수 일별 시세 (code: KOSPI / KOSDAQ) → 최근 마감 1건"""
+    try:
+        r = requests.get(f"https://m.stock.naver.com/api/index/{code}/price?pageSize=25&page=1", timeout=15,
+                         headers={"User-Agent": "Mozilla/5.0", "Referer": "https://m.stock.naver.com/"})
+        rows = r.json()
+        rows = rows if isinstance(rows, list) else rows.get("result") or rows.get("items") or []
+        parsed = []
+        for it in rows:
+            d = str(it.get("localTradedAt") or it.get("tradeDate") or it.get("date") or "")[:10].replace(".", "-")
+            c = _num(it.get("closePrice") or it.get("closeIndex"))
+            if len(d) == 8 and d.isdigit():
+                d = f"{d[:4]}-{d[4:6]}-{d[6:]}"
+            if d and c:
+                parsed.append((d, c))
+        parsed.sort()
+        if len(parsed) < 2:
+            return None
+        (d0, c0), (d1, c1) = parsed[-2], parsed[-1]
+        return {"date": d1, "price": c1, "change": round(c1 - c0, 2), "pct": round((c1 / c0 - 1) * 100, 2),
+                "spark": [c for _, c in parsed[-20:]]}
+    except Exception as e:  # noqa: BLE001
+        print(f"[fresh] 네이버 지수 {code} 실패: {e}")
+        return None
+
+
+def fix_kr_indices(indices: list[dict], kr_dates: list[str]) -> None:
+    """코스피·코스닥 지수 날짜가 한국 종목 날짜보다 늦으면 네이버에서 마감가를 다시 받는다"""
+    latest_kr = max(kr_dates) if kr_dates else ""
+    for i in indices:
+        code = {"^KS11": "KOSPI", "^KQ11": "KOSDAQ"}.get(i["symbol"])
+        if not code or not latest_kr or i.get("date", "") >= latest_kr:
+            continue
+        n = naver_index(code)
+        if n and n["date"] > i.get("date", ""):
+            print(f"[fresh] {i['name']}: Yahoo {i.get('date')} → 네이버 {n['date']} 마감가로 교체")
+            i.update(n)
+        else:
+            print(f"[fresh] {i['name']}: 지수({i.get('date')})가 종목({latest_kr})보다 늦지만 대체 데이터를 받지 못했습니다")
+
+
 # ── 오늘의 상승·하락 상위 ────────────────────────────────────────
 def us_movers(kind: str, n: int = 10) -> list[dict]:
     """Yahoo Finance 기본 스크리너(day_gainers / day_losers): 시총 20억 달러 이상 미국 종목"""
@@ -882,6 +945,7 @@ def main() -> None:
         session = "morning" if now.hour < 12 else "afternoon"  # 오전=미국 증시 마감, 오후=한국 증시 마감
     print(f"[session] {session} (직접 실행={manual}, 한국장 열림={kr_open}, 미국장 열림={us_open})")
 
+    prev = load_previous()
     indices = fetch_quotes(INDICES)
     stocks = {}
     for mk, pool in (("us", US_POOL), ("kr", KR_POOL), ("kq", KOSDAQ_POOL)):
@@ -892,7 +956,15 @@ def main() -> None:
             r["rank"] = rank
         stocks[mk] = sorted(rows, key=lambda r: r["rank"])
     sectors = {"us": fetch_quotes(US_SECTORS), "kr": fetch_quotes(KR_SECTORS)}
-    macro = fetch_quotes(MACRO)
+    # 한국 지수가 한국 종목보다 날짜가 늦으면 네이버로 보정, 그다음 이전 브리핑보다 뒤로 가지 않게
+    fix_kr_indices(indices, [r["date"] for k in ("kr", "kq") for r in stocks.get(k, [])]
+                   + [r["date"] for r in sectors.get("kr", [])])
+    indices = no_regress(indices, prev.get("indices"), "지수")
+    for k in stocks:
+        stocks[k] = no_regress(stocks[k], (prev.get("stocks") or {}).get(k), f"종목({k})")
+    for k in sectors:
+        sectors[k] = no_regress(sectors[k], (prev.get("sectors") or {}).get(k), f"섹터({k})")
+    macro = no_regress(fetch_quotes(MACRO), prev.get("macro"), "매크로")
     usdkrw = next((m["price"] for m in macro if m["symbol"] == "KRW=X"), None)
     try:
         etfs = fetch_etfs()
