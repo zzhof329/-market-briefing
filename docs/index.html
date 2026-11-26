@@ -588,7 +588,7 @@ function viewAnalysis(a) {
   const mkName = m => m === "kr" ? "한국 증시" : m === "crypto" ? "코인" : "미국 증시";
   const watch = a.watch || (Array.isArray(a.outlook) ? a.outlook : []);
   return `<section class="ana" aria-label="심층 분석">
-    <div><span class="badge">심층 분석</span><span class="trig">${a.triggers.map(esc).join(" · ")}${a.reused ? " · 오늘 아침 분석" : ""}</span></div>
+    <div><span class="badge">심층 분석</span><span class="trig">${a.triggers.map(esc).join(" · ")}${a.reused ? " · 오늘 아침 분석" : ""}${a.legacyFrom ? " · 다음 날 아침 작성" : ""}</span></div>
     <h2>${esc(a.title || "왜 이렇게 움직였나")}</h2>
     <p class="sum">${esc(a.summary)}</p>
     ${parts.length > 1 ? `<div class="frow" style="margin-top:14px">${parts.map(x => `<button class="chip ${x.market === mk ? "on" : ""}" type="button" data-anamk="${x.market}">${mkName(x.market)}</button>`).join("")}</div>`
@@ -606,7 +606,7 @@ function viewAnalysis(a) {
 }
 
 function viewDaily(d) {
-  const own = !!analysisFor(d);  // 이 브리핑 시장의 심층 분석이 있으면 그걸 보여주고, 없으면 오늘의 분석
+  const own = !!(analysisFor(d) || S.legacyAna);  // 이 브리핑 시장의 심층 분석이 있으면 그걸 보여주고, 없으면 오늘의 분석
   const ref = d.analysis_ref || (d.analysis?.reused ? d.analysis.origin : null);
   const refBtn = ref ? `<button class="more" type="button" data-open="${esc(ref)}" style="margin-top:12px">오늘 ${ref.endsWith("afternoon") ? "오후" : "아침"} 심층 분석 보기</button>` : "";
   if (own || (!d.drivers?.length && !d.outlook)) return refBtn ? `<div style="margin-top:14px">${refBtn}</div>` : "";
@@ -657,7 +657,7 @@ function viewHome() {
     <div class="facts">${facts.join("")}</div>
   </section>
   ${d.sample ? `<div class="notice">지금 보이는 숫자와 뉴스는 화면 확인용 예시 데이터입니다. 자동 실행이 시작되면 실제 시세로 바뀝니다.</div>` : ""}
-  ${viewAnalysis(analysisFor(d))}
+  ${viewAnalysis(analysisFor(d) || S.legacyAna)}
   ${viewDaily(d)}
 
   <div class="cards">
@@ -1035,10 +1035,31 @@ async function loadMarketDocs() {
   if (cand) { try { S.mk[other] = await getDoc(cand.key); } catch {} }
 }
 
+// 예전(시장 구분 전) 미국 브리핑에 들어 있던 한국 분석 → 그 장을 다룬 한국 마감 브리핑에서 보여줌
+const entryTime = e => `${e.date}T${e.time || (e.session === "morning" ? "07:10" : e.session === "afternoon" ? "15:50" : "12:00")}`;
+async function loadLegacyKr() {
+  S.legacyAna = null;
+  const d = S.doc;
+  if (focusOf(d) !== "kr" || d.session === "intraday" || analysisFor(d)) return;
+  const t = (d.generated_at || "").slice(0, 16);
+  // 이 한국 브리핑 다음에 나온 첫 아침(미국) 브리핑, 단 다음 한국 브리핑보다 앞
+  const later = S.index.filter(e => entryTime(e) > t && e.session !== "intraday").sort((a, b) => entryTime(a) < entryTime(b) ? -1 : 1);
+  const next = later[0];
+  if (!next || focusOf(next) !== "us" || next.session !== "morning") return;
+  try {
+    const nd = await getDoc(next.key), a = nd.analysis;
+    const kr = a && !a.reused && (a.parts || []).find(x => x.market === "kr");
+    if (!kr || (a.parts || []).some(x => x.market === "us") && nd.focus) return;
+    S.legacyAna = {...a, parts: [kr], title: kr.title || a.title, summary: kr.summary || "", link: "",
+      triggers: (a.trig?.kr?.length ? a.trig.kr : a.triggers.filter(x => /코스피|코스닥/.test(x))), legacyFrom: next.key};
+  } catch {}
+}
+
 async function openBrief(key) {
   try {
     S.doc = await getDoc(key);
     await loadMarketDocs();
+    await loadLegacyKr();
     S.key = key;
     $("#pick").value = key;
     setTab("home");
@@ -1109,6 +1130,7 @@ setTopH(); window.addEventListener("resize", setTopH);
   try {
     [S.doc, S.index, S.cal, S.season] = await Promise.all([getDoc("latest"), getIndex(), getExtra("calendar"), getExtra("seasonality")]);
     await loadMarketDocs();
+    await loadLegacyKr();
     fillPicker();
     render();
   } catch {
