@@ -560,6 +560,22 @@ function viewOutlook(o) {
     <p class="disc">전망은 공개된 시세·보도를 바탕으로 한 조건부 시나리오이며, 투자 권유가 아닙니다.</p>`;
 }
 
+// 이 브리핑의 시장에 맞는 심층 분석만 (예전에 여러 시장을 한꺼번에 쓴 분석 정리)
+function analysisFor(d) {
+  const a = d.analysis;
+  if (!a || a.reused) return null;
+  if (!a.parts?.length) return a;  // 시장 구분이 없던 아주 예전 형식은 그대로
+  const f = focusOf(d), allow = f === "us" ? ["us", "crypto"] : ["kr"];
+  if (!a.parts.some(x => x.market === f)) return null;  // 이 시장 파트가 없으면 심층 분석을 보여주지 않음
+  const parts = a.parts.filter(x => allow.includes(x.market));
+  if (parts.length === a.parts.length) return a;
+  // 다른 시장이 섞인 예전 분석: 이 시장 파트만, 제목·요약도 이 시장 것으로
+  const main = parts.find(x => x.market === f);
+  return {...a, parts, title: main.title || a.title, summary: main.summary || "", link: "",
+    triggers: (a.trig?.[f] || []).concat(f === "us" ? a.trig?.crypto || [] : []).length
+      ? (a.trig[f] || []).concat(f === "us" ? a.trig.crypto || [] : []) : a.triggers.filter(t => f === "kr" ? /코스피|코스닥/.test(t) : !/코스피|코스닥/.test(t))};
+}
+
 function viewAnalysis(a) {
   if (!a) return "";
   const wcls = w => w === "높음" ? "high" : w === "낮음" ? "low" : "mid";
@@ -590,7 +606,7 @@ function viewAnalysis(a) {
 }
 
 function viewDaily(d) {
-  const own = d.analysis && !d.analysis.reused;  // 다른 브리핑에서 가져온 분석은 여기서 보여주지 않음
+  const own = !!analysisFor(d);  // 이 브리핑 시장의 심층 분석이 있으면 그걸 보여주고, 없으면 오늘의 분석
   const ref = d.analysis_ref || (d.analysis?.reused ? d.analysis.origin : null);
   const refBtn = ref ? `<button class="more" type="button" data-open="${esc(ref)}" style="margin-top:12px">오늘 ${ref.endsWith("afternoon") ? "오후" : "아침"} 심층 분석 보기</button>` : "";
   if (own || (!d.drivers?.length && !d.outlook)) return refBtn ? `<div style="margin-top:14px">${refBtn}</div>` : "";
@@ -641,7 +657,7 @@ function viewHome() {
     <div class="facts">${facts.join("")}</div>
   </section>
   ${d.sample ? `<div class="notice">지금 보이는 숫자와 뉴스는 화면 확인용 예시 데이터입니다. 자동 실행이 시작되면 실제 시세로 바뀝니다.</div>` : ""}
-  ${viewAnalysis(d.analysis && !d.analysis.reused ? d.analysis : null)}
+  ${viewAnalysis(analysisFor(d))}
   ${viewDaily(d)}
 
   <div class="cards">
