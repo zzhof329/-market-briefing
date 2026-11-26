@@ -1,5 +1,32 @@
 [
  {
+  "key": "2026-11-27-morning",
+  "date": "2026-11-27",
+  "session": "morning",
+  "time": "08:02",
+  "focus": "us",
+  "market_date": "2026-11-25",
+  "headline": "나스닥 0.6% 하락, AI 투자 불안에 반도체 약세 지속",
+  "tags": [
+   "반도체",
+   "AI투자",
+   "나스닥",
+   "금리",
+   "변동성"
+  ],
+  "us_pct": -0.62,
+  "kr_pct": 0.29,
+  "summary": "미국 증시는 나스닥 종합 -0.62%, 나스닥 100 -0.64%, 필라델피아 반도체 -0.65%로 기술주 중심의 약세로 마감했다. 엔비디아(-3.91%)와 아마존(-3.12%)이 크게 밀렸고, 마이크론은 이틀 새 15% 급락했다. 다우(+0.33%)와 S&P 500(-0.25%)은 낙폭이 제한됐고, 나스닥은 장중 4.6%까지 밀렸다가 낙폭을 줄였다. VIX는 26.8로 높은 수준을 유지했다.  미국채 10년물 금리는 4.848%로 0.056%p 하락했고, 3개월물은 4.155%였다. 원/달러 환율은 1,343.05원으로 0.4원 ",
+  "keywords": [
+   "엔비디아",
+   "현대차",
+   "메타",
+   "아마존"
+  ],
+  "analysis": false,
+  "stance": "중립"
+ },
+ {
   "key": "2026-11-26-afternoon",
   "date": "2026-11-26",
   "session": "afternoon",
@@ -23,8 +50,6 @@
    "코스피 6% 급등 뒤 하루 만에 6% 급락"
   ],
   "analysis": false,
-  "analysis_title": null,
-  "analysis_triggers": null,
   "stance": "중립"
  },
  {
@@ -51,8 +76,6 @@
    "코스피 6% 급등 뒤 하루 만에 6% 급락"
   ],
   "analysis": false,
-  "analysis_title": null,
-  "analysis_triggers": null,
   "stance": "중립"
  },
  {
@@ -110,8 +133,6 @@
    "코스피 -3.3% 급락 후 반등, 미국 반도체 -7.9%"
   ],
   "analysis": false,
-  "analysis_title": null,
-  "analysis_triggers": null,
   "stance": "중립"
  },
  {
@@ -167,8 +188,6 @@
    "삼성생명"
   ],
   "analysis": false,
-  "analysis_title": null,
-  "analysis_triggers": null,
   "stance": "중립"
  },
  {
@@ -194,8 +213,6 @@
    "알파벳"
   ],
   "analysis": false,
-  "analysis_title": null,
-  "analysis_triggers": null,
   "stance": "중립"
  },
  {
