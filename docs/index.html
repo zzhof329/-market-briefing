@@ -492,9 +492,9 @@ function briefRow(e) {
     <span class="t"><b>${esc(e.headline)}</b>
       <span class="meta"><span class="tag ${f}">${mktName(f)} ${e.session === "intraday" ? "장중" : "마감"}</span>
         ${v != null ? `<span class="${dir(v)}">${f === "kr" ? "코스피" : "나스닥"} ${pct(v)}</span>` : ""}
-        ${e.analysis ? `<span class="tag ana-t">심층 분석</span>` : ""}${e.stance ? `<span class="tag st-${stCls(e.stance)}">전망 ${esc(e.stance)}</span>` : ""}
+        ${e._ana ? `<span class="tag ana-t">심층 분석</span>` : ""}${e.stance ? `<span class="tag st-${stCls(e.stance)}">전망 ${esc(e.stance)}</span>` : ""}
         ${(e.tags || []).map(t => `<span class="tag">#${esc(t)}</span>`).join("")}</span>
-      ${e.analysis && e.analysis_title ? `<span class="meta" style="color:var(--accent);font-weight:600">심층 분석 · ${esc(e.analysis_title)}</span>` : ""}</span>
+      ${e._ana && e._anaTitle ? `<span class="meta" style="color:var(--accent);font-weight:600">심층 분석 · ${esc(e._anaTitle)}</span>` : ""}</span>
   </button></li>`;
 }
 
@@ -780,7 +780,7 @@ function archiveMatches() {
   const q = S.q.trim().toLowerCase();
   return S.index.filter(e =>
     (S.month === "all" || mktDate(e).startsWith(S.month)) &&
-    (S.ses === "all" || (S.ses === "analysis" ? e.analysis : S.ses === "intraday" ? e.session === "intraday"
+    (S.ses === "all" || (S.ses === "analysis" ? e._ana : S.ses === "intraday" ? e.session === "intraday"
       : e.session !== "intraday" && focusOf(e) === S.ses)) &&
     (!S.tag || (e.tags || []).includes(S.tag)) &&
     (!q || [e.headline, e.summary, ...(e.tags || []), ...(e.keywords || [])].join(" ").toLowerCase().includes(q)));
@@ -1037,6 +1037,23 @@ async function loadMarketDocs() {
 
 // 예전(시장 구분 전) 미국 브리핑에 들어 있던 한국 분석 → 그 장을 다룬 한국 마감 브리핑에서 보여줌
 const entryTime = e => `${e.date}T${e.time || (e.session === "morning" ? "07:10" : e.session === "afternoon" ? "15:50" : "12:00")}`;
+// 아카이브 목록의 '심층 분석' 표시도 화면과 같은 기준으로: 예전 미국 브리핑에 들어 있던 한국 분석은 해당 한국 마감 줄로
+function normalizeIndex() {
+  const isKr = t => /코스피|코스닥/.test(t), isUs = t => !isKr(t) && !/비트코인/.test(t);
+  S.index.forEach(e => { e._ana = !!e.analysis; e._anaTitle = e.analysis_title; });
+  S.index.forEach(e => {
+    if (!e.analysis || e.focus || e.session !== "morning") return;  // 시장별로 나눈 뒤의 브리핑은 그대로
+    const trg = e.analysis_triggers || [];
+    const hasKr = trg.length ? trg.some(isKr) : /코스피|코스닥/.test(e.analysis_title || "");
+    const hasUs = trg.length ? trg.some(isUs) : !hasKr;
+    if (!hasKr) return;
+    const prev = S.index.filter(x => focusOf(x) === "kr" && x.session === "afternoon" && entryTime(x) < entryTime(e))
+      .sort((a, b) => entryTime(a) < entryTime(b) ? 1 : -1)[0];
+    if (prev && !prev._ana) { prev._ana = true; prev._anaTitle = e.analysis_title; }
+    if (!hasUs) { e._ana = false; e._anaTitle = null; }
+  });
+}
+
 async function loadLegacyKr() {
   S.legacyAna = null;
   const d = S.doc;
@@ -1111,7 +1128,7 @@ document.addEventListener("visibilitychange", async () => {
   try {
     const fresh = await getJSON("data/latest.json");
     if (fresh.generated_at !== S.doc?.generated_at) {
-      S.cache.latest = fresh; S.doc = fresh; S.index = await getIndex(); fillPicker(); render();
+      S.cache.latest = fresh; S.doc = fresh; S.index = await getIndex(); normalizeIndex(); fillPicker(); render();
     }
   } catch {}
 });
@@ -1129,6 +1146,7 @@ setTopH(); window.addEventListener("resize", setTopH);
   renderTabs();
   try {
     [S.doc, S.index, S.cal, S.season] = await Promise.all([getDoc("latest"), getIndex(), getExtra("calendar"), getExtra("seasonality")]);
+    normalizeIndex();
     await loadMarketDocs();
     await loadLegacyKr();
     fillPicker();
