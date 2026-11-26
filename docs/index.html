@@ -580,11 +580,15 @@ function viewAnalysis(a) {
 }
 
 function viewDaily(d) {
-  if (d.analysis || (!d.drivers?.length && !d.outlook)) return "";
+  const own = d.analysis && !d.analysis.reused;  // 다른 브리핑에서 가져온 분석은 여기서 보여주지 않음
+  const ref = d.analysis_ref || (d.analysis?.reused ? d.analysis.origin : null);
+  const refBtn = ref ? `<button class="more" type="button" data-open="${esc(ref)}" style="margin-top:12px">오늘 ${ref.endsWith("afternoon") ? "오후" : "아침"} 심층 분석 보기</button>` : "";
+  if (own || (!d.drivers?.length && !d.outlook)) return refBtn ? `<div style="margin-top:14px">${refBtn}</div>` : "";
   return `<section class="ana daily" aria-label="오늘의 분석과 전망">
     <div><span class="badge">오늘의 분석</span><span class="trig">${sesName(d.session)} 기준</span></div>
     ${d.drivers?.length ? `<h3 style="margin-top:12px">오늘 움직인 이유</h3><ul>${d.drivers.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
     ${viewOutlook(d.outlook)}
+    ${refBtn}
   </section>`;
 }
 
@@ -615,7 +619,7 @@ function viewHome() {
     </div>
   </section>
   ${d.sample ? `<div class="notice">지금 보이는 숫자와 뉴스는 화면 확인용 예시 데이터입니다. 자동 실행이 시작되면 실제 시세로 바뀝니다.</div>` : ""}
-  ${viewAnalysis(d.analysis)}
+  ${viewAnalysis(d.analysis && !d.analysis.reused ? d.analysis : null)}
   ${viewDaily(d)}
 
   <div class="cards">
