@@ -489,12 +489,12 @@ function briefRow(e) {
   const f = focusOf(e), v = f === "kr" ? e.kr_pct : e.us_pct;
   return `<li><button class="row ${cur ? "cur" : ""}" type="button" data-open="${esc(e.key)}">
     <span class="mono" style="min-width:54px">${mdDow(mktDate(e))}${e.session === "intraday" && e.time ? `<br>${esc(e.time)}` : ""}</span>
-    <span class="t"><b>${esc(e.headline)}</b>
+    <span class="t"><b>${esc(cleanHeadline(e, f, f === "kr" ? [e.kr_pct] : [e.us_pct]))}</b>
       <span class="meta"><span class="tag ${f}">${mktName(f)} ${e.session === "intraday" ? "장중" : "마감"}</span>
         ${v != null ? `<span class="${dir(v)}">${f === "kr" ? "코스피" : "나스닥"} ${pct(v)}</span>` : ""}
-        ${e._ana ? `<span class="tag ana-t">심층 분석</span>` : ""}${e.stance ? `<span class="tag st-${stCls(e.stance)}">전망 ${esc(e.stance)}</span>` : ""}
+        ${e._ana ? `<span class="tag ana-t">${e._legacy ? "종합 분석" : "심층 분석"}</span>` : ""}${e.stance ? `<span class="tag st-${stCls(e.stance)}">전망 ${esc(e.stance)}</span>` : ""}
         ${(e.tags || []).map(t => `<span class="tag">#${esc(t)}</span>`).join("")}</span>
-      ${e._ana && e._anaTitle ? `<span class="meta" style="color:var(--accent);font-weight:600">심층 분석 · ${esc(e._anaTitle)}</span>` : ""}</span>
+      ${e._ana && e._anaTitle ? `<span class="meta" style="color:var(--accent);font-weight:600">${e._legacy ? "종합 분석" : "심층 분석"} · ${esc(e._anaTitle)}${e._legacy && e._basis ? ` <span style="font-weight:400;color:var(--sub)">(${esc(e._basis)} 기준)</span>` : ""}</span>` : ""}</span>
   </button></li>`;
 }
 
@@ -504,7 +504,18 @@ const WD = ["일", "월", "화", "수", "목", "금", "토"];
 const focusOf = x => x?.focus || (x?.session === "afternoon" ? "kr" : x?.session === "intraday" && x?.intraday?.kr ? "kr" : "us");
 function prevWeekday(ds) { const d = new Date(ds + "T00:00:00Z"); do d.setUTCDate(d.getUTCDate() - 1); while ([0, 6].includes(d.getUTCDay())); return d.toISOString().slice(0, 10); }
 // 장이 열린 날: 아침 미국 브리핑은 전 거래일 미국장
-const mktDate = e => e.market_date || (focusOf(e) === "us" && e.session === "morning" ? prevWeekday(e.date) : e.date);
+const isWeekend = ds => [0, 6].includes(new Date(ds + "T00:00:00Z").getUTCDay());
+const mktDate = e => e.market_date || (focusOf(e) === "us" && e.session === "morning" ? prevWeekday(e.date)
+  : isWeekend(e.date) ? prevWeekday(e.date) : e.date);
+// 시장을 나누기 전 브리핑의 헤드라인이 다른 시장 이야기를 담고 있으면, 그 시장 숫자로 대신 보여줌
+function cleanHeadline(x, f, nums) {
+  const h = x.headline || "";
+  if (x.focus) return h;  // 시장별로 나눈 뒤의 브리핑은 그대로
+  const other = f === "us" ? /코스피|코스닥|한국 증시/ : /나스닥|S&P|다우|미국 증시/;
+  if (!other.test(h)) return h;
+  const [a, b] = nums;
+  return f === "us" ? `나스닥 ${pct(a)}${b != null ? ` · S&P 500 ${pct(b)}` : ""} 마감` : `코스피 ${pct(a)}${b != null ? ` · 코스닥 ${pct(b)}` : ""} 마감`;
+}
 const mdDow = ds => `${ds.slice(5, 7)}.${ds.slice(8, 10)}(${WD[new Date(ds.slice(0, 10) + "T00:00:00Z").getUTCDay()]})`;
 const mktName = f => f === "kr" ? "한국 증시" : "미국 증시";
 const briefLabel = e => `${mdDow(mktDate(e))} ${mktName(focusOf(e))} ${e.session === "intraday" ? `장중 ${e.time || e.intraday?.at || ""}`.trim() : "마감"}`;
@@ -561,9 +572,18 @@ function viewOutlook(o) {
 }
 
 // 이 브리핑의 시장에 맞는 심층 분석만 (예전에 여러 시장을 한꺼번에 쓴 분석 정리)
+// 분석에 쓰인 데이터의 장 날짜 (시장별)
+function basisOf(d) {
+  const ix = s2 => (d.indices || []).find(i => i.symbol === s2)?.date;
+  const us = ix("^IXIC"), kr = ix("^KS11"), fmt = ds => mdw(new Date(ds + "T00:00:00Z"));
+  return {us, kr, text: [us && `미국 ${fmt(us)}`, kr && `한국 ${fmt(kr)}`].filter(Boolean).join(" · ")};
+}
+
 function analysisFor(d) {
   const a = d.analysis;
   if (!a || a.reused) return null;
+  // 시장을 나누기 전에 쓴 분석: 종합 분석으로 모든 파트를 그대로
+  if (!d.focus) return {...a, legacy: true, basis: basisOf(d).text};
   if (!a.parts?.length) return a;  // 시장 구분이 없던 아주 예전 형식은 그대로
   const f = focusOf(d), allow = f === "us" ? ["us", "crypto"] : ["kr"];
   if (!a.parts.some(x => x.market === f)) return null;  // 이 시장 파트가 없으면 심층 분석을 보여주지 않음
@@ -588,7 +608,8 @@ function viewAnalysis(a) {
   const mkName = m => m === "kr" ? "한국 증시" : m === "crypto" ? "코인" : "미국 증시";
   const watch = a.watch || (Array.isArray(a.outlook) ? a.outlook : []);
   return `<section class="ana" aria-label="심층 분석">
-    <div><span class="badge">심층 분석</span><span class="trig">${a.triggers.map(esc).join(" · ")}${a.reused ? " · 오늘 아침 분석" : ""}${a.legacyFrom ? ` · ${esc(a.legacyFrom)}` : ""}</span></div>
+    <div><span class="badge">${a.legacy ? "종합 분석" : "심층 분석"}</span><span class="trig">${a.legacy ? "시장 구분 전 작성 · " : ""}${a.triggers.map(esc).join(" · ")}${a.reused ? " · 오늘 아침 분석" : ""}${a.legacyFrom ? ` · ${esc(a.legacyFrom)}` : ""}</span></div>
+    ${a.legacy && a.basis ? `<p class="closeline" style="margin-top:8px"><span class="cl-l">데이터 기준</span><span>${esc(a.basis)} 마감</span></p>` : ""}
     <h2>${esc(a.title || "왜 이렇게 움직였나")}</h2>
     <p class="sum">${esc(a.summary)}</p>
     ${parts.length > 1 ? `<div class="frow" style="margin-top:14px">${parts.map(x => `<button class="chip ${x.market === mk ? "on" : ""}" type="button" data-anamk="${x.market}">${mkName(x.market)}</button>`).join("")}</div>`
@@ -649,7 +670,7 @@ function viewHome() {
   <section class="hero">
     <div>
       <p class="when">${d.session === "intraday" ? `<span class="livebadge">LIVE</span>` : ""}<b>${briefLabel(d)} 브리핑</b><span class="mono">작성 ${esc(d.generated_at.replace("T", " ").slice(0, 16))} KST</span></p>
-      <h1>${esc(d.headline)}</h1>
+      <h1>${esc(cleanHeadline(d, f, us ? [I("^IXIC")?.pct, I("^GSPC")?.pct] : [I("^KS11")?.pct, I("^KQ11")?.pct]))}</h1>
       ${closeLine(f)}
       ${d.session === "intraday" ? `<p class="desc" style="margin:6px 0 0">직접 실행한 장중 브리핑이라 마감 전 가격입니다. 정해진 시간에 마감 브리핑이 따로 올라옵니다.</p>` : ""}
       ${lede ? `<p class="lede">${esc(lede)}</p>` : ""}
@@ -1049,35 +1070,21 @@ function legacyTarget(e) {
 }
 
 function normalizeIndex() {
-  const isKr = t => /코스피|코스닥/.test(t), isUs = t => !isKr(t) && !/비트코인/.test(t);
-  S.index.forEach(e => { e._ana = !!e.analysis; e._anaTitle = e.analysis_title; });
   S.index.forEach(e => {
-    if (!e.analysis || e.focus || e.session !== "morning") return;  // 시장별로 나눈 뒤의 브리핑은 그대로
-    const trg = e.analysis_triggers || [];
-    const hasKr = trg.some(isKr), hasUs = trg.some(isUs);
-    if (!hasKr) return;
-    const target = legacyTarget(e);
-    if (target && !target._ana) { target._ana = true; target._anaTitle = e.analysis_title; }
-    if (!hasUs) { e._ana = false; e._anaTitle = null; }
+    e._ana = !!e.analysis; e._anaTitle = e.analysis_title;
+    e._legacy = e._ana && !e.focus;  // 시장을 나누기 전에 쓴 분석
   });
 }
 
-async function loadLegacyKr() {
-  S.legacyAna = null;
-  const d = S.doc;
-  if (focusOf(d) !== "kr" || d.session === "intraday" || analysisFor(d)) return;
-  const key = d.key || `${d.date}-${d.session}`;
-  const src = S.index.find(e => legacyTarget(e)?.key === key);
-  if (!src) return;
-  try {
-    const a = (await getDoc(src.key)).analysis;
-    const kr = a && (a.parts || []).find(x => x.market === "kr");
-    if (!kr) return;
-    S.legacyAna = {...a, parts: [kr], title: kr.title || a.title, summary: kr.summary || "", link: "",
-      triggers: (a.trig?.kr?.length ? a.trig.kr : a.triggers.filter(x => /코스피|코스닥/.test(x))),
-      legacyFrom: `${+src.date.slice(5, 7)}/${+src.date.slice(8)} 아침 작성`};
-  } catch {}
+// 예전 종합 분석의 데이터 기준일을 목록에 표시하려고 해당 브리핑을 미리 읽어둠
+async function preloadLegacy() {
+  const list = S.index.filter(e => e._legacy && !e._basis).slice(0, 30);
+  if (!list.length) return;
+  await Promise.all(list.map(async e => { try { e._basis = basisOf(await getDoc(e.key)).text; } catch {} }));
+  if (S.tab === "archive" || S.tab === "home") render();
 }
+
+async function loadLegacyKr() { S.legacyAna = null; }  // 예전 분석은 다른 브리핑으로 옮기지 않음
 
 async function openBrief(key) {
   try {
@@ -1158,6 +1165,7 @@ setTopH(); window.addEventListener("resize", setTopH);
     await loadLegacyKr();
     fillPicker();
     render();
+    preloadLegacy();
   } catch {
     $("#view").innerHTML = `<p class="empty">최신 브리핑(data/latest.json)을 찾지 못했습니다. GitHub Actions에서 워크플로를 한 번 실행해 주세요.</p>`;
   }
