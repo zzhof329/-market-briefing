@@ -503,6 +503,8 @@ def fetch_news(limit: int = 7) -> list[dict]:
 SYSTEM = """당신은 한국 개인투자자를 위한 증권사 리서치센터의 데일리 마켓 브리핑 작성자입니다.
 주어진 시세·뉴스 데이터만 근거로 쓰고, 데이터에 없는 수치나 사실은 만들지 마세요.
 매수·매도 권유는 하지 않습니다. 문체는 간결한 '~했다/~이다' 체.
+이 브리핑은 focus 시장 하나만 다룹니다. headline, drivers, outlook, watch, tags, news_notes는 focus 시장에 대해서만 쓰고,
+commentary는 focus에 해당하는 키(미국 증시=us, 한국 증시=kr)만 쓰고 다른 시장 키는 빈 문자열로 두세요. macro·crypto 코멘트는 평소대로 쓰세요.
 session이 '장중'이면 열려 있는 시장은 아직 마감 전입니다. '마감했다' 대신 '○시 현재 ~% 하락 중'처럼 쓰고, 마감 결과처럼 쓰지 마세요.
 전망(outlook)은 확정적 예측이 아니라 조건부 시나리오로 쓰고, 근거가 약하면 '중립'으로 두세요.
 시장 이름은 정확하게 쓰세요. '뉴욕 증시', '뉴욕장', '월가', '서울 증시', '서울장', '여의도' 같은 표현 대신
@@ -655,7 +657,7 @@ ANALYSIS_VIX_JUMP = 15.0    # VIX +15% 이상
 ANALYSIS_SYSTEM = """당신은 한국 개인투자자를 위한 증권사 시황 애널리스트입니다.
 시장이 크게 움직인 이유를 웹 검색으로 실제 보도를 확인해 분석합니다.
 - triggers에 있는 시장(us=미국 증시, kr=한국 증시)마다 parts를 하나씩 쓰세요. 미국은 가장 최근(전날 밤) 거래일, 한국은 가장 최근 거래일 기준입니다.
-- 코인(market "crypto") 파트는 항상 하나 쓰세요. 비트코인 중심으로, 주식시장 급변과의 연관성·김치 프리미엄·공포탐욕지수를 반영하고, 움직임이 작으면 원인은 2개로 간단히.
+- triggers의 crypto_part가 true이면 코인(market "crypto") 파트를 하나 쓰세요(아침 미국 증시 브리핑). false면 코인 파트는 쓰지 마세요. 비트코인 중심으로, 주식시장 급변과의 연관성·김치 프리미엄·공포탐욕지수를 반영하고, 움직임이 작으면 원인은 2개로 간단히.
 - 원인은 시장마다 3개 이상, 서로 다른 축(펀더멘털·정책/금리·수급/포지션·심리)에서 찾고, 웹 검색을 충분히 해서 근거를 확인하세요.
 - 전망은 조건부 시나리오로 쓰고 확정적 예측은 하지 마세요.
 - 확인된 사실(발표, 실적, 지표, 발언)과 시장의 해석을 구분해서 쓰세요. 해석은 '시장에서는 ~로 받아들였다'처럼 쓰세요.
@@ -752,7 +754,7 @@ def market_key(m) -> str:
 
 
 def write_analysis(payload: dict, trig: dict) -> dict | None:
-    triggers = trig["us"] + trig["kr"] + trig["crypto"]
+    triggers = trig.get("us", []) + trig.get("kr", []) + trig.get("crypto", [])
     if not os.getenv("ANTHROPIC_API_KEY"):
         return None
     from anthropic import Anthropic
@@ -869,32 +871,30 @@ def build_calendar() -> list[dict]:
 
 # ── 저장 ─────────────────────────────────────────────────────────
 def repair_index(index: list[dict]) -> None:
-    """예전 버그로 '심층 분석' 표시가 빠진 날을 보관 파일을 보고 바로잡는다"""
-    by_date: dict[str, list[dict]] = {}
+    """각 브리핑에 그 브리핑에서 쓴 심층 분석이 있는지 보관 파일을 보고 '심층 분석' 표시를 맞춘다"""
+    by_date: dict[str, list[tuple[dict, dict | None]]] = {}
     for e in index:
-        by_date.setdefault(e["date"], []).append(e)
-    for date, entries in by_date.items():
-        docs = {}
-        for e in entries:
-            try:
-                a = json.loads((ARCHIVE_DIR / f"{e['key']}.json").read_text("utf-8")).get("analysis")
-            except Exception:  # noqa: BLE001
-                a = None
-            docs[e["key"]] = a
-        with_a = [k for k, a in docs.items() if a]
-        if not with_a:
-            continue
-        orig = next((k for k in with_a if docs[k].get("origin") == k
-                     or (not docs[k].get("origin") and not docs[k].get("reused"))), None)
-        orig = orig or docs[with_a[0]].get("origin") or with_a[0]
-        for e in entries:
-            is_orig = e["key"] == orig
-            if bool(e.get("analysis")) != is_orig:
-                print(f"[archive] {e['key']}: 심층 분석 표시 {'복구' if is_orig else '정리'}")
-            e["analysis"] = is_orig
-            if is_orig and docs.get(e["key"]):
-                e["analysis_title"] = docs[e["key"]].get("title")
-                e["analysis_triggers"] = docs[e["key"]].get("triggers")
+        try:
+            a = json.loads((ARCHIVE_DIR / f"{e['key']}.json").read_text("utf-8")).get("analysis")
+        except Exception:  # noqa: BLE001
+            a = None
+        by_date.setdefault(e["date"], []).append((e, a))
+    for date, pairs in by_date.items():
+        flags = {e["key"]: bool(a) and (a.get("origin") == e["key"] or (not a.get("origin") and not a.get("reused")))
+                 for e, a in pairs}
+        if not any(flags.values()):  # 예전 버그로 모두 '빌려온 분석'으로 저장된 날: 분석이 있는 첫 브리핑을 원본으로
+            first = next((e["key"] for e, a in pairs if a), None)
+            if first:
+                flags[first] = True
+        for e, a in pairs:
+            if bool(e.get("analysis")) != flags[e["key"]]:
+                print(f"[archive] {e['key']}: 심층 분석 표시 {'복구' if flags[e['key']] else '정리'}")
+            e["analysis"] = flags[e["key"]]
+            if flags[e["key"]] and a:
+                e["analysis_title"], e["analysis_triggers"] = a.get("title"), a.get("triggers")
+            else:
+                e.pop("analysis_title", None)
+                e.pop("analysis_triggers", None)
 
 
 def save(doc: dict) -> None:
@@ -915,6 +915,7 @@ def save(doc: dict) -> None:
     movers = sorted(doc["stocks"]["us"] + doc["stocks"]["kr"], key=lambda s: -abs(s["pct"]))
     entry = {
         "key": key, "date": doc["date"], "session": doc["session"], "time": doc["generated_at"][11:16],
+        "focus": doc.get("focus"), "market_date": doc.get("market_date"),
         "headline": doc["headline"], "tags": doc.get("tags", []),
         "us_pct": pct_of("^IXIC"), "kr_pct": pct_of("^KS11"),
         "summary": " ".join(doc["commentary"].values())[:300],
@@ -943,7 +944,9 @@ def main() -> None:
         session = "intraday"  # 직접 실행했는데 장이 열려 있으면 장중 브리핑 (마감 브리핑과 따로 저장)
     else:
         session = "morning" if now.hour < 12 else "afternoon"  # 오전=미국 증시 마감, 오후=한국 증시 마감
-    print(f"[session] {session} (직접 실행={manual}, 한국장 열림={kr_open}, 미국장 열림={us_open})")
+    # 브리핑마다 한 시장만: 아침=미국 증시, 오후=한국 증시, 장중=열려 있는 시장(둘 다면 한국)
+    focus = "us" if session == "morning" else "kr" if session == "afternoon" else ("kr" if kr_open else "us")
+    print(f"[session] {session} / {focus} (직접 실행={manual}, 한국장 열림={kr_open}, 미국장 열림={us_open})")
 
     prev = load_previous()
     indices = fetch_quotes(INDICES)
@@ -998,56 +1001,50 @@ def main() -> None:
     def lite(rows):
         return [{k: v for k, v in r.items() if k != "spark"} for r in rows]
 
+    US_SYMS = {"^IXIC", "^NDX", "^GSPC", "^DJI", "^SOX", "^VIX"}
+    idx_focus = [i for i in indices if (i["symbol"] in US_SYMS) == (focus == "us")]
     payload = {
+        "focus": "미국 증시" if focus == "us" else "한국 증시",
         "now_kst": now.strftime("%Y-%m-%d %H:%M"),
         "session": (f"장중 ({now:%H:%M} 기준, 열려 있는 시장: {', '.join(x for x, o in (('한국 증시', kr_open), ('미국 증시', us_open)) if o)})"
                     if session == "intraday" else "미국 증시 마감 직후" if session == "morning" else "한국 증시 마감 직후"),
-        "indices": lite(indices),
-        "stocks": {k: lite(v) for k, v in stocks.items()},
-        "sectors": {k: lite(v) for k, v in sectors.items()},
+        "indices": lite(idx_focus),
+        "stocks": {k: lite(v) for k, v in stocks.items() if (k == "us") == (focus == "us")},
+        "sectors": {k: lite(v) for k, v in sectors.items() if k == focus},
         "macro": lite(macro),
-        "news": [{"i": n, "market": x["market"], "title": x["title"]} for n, x in enumerate(news)],
-        "upcoming_events": upcoming,  # watch 항목 작성에 참고
-        "technicals": technicals(indices),  # 전망·지수 수준 근거
+        "news": [{"i": n, "market": x["market"], "title": x["title"]} for n, x in enumerate(news) if x["market"] == focus],
+        "upcoming_events": [e for e in upcoming if e.get("country", "us") == focus],  # watch 항목 작성에 참고
+        "technicals": technicals(idx_focus),  # 전망·지수 수준 근거
         "crypto": {"coins": [{k: v for k, v in c.items() if k != "spark"} for c in crypto["coins"]],
                    "fear_greed": crypto["fng"]} if crypto else None,
     }
     brief = write_with_claude(payload) or fallback_briefing(indices)
     analysis = None
-    trig = analysis_triggers(indices, crypto)
+    t_all = analysis_triggers(indices, crypto)
+    trig = {"us": t_all["us"] if focus == "us" else [], "kr": t_all["kr"] if focus == "kr" else [],
+            "crypto": t_all["crypto"] if session == "morning" else [], "crypto_part": session == "morning"}
     key_now = f"{now.strftime('%Y-%m-%d')}-{session}"
-    earlier, origin = todays_analysis(now.strftime("%Y-%m-%d"))
-
-    def shown(a: dict) -> dict:
-        """같은 브리핑에서 쓴 분석이면 원본 그대로, 다른 브리핑(아침→오후)에서 가져오면 reused 표시"""
-        a = dict(a, origin=origin)
-        if origin == key_now:
-            a.pop("reused", None)
-        else:
-            a["reused"] = True
-        return a
-
+    earlier = None
+    try:  # 이 브리핑 자리(같은 날 같은 세션)에서 이미 쓴 분석
+        a = json.loads((ARCHIVE_DIR / f"{key_now}.json").read_text("utf-8")).get("analysis")
+        if a and (a.get("origin") == key_now or (not a.get("origin") and not a.get("reused"))):
+            earlier = dict(a, origin=key_now)
+    except Exception:  # noqa: BLE001
+        pass
     has_crypto = any(x.get("market") == "crypto" for x in (earlier or {}).get("parts", []))
-    # 각 브리핑에는 그 브리핑에서 쓴 심층 분석만 보여준다. 다른 브리핑(아침)의 분석은 링크만 단다.
-    analysis_ref = None
     if session == "intraday":
-        analysis_ref = origin if earlier else None  # 장중 브리핑은 심층 분석을 쓰지 않음
-    elif earlier and origin == key_now and earlier.get("parts") and not (manual and crypto and not has_crypto):
-        analysis = shown(earlier)  # 같은 브리핑을 다시 실행: 쓴 분석 그대로
+        pass  # 장중 브리핑은 심층 분석을 쓰지 않음
+    elif earlier and earlier.get("parts") and not (manual and session == "morning" and crypto and not has_crypto):
+        analysis = earlier  # 시장마다 하루 한 번: 다시 실행해도 쓴 분석 그대로
         print("[analysis] 이 브리핑에서 이미 쓴 심층 분석을 그대로 둡니다")
-    elif earlier and origin != key_now:
-        analysis_ref = origin  # 하루 한 번: 오늘 다른 브리핑에서 이미 씀 → 링크만
-        print(f"[analysis] 오늘 심층 분석은 {origin} 브리핑에 있어 링크만 겁니다")
     elif trig["us"] or trig["kr"] or trig["crypto"]:
-        if session == "morning" or manual:
-            print(f"[analysis] 큰 변동: {trig} → 심층 분석 작성")
-            analysis = write_analysis(payload, trig)
-            if analysis:
-                analysis["origin"] = key_now
-        else:
-            print(f"[analysis] 큰 변동: {trig} → 심층 분석은 다음 날 아침 브리핑에서 작성합니다")
-    if analysis is None and earlier and origin == key_now:
-        analysis = shown(earlier)  # 다시 쓰기에 실패하면 이 브리핑에서 쓴 분석이라도 보여줌
+        print(f"[analysis] 큰 변동: {trig} → 심층 분석 작성")
+        analysis = write_analysis(payload, trig)
+        if analysis:
+            analysis["origin"] = key_now
+    if analysis is None and earlier:
+        analysis = earlier  # 다시 쓰기에 실패하면 쓴 분석이라도 보여줌
+    analysis_ref = None
 
     ko = brief.get("ko_names") or {}
     for d in ("up", "down"):
@@ -1080,6 +1077,8 @@ def main() -> None:
         "news": news,
         "analysis": analysis,
         "analysis_ref": analysis_ref,
+        "focus": focus,
+        "market_date": next((i["date"] for i in indices if i["symbol"] == ("^IXIC" if focus == "us" else "^KS11")), None),
         "drivers": [str(x)[:200] for x in (brief.get("drivers") or [])[:3]],
         "outlook": clean_outlook(brief.get("outlook")),
     }
