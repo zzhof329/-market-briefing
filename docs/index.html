@@ -391,7 +391,7 @@ function spark(values, d, w = 90, h = 26) {
   const pts = values.map((v, i) => `${(i / (values.length - 1) * w).toFixed(1)},${(h - 2 - (v - mn) / r * (h - 4)).toFixed(1)}`).join(" ");
   return `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true"><polyline points="${pts}" fill="none" stroke="var(--${d})" stroke-width="1.6" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg>`;
 }
-const pick = ids => ids.map(id => S.doc.indices.find(i => i.symbol === id)).filter(Boolean);
+const pick = (ids, d = S.doc) => ids.map(id => (d.indices || []).find(i => i.symbol === id)).filter(Boolean);
 const find = (list, sym) => (list || []).find(x => x.symbol === sym);
 
 function idxTable(list) {
@@ -485,12 +485,14 @@ function newsList(list, limit) {
 }
 
 function briefRow(e) {
-  const cur = e.key === S.key || (S.key === "latest" && e.key === `${S.doc?.date}-${S.doc?.session}`);
+  const cur = e.key === S.key || (S.key === "latest" && e.key === (S.doc?.key || `${S.doc?.date}-${S.doc?.session}`));
+  const f = focusOf(e), v = f === "kr" ? e.kr_pct : e.us_pct;
   return `<li><button class="row ${cur ? "cur" : ""}" type="button" data-open="${esc(e.key)}">
-    <span class="mono">${md(e.date)}${e.session === "intraday" && e.time ? `<br>${esc(e.time)}` : ""}</span>
+    <span class="mono" style="min-width:54px">${mdDow(mktDate(e))}${e.session === "intraday" && e.time ? `<br>${esc(e.time)}` : ""}</span>
     <span class="t"><b>${esc(e.headline)}</b>
-      <span class="meta">${e.analysis ? `<span class="tag ana-t">심층 분석</span>` : ""}${e.stance ? `<span class="tag st-${stCls(e.stance)}">전망 ${esc(e.stance)}</span>` : ""}<span class="tag ses">${sesName(e.session)}</span>
-        <span class="${dir(e.us_pct)}">나스닥 ${pct(e.us_pct)}</span><span class="${dir(e.kr_pct)}">코스피 ${pct(e.kr_pct)}</span>
+      <span class="meta"><span class="tag ${f}">${mktName(f)} ${e.session === "intraday" ? "장중" : "마감"}</span>
+        ${v != null ? `<span class="${dir(v)}">${f === "kr" ? "코스피" : "나스닥"} ${pct(v)}</span>` : ""}
+        ${e.analysis ? `<span class="tag ana-t">심층 분석</span>` : ""}${e.stance ? `<span class="tag st-${stCls(e.stance)}">전망 ${esc(e.stance)}</span>` : ""}
         ${(e.tags || []).map(t => `<span class="tag">#${esc(t)}</span>`).join("")}</span>
       ${e.analysis && e.analysis_title ? `<span class="meta" style="color:var(--accent);font-weight:600">심층 분석 · ${esc(e.analysis_title)}</span>` : ""}</span>
   </button></li>`;
@@ -498,16 +500,24 @@ function briefRow(e) {
 
 /* ── 장 마감 시점 ─────────────────────────────── */
 const WD = ["일", "월", "화", "수", "목", "금", "토"];
+// 브리핑이 다루는 시장: 아침=미국 증시, 오후=한국 증시, 장중=저장된 값
+const focusOf = x => x?.focus || (x?.session === "afternoon" ? "kr" : x?.session === "intraday" && x?.intraday?.kr ? "kr" : "us");
+function prevWeekday(ds) { const d = new Date(ds + "T00:00:00Z"); do d.setUTCDate(d.getUTCDate() - 1); while ([0, 6].includes(d.getUTCDay())); return d.toISOString().slice(0, 10); }
+// 장이 열린 날: 아침 미국 브리핑은 전 거래일 미국장
+const mktDate = e => e.market_date || (focusOf(e) === "us" && e.session === "morning" ? prevWeekday(e.date) : e.date);
+const mdDow = ds => `${ds.slice(5, 7)}.${ds.slice(8, 10)}(${WD[new Date(ds.slice(0, 10) + "T00:00:00Z").getUTCDay()]})`;
+const mktName = f => f === "kr" ? "한국 증시" : "미국 증시";
+const briefLabel = e => `${mdDow(mktDate(e))} ${mktName(focusOf(e))} ${e.session === "intraday" ? `장중 ${e.time || e.intraday?.at || ""}`.trim() : "마감"}`;
 function nthSunday(y, m, n) { const d = new Date(Date.UTC(y, m, 1)); d.setUTCDate(1 + (7 - d.getUTCDay()) % 7 + 7 * (n - 1)); return d; }
 function usDST(ds) {  // 미국 서머타임: 3월 둘째 일요일 ~ 11월 첫째 일요일
   const d = new Date(ds + "T12:00:00Z"), y = d.getUTCFullYear();
   return d >= nthSunday(y, 2, 2) && d < nthSunday(y, 10, 1);
 }
 const mdw = d => `${d.getUTCMonth() + 1}/${d.getUTCDate()}(${WD[d.getUTCDay()]})`;
-function closeInfo(market, ds) {
+function closeInfo(market, ds, doc = S.doc) {
   if (!ds) return null;
   const day = new Date(ds + "T00:00:00Z");
-  const live = S.doc?.intraday;
+  const live = doc?.intraday;
   if (live?.[market]) {  // 장중 브리핑: 아직 마감 전 가격
     const t = `${mdw(day)} ${live.at} 현재`;
     return {local: t, kst: t, short: `${mdw(day)} ${live.at} 장중`, live: true};
@@ -517,9 +527,9 @@ function closeInfo(market, ds) {
   const kst = new Date(Date.UTC(day.getUTCFullYear(), day.getUTCMonth(), day.getUTCDate(), 16 + (usDST(ds) ? 4 : 5) + 9));
   return {local: `${mdw(day)} 16:00 뉴욕`, kst: `${mdw(kst)} ${String(kst.getUTCHours()).padStart(2, "0")}:00 한국`, short: `${mdw(day)} 마감`, dst: usDST(ds)};
 }
-function closeLine(which) {
-  const d = S.doc, ix = s => (d.indices || []).find(i => i.symbol === s);
-  const us = closeInfo("us", ix("^IXIC")?.date || ix("^GSPC")?.date), kr = closeInfo("kr", ix("^KS11")?.date);
+function closeLine(which, d = S.doc) {
+  const ix = s => (d.indices || []).find(i => i.symbol === s);
+  const us = closeInfo("us", ix("^IXIC")?.date || ix("^GSPC")?.date, d), kr = closeInfo("kr", ix("^KS11")?.date, d);
   const parts = [];
   if (us && which !== "kr") parts.push(us.live ? `<span><b>미국</b> ${us.kst} 한국시간 (장중)</span>`
     : `<span><b>미국</b> ${us.local} <span class="mono">=</span> ${us.kst}${us.dst ? " (서머타임)" : ""}</span>`);
@@ -585,7 +595,7 @@ function viewDaily(d) {
   const refBtn = ref ? `<button class="more" type="button" data-open="${esc(ref)}" style="margin-top:12px">오늘 ${ref.endsWith("afternoon") ? "오후" : "아침"} 심층 분석 보기</button>` : "";
   if (own || (!d.drivers?.length && !d.outlook)) return refBtn ? `<div style="margin-top:14px">${refBtn}</div>` : "";
   return `<section class="ana daily" aria-label="오늘의 분석과 전망">
-    <div><span class="badge">오늘의 분석</span><span class="trig">${sesName(d.session)} 기준</span></div>
+    <div><span class="badge">오늘의 분석</span><span class="trig">${briefLabel(d)} 기준</span></div>
     ${d.drivers?.length ? `<h3 style="margin-top:12px">오늘 움직인 이유</h3><ul>${d.drivers.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
     ${viewOutlook(d.outlook)}
     ${refBtn}
@@ -593,58 +603,68 @@ function viewDaily(d) {
 }
 
 function viewHome() {
-  const d = S.doc, c = d.commentary || {};
-  const nas = find(d.indices, "^IXIC"), ksp = find(d.indices, "^KS11");
-  const fx = find(d.macro, "KRW=X"), tnx = find(d.macro, "^TNX");
+  const d = S.doc, c = d.commentary || {}, f = focusOf(d), us = f === "us";
+  const I = s2 => find(d.indices, s2), M = s2 => find(d.macro, s2);
+  const fx = M("KRW=X");
   const fact = (v, lbl, cls = "", when = "") => `<div class="fact"><b class="${cls}">${v}</b><span>${lbl}</span>${when ? `<small>${when}</small>` : ""}</div>`;
+  const pctFact = (it, lbl, mk) => it ? fact(pct(it.pct), lbl, dir(it.pct), closeInfo(mk, it.date)?.short) : "";
   const card = (tab, lbl, title, item, desc, when = "") => `<button class="card" type="button" data-tab="${tab}">
     <span class="lbl">${lbl}</span><h3>${title}</h3>
     ${item ? `<span class="big">${nf(item.price)} <small class="${dir(item.pct)}">${arrow(item.pct)} ${pct(item.pct)}</small></span>${when ? `<span class="cwhen">${when}</span>` : ""}${spark(item.spark, dir(item.pct), 200, 30)}` : ""}
     <p>${desc}</p></button>`;
+  const cw = (mk, it) => (x => x && (x.live ? x.short : mk === "us" ? `${x.local} 마감 · 한국 ${x.kst.replace(" 한국", "")}` : `${x.local} 마감`))(closeInfo(mk, it?.date));
+  const fxWhen = fx?.date ? `${mdw(new Date(fx.date + "T00:00:00Z"))} 기준` : "";
+  const news = (d.news || []).filter(n => n.market === f);
   const recent = S.index.slice(0, 8);
+  // 이 브리핑의 시장만 보여줌
+  const facts = us
+    ? [pctFact(I("^IXIC"), "나스닥", "us"), pctFact(I("^GSPC"), "S&P 500", "us"), pctFact(I("^NDX"), "나스닥 100", "us"),
+       M("^TNX") ? fact(nf(M("^TNX").price, 2) + "%", "미국채 10년", "", closeInfo("us", M("^TNX").date)?.short) : ""]
+    : [pctFact(I("^KS11"), "코스피", "kr"), pctFact(I("^KQ11"), "코스닥", "kr"),
+       fx ? fact(nf(fx.price, 1), "원/달러", "", fxWhen) : "",
+       M("JPYKRW=X") ? fact(nf(M("JPYKRW=X").price * 100, 1), "원/엔 (100엔)", "", fxWhen) : ""];
+  const cards = us
+    ? card("us", "미국", "나스닥 종합", I("^IXIC"), "지수·섹터·대형주 흐름", cw("us", I("^IXIC")))
+      + card("us", "미국", "S&P 500", I("^GSPC"), "미국 대형주 500개", cw("us", I("^GSPC")))
+    : card("kr", "한국", "코스피", I("^KS11"), "지수·업종·대형주 흐름", cw("kr", I("^KS11")))
+      + card("kr", "한국", "코스닥", I("^KQ11"), "중소형·성장주 시장", cw("kr", I("^KQ11")));
+  const lede = (c[f] || "").split(/(?<=다\.)\s/).slice(0, 2).join(" ");
   return `
   <section class="hero">
     <div>
-      <p class="when">${d.session === "intraday" ? `<span class="livebadge">LIVE</span>` : ""}<b>${sesName(d.session)} 브리핑</b><span class="mono">작성 ${esc(d.generated_at.replace("T", " ").slice(0, 16))} KST</span></p>
+      <p class="when">${d.session === "intraday" ? `<span class="livebadge">LIVE</span>` : ""}<b>${briefLabel(d)} 브리핑</b><span class="mono">작성 ${esc(d.generated_at.replace("T", " ").slice(0, 16))} KST</span></p>
       <h1>${esc(d.headline)}</h1>
-      ${closeLine()}
+      ${closeLine(f)}
       ${d.session === "intraday" ? `<p class="desc" style="margin:6px 0 0">직접 실행한 장중 브리핑이라 마감 전 가격입니다. 정해진 시간에 마감 브리핑이 따로 올라옵니다.</p>` : ""}
-      <p class="lede">${esc((c.us || "").split(/(?<=다\.)\s/)[0])} ${esc((c.kr || "").split(/(?<=다\.)\s/)[0])}</p>
+      ${lede ? `<p class="lede">${esc(lede)}</p>` : ""}
     </div>
-    <div class="facts">
-      ${nas ? fact(pct(nas.pct), "나스닥", dir(nas.pct), closeInfo("us", nas.date)?.short) : ""}
-      ${ksp ? fact(pct(ksp.pct), "코스피", dir(ksp.pct), closeInfo("kr", ksp.date)?.short) : ""}
-      ${fx ? fact(nf(fx.price, 1), "원/달러", "", fx.date ? `${mdw(new Date(fx.date + "T00:00:00Z"))} 기준` : "") : ""}
-      ${tnx ? fact(nf(tnx.price, 2) + "%", "미국채 10년", "", closeInfo("us", tnx.date)?.short) : ""}
-    </div>
+    <div class="facts">${facts.join("")}</div>
   </section>
   ${d.sample ? `<div class="notice">지금 보이는 숫자와 뉴스는 화면 확인용 예시 데이터입니다. 자동 실행이 시작되면 실제 시세로 바뀝니다.</div>` : ""}
   ${viewAnalysis(d.analysis && !d.analysis.reused ? d.analysis : null)}
   ${viewDaily(d)}
 
   <div class="cards">
-    ${card("us", "미국", "나스닥 종합", nas, "지수·섹터·대형주 흐름", (c => c && (c.live ? c.short : `${c.local} 마감 · 한국 ${c.kst.replace(" 한국", "")}`))(closeInfo("us", nas?.date)))}
-    ${card("kr", "한국", "코스피", ksp, "지수·업종·대형주 흐름", (c => c && (c.live ? c.short : `${c.local} 마감`))(closeInfo("kr", ksp?.date)))}
-    ${card("macro", "환율·금리", "원/달러 환율", fx, "달러, 국채 금리, 유가, 금", fx?.date ? `${mdw(new Date(fx.date + "T00:00:00Z"))} 기준` : "")}
-    <button class="card" type="button" data-tab="news"><span class="lbl">뉴스</span><h3>오늘의 뉴스</h3>
-      <span class="big">${(d.news || []).length}<small class="flat">건</small></span><p>${esc((d.news || []).find(n => n.note)?.title || "시장 관련 주요 기사")}</p></button>
+    ${cards}
+    ${card("macro", "환율·금리", "원/달러 환율", fx, "달러, 국채 금리, 유가, 금", fxWhen)}
+    <button class="card" type="button" data-tab="news"><span class="lbl">뉴스</span><h3>${mktName(f)} 뉴스</h3>
+      <span class="big">${news.length}<small class="flat">건</small></span><p>${esc(news.find(n => n.note)?.title || news[0]?.title || "시장 관련 주요 기사")}</p></button>
   </div>
 
   <section class="sec">
-    <h2>지수 한눈에</h2>
-    <p class="desc">미국 지수는 전 거래일 종가, 한국 지수는 가장 최근 종가 기준입니다.</p>
-    ${idxTable(d.indices)}
+    <h2>${mktName(f)} 지수</h2>
+    ${idxTable(pick(us ? US_IDX : KR_IDX))}
   </section>
 
   <section class="sec cols">
     <div>
       <h2>최근 브리핑</h2>
-      <p class="desc">하루 두 번, 미국 증시와 한국 증시 마감 직후에 쌓입니다.</p>
+      <p class="desc">미국 증시 마감은 아침, 한국 증시 마감은 오후에 쌓입니다.</p>
       ${recent.length ? `<ul class="list">${recent.map(briefRow).join("")}</ul><button class="more" type="button" data-tab="archive">전체 아카이브 보기</button>` : `<p class="empty">아직 보관된 브리핑이 없습니다.</p>`}
     </div>
     <div>
-      <h2>오늘 챙겨볼 것</h2>
-      <p class="desc">다음 거래일까지 확인할 일정과 변수</p>
+      <h2>챙겨볼 것</h2>
+      <p class="desc">${mktName(f)} 다음 거래일까지 확인할 일정과 변수</p>
       ${d.watch?.length ? `<ul class="watch">${d.watch.map(w => `<li>${esc(w)}</li>`).join("")}</ul>` : `<p class="empty">체크포인트 없음</p>`}
       ${upcomingEvents().length ? `<h2 style="margin-top:22px">다가오는 일정</h2><p class="desc">앞으로 7일, 한국시간</p>
         <div class="list evlist">${Object.entries(upcomingEvents().reduce((a, e) => ((a[e.date] = a[e.date] || []).push(e), a), {})).map(([ds, l]) => `<div class="day"><div class="dh ${ds === todayStr() ? "today" : ""}">${+ds.slice(5, 7)}월 ${+ds.slice(8)}일 (${dname(ds)})</div>${l.map(evRow).join("")}</div>`).join("")}</div>
@@ -664,13 +684,14 @@ function etfTable(list, mk) {
 }
 
 function viewMarket(mk) {
-  const d = S.doc, us = mk === "us";
+  const d = S.mk?.[mk] || S.doc, us = mk === "us";
   return `
   <div class="shead"><div><h2 class="sec" style="margin:0;font-family:var(--f-display);font-size:21px">${us ? "미국 시장" : "한국 시장"}</h2>
     <p class="desc" style="margin:4px 0 0;color:var(--sub)">${us ? "나스닥·S&P 500·다우·반도체 지수와 대형 기술주" : "코스피·코스닥과 시가총액 상위 종목"}</p></div></div>
-  ${closeLine(mk)}
+  ${closeLine(mk, d)}
+  ${d !== S.doc ? `<p class="desc" style="margin:6px 0 0">${briefLabel(d)} 브리핑 기준</p>` : ""}
   <div class="memo"><p>${esc(d.commentary?.[mk] || "코멘트 없음")}</p></div>
-  <section class="sec"><h2>지수</h2>${idxTable(pick(us ? US_IDX : KR_IDX))}</section>
+  <section class="sec"><h2>지수</h2>${idxTable(pick(us ? US_IDX : KR_IDX, d))}</section>
   <section class="sec cols">
     <div><h2>섹터 흐름</h2><p class="desc">${us ? "SPDR 섹터 ETF" : "KODEX 섹터 ETF"} 등락률 기준</p>${sectorBars(d.sectors?.[mk])}</div>
     <div><div class="shead" style="margin-top:0;align-items:center"><h2>시가총액 상위 10</h2>
@@ -742,14 +763,15 @@ function viewNews() {
 function archiveMatches() {
   const q = S.q.trim().toLowerCase();
   return S.index.filter(e =>
-    (S.month === "all" || e.date.startsWith(S.month)) &&
-    (S.ses === "all" || (S.ses === "analysis" ? e.analysis : e.session === S.ses)) &&
+    (S.month === "all" || mktDate(e).startsWith(S.month)) &&
+    (S.ses === "all" || (S.ses === "analysis" ? e.analysis : S.ses === "intraday" ? e.session === "intraday"
+      : e.session !== "intraday" && focusOf(e) === S.ses)) &&
     (!S.tag || (e.tags || []).includes(S.tag)) &&
     (!q || [e.headline, e.summary, ...(e.tags || []), ...(e.keywords || [])].join(" ").toLowerCase().includes(q)));
 }
 
 function viewArchive() {
-  const months = [...new Set(S.index.map(e => e.date.slice(0, 7)))];
+  const months = [...new Set(S.index.map(e => mktDate(e).slice(0, 7)))].sort().reverse();
   const tagCount = {};
   S.index.forEach(e => (e.tags || []).forEach(t => tagCount[t] = (tagCount[t] || 0) + 1));
   const tags = Object.entries(tagCount).sort((a, b) => b[1] - a[1]).slice(0, 16);
@@ -761,7 +783,7 @@ function viewArchive() {
   <div class="filters">
     <input id="archQ" type="search" placeholder="헤드라인·태그·종목명으로 찾기" value="${esc(S.q)}" aria-label="아카이브 검색">
     <div class="frow"><span class="flbl">기간</span>${chip("month", "all", S.month, "전체")}${months.map(m => chip("month", m, S.month, `${m.slice(0, 4)}년 ${+m.slice(5)}월`)).join("")}</div>
-    <div class="frow"><span class="flbl">구분</span>${chip("ses", "all", S.ses, "전체")}${chip("ses", "morning", S.ses, "미국 증시 마감")}${chip("ses", "afternoon", S.ses, "한국 증시 마감")}${chip("ses", "intraday", S.ses, "장중")}${chip("ses", "analysis", S.ses, "심층 분석만")}</div>
+    <div class="frow"><span class="flbl">구분</span>${chip("ses", "all", S.ses, "전체")}${chip("ses", "us", S.ses, "미국 증시")}${chip("ses", "kr", S.ses, "한국 증시")}${chip("ses", "intraday", S.ses, "장중")}${chip("ses", "analysis", S.ses, "심층 분석만")}</div>
     ${tags.length ? `<div class="frow"><span class="flbl">태그</span>${tags.map(([t, n]) => `<button class="chip ${S.tag === t ? "on" : ""}" type="button" data-tag="${esc(t)}">#${esc(t)} <span class="mono">${n}</span></button>`).join("")}</div>` : ""}
   </div>
   ${hits.length ? `<ul class="list">${hits.map(briefRow).join("")}</ul>` : `<p class="empty">조건에 맞는 브리핑이 없습니다. 검색어나 필터를 바꿔 보세요.</p>`}`;
@@ -975,7 +997,7 @@ function render() {
   document.title = `${S.doc.headline} | 나스닥·코스피 브리핑 아카이브`;
   const sync = $("#sync");
   sync.className = "sync" + (S.doc.sample ? " sample" : "");
-  sync.querySelector("span").textContent = S.doc.sample ? "예시 데이터" : `${md(S.doc.date)} ${sesName(S.doc.session)} 반영`;
+  sync.querySelector("span").textContent = S.doc.sample ? "예시 데이터" : `${briefLabel(S.doc)} 반영`;
   const aq = $("#archQ");
   if (aq) aq.addEventListener("input", e => { S.q = e.target.value; const pos = e.target.selectionStart; render(); const n = $("#archQ"); n.focus(); n.setSelectionRange(pos, pos); });
 }
@@ -988,9 +1010,19 @@ function setTab(t) {
   if (window.scrollY > tabsTop) window.scrollTo({top: Math.max(tabsTop, 0)});
 }
 
+async function loadMarketDocs() {
+  const cur = S.doc, f = focusOf(cur), other = f === "us" ? "kr" : "us";
+  S.mk = {[f]: cur};
+  const curT = (cur.generated_at || "").slice(0, 16);
+  const cand = S.index.find(e => focusOf(e) === other && e.session !== "intraday"
+    && `${e.date}T${e.time || (e.session === "morning" ? "07:10" : "15:50")}` <= curT);
+  if (cand) { try { S.mk[other] = await getDoc(cand.key); } catch {} }
+}
+
 async function openBrief(key) {
   try {
     S.doc = await getDoc(key);
+    await loadMarketDocs();
     S.key = key;
     $("#pick").value = key;
     setTab("home");
@@ -1001,7 +1033,7 @@ async function openBrief(key) {
 
 function fillPicker() {
   $("#pick").innerHTML = `<option value="latest">최신 브리핑</option>` +
-    S.index.map(e => `<option value="${esc(e.key)}">${md(e.date)} ${sesName(e.session)}${e.session === "intraday" && e.time ? " " + esc(e.time) : ""}</option>`).join("");
+    S.index.map(e => `<option value="${esc(e.key)}">${briefLabel(e)}</option>`).join("");
   $("#pick").value = S.key;
 }
 
@@ -1060,6 +1092,7 @@ setTopH(); window.addEventListener("resize", setTopH);
   renderTabs();
   try {
     [S.doc, S.index, S.cal, S.season] = await Promise.all([getDoc("latest"), getIndex(), getExtra("calendar"), getExtra("seasonality")]);
+    await loadMarketDocs();
     fillPicker();
     render();
   } catch {
