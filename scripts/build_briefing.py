@@ -944,6 +944,8 @@ def main() -> None:
         session = "intraday"  # 직접 실행했는데 장이 열려 있으면 장중 브리핑 (마감 브리핑과 따로 저장)
     else:
         session = "morning" if now.hour < 12 else "afternoon"  # 오전=미국 증시 마감, 오후=한국 증시 마감
+        if now.weekday() == 5:
+            session = "morning"  # 토요일엔 한국장이 없으니 몇 시든 금요일 미국장 마감 브리핑
     # 브리핑마다 한 시장만: 아침=미국 증시, 오후=한국 증시, 장중=열려 있는 시장(둘 다면 한국)
     focus = "us" if session == "morning" else "kr" if session == "afternoon" else ("kr" if kr_open else "us")
     print(f"[session] {session} / {focus} (직접 실행={manual}, 한국장 열림={kr_open}, 미국장 열림={us_open})")
