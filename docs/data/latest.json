@@ -1,28 +1,27 @@
 {
- "generated_at": "2026-11-27T17:11+09:00",
- "date": "2026-11-27",
- "session": "afternoon",
- "key": "2026-11-27-afternoon",
+ "generated_at": "2026-11-28T23:46+09:00",
+ "date": "2026-11-28",
+ "session": "morning",
+ "key": "2026-11-28-morning",
  "intraday": null,
  "sample": false,
- "headline": "코스피 4%·코스닥 8% 급등…외국인 순매수에 반등",
+ "headline": "AI 우려 완화에 나스닥 2.3%↑, 반도체 4.7% 급등…20일선은 아직 하회",
  "commentary": {
-  "us": "",
-  "kr": "코스피는 전일 대비 4.34% 오른 4,915.68에 마감했다. 코스닥은 8.13% 급등한 708.99에 마감했다. 외국인이 두 달여 만에 코스피에서 1조 원 넘게 순매수한 것으로 보도됐다. 다만 코스피는 20일 이동평균선(5,154.25)을 여전히 밑돌고 있어 추세 회복 여부는 추가 확인이 필요하다.",
-  "macro": "원/달러 환율은 전일 대비 0.6% 내린 1,334.87원이다. 달러 인덱스는 103.727로 0.05% 올랐다. WTI는 2.78% 오른 86.01달러, 금은 4.4% 오른 3,691.4달러다. 미국채 10년물 금리 4.848%는 11월 25일 기준 수치다.",
-  "crypto": "비트코인은 전일 대비 2.13% 오른 61,780달러이며, 원화 환산 시 83,756,000원(1.86%)이다. 김치 프리미엄은 1.56%다. 공포탐욕지수는 12로 극단적 공포 구간이며, 전일 11에서 소폭 올랐다. 한국 증시 반등과 함께 코인 시세도 동반 상승해 위험자산 심리 개선이 함께 나타났다."
+  "us": "미국 증시는 AI·기술주 반등에 힘입어 3대 지수가 모두 올랐다. 나스닥 종합은 2.31%, 나스닥 100은 2.61%, S&P 500은 1.6%, 다우는 1.18% 상승했다. 필라델피아 반도체 지수는 4.69% 급등했으나 20일 고점 대비로는 여전히 14.05% 낮다. VIX는 11.16% 내린 23.81로 변동성 완화가 확인됐다. 나스닥 종합은 20일 이동평균(24,609.76)을 여전히 1.95% 밑돌고 있다.",
+  "kr": "",
+  "macro": "미국채 10년물 금리는 4.936%로 0.088%p 올라 1.82% 상승했다. 달러 인덱스는 104.01로 0.33% 올랐지만, 원/달러 환율은 1,333.9원으로 0.72% 하락했다. WTI는 83.08달러로 0.72% 내렸고, 금은 3,639.6달러로 2.94% 올랐다.",
+  "crypto": "비트코인은 5만 9,161달러로 1.18% 하락했으며, 원화 환산가는 8,045만 6,000원으로 김치 프리미엄은 1.95%이다. 이더리움(-1.08%), 솔라나(-1.57%), 리플(-1.04%) 등 주요 코인도 약세였다. 공포탐욕지수는 10으로 극단적 공포 구간이 이어지고 있어, 미국 증시의 기술주 반등이 코인 시장으로는 이어지지 않았다."
  },
  "crypto": {
   "coins": [
    {
     "symbol": "BTC",
     "name": "비트코인",
-    "price": 61780.4688,
-    "change": 1285.7578,
-    "pct": 2.13,
-    "date": "2026-11-27",
+    "price": 59161.1797,
+    "change": -705.1914,
+    "pct": -1.18,
+    "date": "2026-11-28",
     "spark": [
-     74584.6484,
      75223.1484,
      73720.1172,
      73964.4688,
@@ -41,21 +40,21 @@
      59747.7656,
      60378.1992,
      60494.7109,
-     61780.4688
+     59866.3711,
+     59161.1797
     ],
-    "krw": 83756000.0,
-    "krw_pct": 1.86,
-    "premium": 1.56
+    "krw": 80456000.0,
+    "krw_pct": -0.97,
+    "premium": 1.95
    },
    {
     "symbol": "ETH",
     "name": "이더리움",
-    "price": 1734.09,
-    "change": 46.3481,
-    "pct": 2.75,
-    "date": "2026-11-27",
+    "price": 1643.22,
+    "change": -17.8633,
+    "pct": -1.08,
+    "date": "2026-11-28",
     "spark": [
-     2120.9802,
      2131.4985,
      2050.1809,
      2055.8762,
@@ -74,21 +73,21 @@
      1677.6948,
      1690.769,
      1687.7418,
-     1734.09
+     1661.0833,
+     1643.22
     ],
-    "krw": 2351000.0,
-    "krw_pct": 2.53,
-    "premium": 1.56
+    "krw": 2234000.0,
+    "krw_pct": -1.02,
+    "premium": 1.92
    },
    {
     "symbol": "XRP",
     "name": "엑스알피(리플)",
-    "price": 0.9774,
-    "change": 0.0345,
-    "pct": 3.66,
-    "date": "2026-11-27",
+    "price": 0.9381,
+    "change": -0.0099,
+    "pct": -1.04,
+    "date": "2026-11-28",
     "spark": [
-     1.1105,
      1.0969,
      1.0557,
      1.0528,
@@ -107,21 +106,21 @@
      0.9244,
      0.9369,
      0.9429,
-     0.9774
+     0.948,
+     0.9381
     ],
-    "krw": 1325.0,
-    "krw_pct": 3.52,
-    "premium": 1.56
+    "krw": 1276.0,
+    "krw_pct": -0.78,
+    "premium": 1.97
    },
    {
     "symbol": "BNB",
     "name": "바이낸스코인",
-    "price": 565.68,
-    "change": 12.5185,
-    "pct": 2.26,
-    "date": "2026-11-27",
+    "price": 550.67,
+    "change": -3.5108,
+    "pct": -0.63,
+    "date": "2026-11-28",
     "spark": [
-     683.2907,
      690.0752,
      679.5909,
      679.5052,
@@ -140,19 +139,19 @@
      547.7404,
      553.5673,
      553.1615,
-     565.68
+     554.1808,
+     550.67
     ],
-    "krw_est": 755109
+    "krw_est": 734539
    },
    {
     "symbol": "SOL",
     "name": "솔라나",
-    "price": 73.18,
-    "change": 2.2472,
-    "pct": 3.17,
-    "date": "2026-11-27",
+    "price": 70.46,
+    "change": -1.1203,
+    "pct": -1.57,
+    "date": "2026-11-28",
     "spark": [
-     86.2428,
      86.5493,
      83.2603,
      83.3211,
@@ -171,21 +170,21 @@
      69.6358,
      70.3932,
      70.9328,
-     73.18
+     71.5803,
+     70.46
     ],
-    "krw": 99250.0,
-    "krw_pct": 2.96,
-    "premium": 1.6
+    "krw": 95800.0,
+    "krw_pct": -1.34,
+    "premium": 1.93
    },
    {
     "symbol": "DOGE",
     "name": "도지코인",
-    "price": 0.0582,
-    "change": 0.0018,
-    "pct": 3.27,
-    "date": "2026-11-27",
+    "price": 0.0565,
+    "change": -0.0011,
+    "pct": -1.97,
+    "date": "2026-11-28",
     "spark": [
-     0.0688,
      0.0699,
      0.068,
      0.0675,
@@ -204,21 +203,21 @@
      0.0552,
      0.056,
      0.0564,
-     0.0582
+     0.0577,
+     0.0565
     ],
-    "krw": 79.0,
-    "krw_pct": 3.0,
-    "premium": 1.69
+    "krw": 76.9,
+    "krw_pct": -1.79,
+    "premium": 2.04
    },
    {
     "symbol": "TRX",
     "name": "트론",
-    "price": 0.3052,
-    "change": 0.0015,
-    "pct": 0.5,
-    "date": "2026-11-27",
+    "price": 0.3002,
+    "change": -0.0004,
+    "pct": -0.15,
+    "date": "2026-11-28",
     "spark": [
-     0.3191,
      0.3174,
      0.3175,
      0.3166,
@@ -237,21 +236,21 @@
      0.3078,
      0.3036,
      0.3037,
-     0.3052
+     0.3006,
+     0.3002
     ],
-    "krw": 414.0,
-    "krw_pct": 0.49,
-    "premium": 1.62
+    "krw": 409.0,
+    "krw_pct": 0.25,
+    "premium": 2.14
    },
    {
     "symbol": "ADA",
     "name": "에이다",
-    "price": 0.1528,
-    "change": 0.0044,
-    "pct": 2.98,
-    "date": "2026-11-27",
+    "price": 0.1457,
+    "change": -0.0025,
+    "pct": -1.72,
+    "date": "2026-11-28",
     "spark": [
-     0.1748,
      0.177,
      0.1738,
      0.1744,
@@ -270,21 +269,21 @@
      0.1444,
      0.1458,
      0.1484,
-     0.1528
+     0.1483,
+     0.1457
     ],
-    "krw": 207.0,
-    "krw_pct": 2.99,
-    "premium": 1.49
+    "krw": 199.0,
+    "krw_pct": -1.0,
+    "premium": 2.39
    },
    {
     "symbol": "LINK",
     "name": "체인링크",
-    "price": 9.599,
-    "change": 0.3288,
-    "pct": 3.55,
-    "date": "2026-11-27",
+    "price": 9.138,
+    "change": -0.2183,
+    "pct": -2.33,
+    "date": "2026-11-28",
     "spark": [
-     10.3854,
      10.6353,
      10.2771,
      10.1932,
@@ -303,21 +302,21 @@
      8.8379,
      9.0475,
      9.2702,
-     9.599
+     9.3563,
+     9.138
     ],
-    "krw": 13020.0,
-    "krw_pct": 3.33,
-    "premium": 1.61
+    "krw": 12430.0,
+    "krw_pct": -2.28,
+    "premium": 1.98
    },
    {
     "symbol": "AVAX",
     "name": "아발란체",
-    "price": 6.756,
-    "change": 0.172,
-    "pct": 2.61,
-    "date": "2026-11-27",
+    "price": 6.464,
+    "change": -0.1405,
+    "pct": -2.13,
+    "date": "2026-11-28",
     "spark": [
-     7.9159,
      8.6332,
      8.3705,
      8.5161,
@@ -336,31 +335,31 @@
      6.5645,
      6.6236,
      6.584,
-     6.756
+     6.6045,
+     6.464
     ],
-    "krw": 9160.0,
-    "krw_pct": 2.35,
-    "premium": 1.57
+    "krw": 8800.0,
+    "krw_pct": -1.84,
+    "premium": 2.06
    }
   ],
   "fng": {
-   "value": 12,
+   "value": 10,
    "label": "극단적 공포",
-   "prev": 11
+   "prev": 12
   },
-  "usdkrw": 1334.87
+  "usdkrw": 1333.9
  },
  "etfs": {
   "us": [
    {
     "symbol": "VOO",
     "name": "뱅가드 S&P 500",
-    "price": 658.87,
-    "change": -1.84,
-    "pct": -0.28,
-    "date": "2026-11-25",
+    "price": 669.79,
+    "change": 10.92,
+    "pct": 1.66,
+    "date": "2026-11-27",
     "spark": [
-     707.32,
      694.81,
      691.32,
      693.54,
@@ -379,19 +378,19 @@
      635.54,
      663.91,
      660.71,
-     658.87
+     658.87,
+     669.79
     ],
     "desc": "S&P 500 (대형주)"
    },
    {
     "symbol": "QQQ",
     "name": "인베스코 QQQ",
-    "price": 633.93,
-    "change": -4.17,
-    "pct": -0.65,
-    "date": "2026-11-25",
+    "price": 650.99,
+    "change": 17.06,
+    "pct": 2.69,
+    "date": "2026-11-27",
     "spark": [
-     715.34,
      690.49,
      681.09,
      685.28,
@@ -410,19 +409,19 @@
      608.45,
      651.03,
      638.1,
-     633.93
+     633.93,
+     650.99
     ],
     "desc": "나스닥 100 (기술주)"
    },
    {
     "symbol": "DIA",
     "name": "SPDR 다우존스",
-    "price": 501.27,
-    "change": 1.53,
-    "pct": 0.31,
-    "date": "2026-11-25",
+    "price": 507.6,
+    "change": 6.33,
+    "pct": 1.26,
+    "date": "2026-11-27",
     "spark": [
-     522.73,
      517.13,
      519.34,
      517.06,
@@ -441,19 +440,19 @@
      481.08,
      495.8,
      499.74,
-     501.27
+     501.27,
+     507.6
     ],
     "desc": "다우존스 30 (우량주)"
    },
    {
     "symbol": "IWM",
     "name": "아이셰어즈 러셀 2000",
-    "price": 268.87,
-    "change": 1.73,
-    "pct": 0.65,
-    "date": "2026-11-25",
+    "price": 273.79,
+    "change": 4.92,
+    "pct": 1.83,
+    "date": "2026-11-27",
     "spark": [
-     284.01,
      279.33,
      279.14,
      279.79,
@@ -472,19 +471,19 @@
      256.61,
      265.74,
      267.14,
-     268.87
+     268.87,
+     273.79
     ],
     "desc": "러셀 2000 (소형주)"
    },
    {
     "symbol": "SCHD",
     "name": "슈왑 미국 배당",
-    "price": 35.29,
-    "change": 0.4,
-    "pct": 1.15,
-    "date": "2026-11-25",
+    "price": 35.67,
+    "change": 0.38,
+    "pct": 1.08,
+    "date": "2026-11-27",
     "spark": [
-     35.61,
      35.78,
      35.9,
      35.55,
@@ -503,19 +502,19 @@
      33.94,
      34.39,
      34.89,
-     35.29
+     35.29,
+     35.67
     ],
     "desc": "배당 성장주"
    },
    {
     "symbol": "SOXX",
     "name": "아이셰어즈 반도체",
-    "price": 127.98,
-    "change": -0.64,
-    "pct": -0.5,
-    "date": "2026-11-25",
+    "price": 134.07,
+    "change": 6.09,
+    "pct": 4.76,
+    "date": "2026-11-27",
     "spark": [
-     171.2867,
      157.17,
      151.2167,
      155.0,
@@ -534,19 +533,19 @@
      123.4,
      140.22,
      128.62,
-     127.98
+     127.98,
+     134.07
     ],
     "desc": "반도체"
    },
    {
     "symbol": "JEPI",
     "name": "JP모건 프리미엄 인컴",
-    "price": 56.07,
-    "change": 0.04,
-    "pct": 0.07,
-    "date": "2026-11-25",
+    "price": 56.73,
+    "change": 0.66,
+    "pct": 1.18,
+    "date": "2026-11-27",
     "spark": [
-     57.93,
      57.56,
      57.39,
      57.33,
@@ -565,19 +564,19 @@
      54.25,
      55.9,
      56.03,
-     56.07
+     56.07,
+     56.73
     ],
     "desc": "커버드콜 (월배당)"
    },
    {
     "symbol": "TLT",
     "name": "아이셰어즈 미국 장기채",
-    "price": 82.24,
-    "change": 0.75,
-    "pct": 0.92,
-    "date": "2026-11-25",
+    "price": 81.27,
+    "change": -0.97,
+    "pct": -1.18,
+    "date": "2026-11-27",
     "spark": [
-     81.49,
      81.84,
      81.73,
      81.11,
@@ -596,19 +595,19 @@
      81.45,
      81.69,
      81.49,
-     82.24
+     82.24,
+     81.27
     ],
     "desc": "미국 20년+ 국채"
    },
    {
     "symbol": "GLD",
     "name": "SPDR 금",
-    "price": 327.45,
-    "change": 2.0,
-    "pct": 0.61,
-    "date": "2026-11-25",
+    "price": 334.4,
+    "change": 6.95,
+    "pct": 2.12,
+    "date": "2026-11-27",
     "spark": [
-     368.57,
      355.78,
      361.65,
      359.26,
@@ -627,19 +626,19 @@
      322.87,
      333.02,
      325.45,
-     327.45
+     327.45,
+     334.4
     ],
     "desc": "금"
    },
    {
     "symbol": "IBIT",
     "name": "아이셰어즈 비트코인",
-    "price": 34.07,
-    "change": 0.31,
-    "pct": 0.92,
-    "date": "2026-11-25",
+    "price": 33.86,
+    "change": -0.21,
+    "pct": -0.62,
+    "date": "2026-11-27",
     "spark": [
-     45.71,
      43.36,
      43.35,
      44.05,
@@ -658,7 +657,8 @@
      33.02,
      34.62,
      33.76,
-     34.07
+     34.07,
+     33.86
     ],
     "desc": "비트코인 현물"
    }
@@ -977,27 +977,26 @@
   ]
  },
  "watch": [
-  "외국인 수급이 이틀 이상 순매수로 이어지는지 여부",
-  "증안펀드 관련 정책 내용이 구체화되는지 여부(현재 기대감 중심 보도)",
-  "코스피 5일 이동평균선(4,807.79) 위 유지 및 20일 이동평균선(5,154.25) 회복 시도 여부"
+  "12/2 00:00(KST) ISM 제조업 PMI(11월) 발표로 경기 흐름을 확인할 필요가 있다.",
+  "12/4 00:00(KST) ISM 서비스업 PMI(11월)가 발표된다.",
+  "12/4 22:30(KST) 11월 고용보고서 발표를 앞두고 있으며, 12월 FOMC 직전 마지막 고용지표라는 점에서 금리 기대에 영향을 줄 수 있다."
  ],
  "tags": [
-  "외국인 수급",
+  "미국증시",
+  "AI",
   "반도체",
-  "2차전지",
-  "증안펀드",
-  "코스닥 급등"
+  "금리",
+  "고용지표"
  ],
  "indices": [
   {
    "symbol": "^IXIC",
    "name": "나스닥 종합",
-   "price": 23585.8008,
-   "change": -147.7383,
-   "pct": -0.62,
-   "date": "2026-11-25",
+   "price": 24129.5,
+   "change": 543.6992,
+   "pct": 2.31,
+   "date": "2026-11-27",
    "spark": [
-    26184.7207,
     25437.0,
     25164.3105,
     25372.0098,
@@ -1016,18 +1015,18 @@
     22617.7305,
     24089.5605,
     23733.5391,
-    23585.8008
+    23585.8008,
+    24129.5
    ]
   },
   {
    "symbol": "^NDX",
    "name": "나스닥 100",
-   "price": 26046.9004,
-   "change": -167.2695,
-   "pct": -0.64,
-   "date": "2026-11-25",
+   "price": 26726.3906,
+   "change": 679.4902,
+   "pct": 2.61,
+   "date": "2026-11-27",
    "spark": [
-    29402.5098,
     28384.8496,
     27989.8203,
     28180.2598,
@@ -1046,18 +1045,18 @@
     25028.9805,
     26746.0996,
     26214.1699,
-    26046.9004
+    26046.9004,
+    26726.3906
    ]
   },
   {
    "symbol": "^GSPC",
    "name": "S&P 500",
-   "price": 7182.7798,
-   "change": -18.3101,
-   "pct": -0.25,
-   "date": "2026-11-25",
+   "price": 7297.4902,
+   "change": 114.7104,
+   "pct": 1.6,
+   "date": "2026-11-27",
    "spark": [
-    7720.3901,
     7580.0698,
     7541.3999,
     7568.9199,
@@ -1076,18 +1075,18 @@
     6910.3901,
     7237.1699,
     7201.0898,
-    7182.7798
+    7182.7798,
+    7297.4902
    ]
   },
   {
    "symbol": "^DJI",
    "name": "다우존스",
-   "price": 50182.9492,
-   "change": 164.25,
-   "pct": 0.33,
-   "date": "2026-11-25",
+   "price": 50774.9414,
+   "change": 591.9922,
+   "pct": 1.18,
+   "date": "2026-11-27",
    "spark": [
-    52342.5586,
     51770.3086,
     51983.9805,
     51786.7188,
@@ -1106,18 +1105,18 @@
     48147.3281,
     49595.3086,
     50018.6992,
-    50182.9492
+    50182.9492,
+    50774.9414
    ]
   },
   {
    "symbol": "^SOX",
    "name": "필라델피아 반도체",
-   "price": 8774.8604,
-   "change": -57.6396,
-   "pct": -0.65,
-   "date": "2026-11-25",
+   "price": 9186.71,
+   "change": 411.8496,
+   "pct": 4.69,
+   "date": "2026-11-27",
    "spark": [
-    11518.2002,
     10688.7998,
     10328.3301,
     10600.4004,
@@ -1136,18 +1135,18 @@
     8408.5898,
     9588.0498,
     8832.5,
-    8774.8604
+    8774.8604,
+    9186.71
    ]
   },
   {
    "symbol": "^VIX",
    "name": "VIX 변동성",
-   "price": 26.8,
-   "change": -1.49,
-   "pct": -5.27,
-   "date": "2026-11-26",
+   "price": 23.81,
+   "change": -2.99,
+   "pct": -11.16,
+   "date": "2026-11-27",
    "spark": [
-    19.42,
     21.15,
     20.83,
     16.61,
@@ -1166,7 +1165,8 @@
     26.62,
     26.36,
     28.29,
-    26.8
+    26.8,
+    23.81
    ]
   },
   {
@@ -1235,12 +1235,11 @@
    {
     "symbol": "AAPL",
     "name": "애플",
-    "price": 355.58,
-    "change": 1.51,
-    "pct": 0.43,
-    "date": "2026-11-25",
+    "price": 358.54,
+    "change": 2.96,
+    "pct": 0.83,
+    "date": "2026-11-27",
     "spark": [
-     348.91,
      344.63,
      338.32,
      331.9,
@@ -1259,20 +1258,20 @@
      342.56,
      349.08,
      354.07,
-     355.58
+     355.58,
+     358.54
     ],
-    "cap": 5167353080425.721,
+    "cap": 5210368658456.359,
     "rank": 1
    },
    {
     "symbol": "MSFT",
     "name": "마이크로소프트",
-    "price": 489.93,
-    "change": -6.2,
-    "pct": -1.25,
-    "date": "2026-11-25",
+    "price": 492.85,
+    "change": 2.92,
+    "pct": 0.6,
+    "date": "2026-11-27",
     "spark": [
-     530.14,
      521.91,
      507.12,
      520.99,
@@ -1291,20 +1290,20 @@
      484.52,
      492.5,
      496.13,
-     489.93
+     489.93,
+     492.85
     ],
-    "cap": 3638315442470.2866,
+    "cap": 3660000030279.0947,
     "rank": 2
    },
    {
     "symbol": "NVDA",
     "name": "엔비디아",
-    "price": 149.3,
-    "change": -6.08,
-    "pct": -3.91,
-    "date": "2026-11-25",
+    "price": 150.49,
+    "change": 1.19,
+    "pct": 0.8,
+    "date": "2026-11-27",
     "spark": [
-     213.66,
      204.64,
      202.06,
      206.69,
@@ -1323,20 +1322,20 @@
      125.53,
      165.05,
      155.38,
-     149.3
+     149.3,
+     150.49
     ],
-    "cap": 3605147173690.796,
+    "cap": 3633882162643.4326,
     "rank": 3
    },
    {
     "symbol": "GOOGL",
     "name": "알파벳",
-    "price": 273.1,
-    "change": -5.95,
-    "pct": -2.13,
-    "date": "2026-11-25",
+    "price": 274.96,
+    "change": 1.86,
+    "pct": 0.68,
+    "date": "2026-11-27",
     "spark": [
-     283.82,
      279.84,
      278.99,
      280.03,
@@ -1355,20 +1354,20 @@
      265.29,
      282.1,
      279.05,
-     273.1
+     273.1,
+     274.96
     ],
-    "cap": 3357491475036.621,
+    "cap": 3380358134948.7305,
     "rank": 4
    },
    {
     "symbol": "AMZN",
     "name": "아마존",
-    "price": 244.43,
-    "change": -7.86,
-    "pct": -3.12,
-    "date": "2026-11-25",
+    "price": 254.12,
+    "change": 9.69,
+    "pct": 3.96,
+    "date": "2026-11-27",
     "spark": [
-     243.79,
      240.35,
      245.63,
      250.69,
@@ -1387,20 +1386,20 @@
      246.82,
      255.39,
      252.29,
-     244.43
+     244.43,
+     254.12
     ],
-    "cap": 2643055316937.7896,
+    "cap": 2747834653522.1934,
     "rank": 5
    },
    {
     "symbol": "META",
     "name": "메타",
-    "price": 609.89,
-    "change": 20.07,
-    "pct": 3.4,
-    "date": "2026-11-25",
+    "price": 628.96,
+    "change": 19.07,
+    "pct": 3.13,
+    "date": "2026-11-27",
     "spark": [
-     624.52,
      614.99,
      606.73,
      621.03,
@@ -1419,20 +1418,20 @@
      560.84,
      597.6,
      589.82,
-     609.89
+     609.89,
+     628.96
     ],
-    "cap": 1559026015237.1104,
+    "cap": 1607773554654.2903,
     "rank": 6
    },
    {
     "symbol": "TSLA",
     "name": "테슬라",
-    "price": 380.14,
-    "change": -4.54,
-    "pct": -1.18,
-    "date": "2026-11-25",
+    "price": 400.0,
+    "change": 19.86,
+    "pct": 5.22,
+    "date": "2026-11-27",
     "spark": [
-     403.3,
      399.81,
      403.82,
      398.5,
@@ -1451,20 +1450,20 @@
      345.82,
      385.46,
      384.68,
-     380.14
+     380.14,
+     400.0
     ],
-    "cap": 1502601463494.1677,
+    "cap": 1581103178400.0,
     "rank": 7
    },
    {
     "symbol": "AVGO",
     "name": "브로드컴",
-    "price": 300.86,
-    "change": -0.22,
-    "pct": -0.07,
-    "date": "2026-11-25",
+    "price": 312.34,
+    "change": 11.48,
+    "pct": 3.82,
+    "date": "2026-11-27",
     "spark": [
-     345.0,
      326.08,
      322.23,
      332.13,
@@ -1483,20 +1482,20 @@
      304.41,
      313.55,
      301.08,
-     300.86
+     300.86,
+     312.34
     ],
-    "cap": 1436194211257.6812,
+    "cap": 1490995534552.5454,
     "rank": 8
    },
    {
     "symbol": "LLY",
     "name": "일라이 릴리",
-    "price": 1392.22,
-    "change": -15.37,
-    "pct": -1.09,
-    "date": "2026-11-25",
+    "price": 1392.38,
+    "change": 0.16,
+    "pct": 0.01,
+    "date": "2026-11-27",
     "spark": [
-     1373.7,
      1417.54,
      1410.99,
      1409.38,
@@ -1515,20 +1514,20 @@
      1347.11,
      1364.6,
      1407.59,
-     1392.22
+     1392.22,
+     1392.38
     ],
-    "cap": 1240113020962.7742,
+    "cap": 1240255570613.121,
     "rank": 9
    },
    {
     "symbol": "BRK-B",
     "name": "버크셔 해서웨이",
-    "price": 579.32,
-    "change": 2.11,
-    "pct": 0.37,
-    "date": "2026-11-25",
+    "price": 580.79,
+    "change": 1.47,
+    "pct": 0.25,
+    "date": "2026-11-27",
     "spark": [
-     541.96,
      542.49,
      556.11,
      557.07,
@@ -1547,9 +1546,10 @@
      570.0,
      572.36,
      577.21,
-     579.32
+     579.32,
+     580.79
     ],
-    "cap": 1230776497622.0037,
+    "cap": 1233899478652.7393,
     "rank": 10
    }
   ],
@@ -2097,7 +2097,7 @@
      29000.0,
      31700.0
     ],
-    "cap": 4214246247400.0,
+    "cap": 4216859088200.0,
     "rank": 7
    },
    {
@@ -2203,12 +2203,11 @@
    {
     "symbol": "XLK",
     "name": "기술",
-    "price": 155.79,
-    "change": -1.3,
-    "pct": -0.83,
-    "date": "2026-11-25",
+    "price": 160.15,
+    "change": 4.36,
+    "pct": 2.8,
+    "date": "2026-11-27",
     "spark": [
-     188.74,
      179.51,
      174.22,
      176.51,
@@ -2227,18 +2226,18 @@
      149.01,
      162.38,
      157.09,
-     155.79
+     155.79,
+     160.15
     ]
    },
    {
     "symbol": "XLC",
     "name": "커뮤니케이션",
-    "price": 105.38,
-    "change": 0.93,
-    "pct": 0.89,
-    "date": "2026-11-25",
+    "price": 107.48,
+    "change": 2.1,
+    "pct": 1.99,
+    "date": "2026-11-27",
     "spark": [
-     101.21,
      99.9,
      100.26,
      101.44,
@@ -2257,18 +2256,18 @@
      100.03,
      103.6,
      104.45,
-     105.38
+     105.38,
+     107.48
     ]
    },
    {
     "symbol": "XLY",
     "name": "임의소비재",
-    "price": 117.49,
-    "change": -0.23,
-    "pct": -0.2,
-    "date": "2026-11-25",
+    "price": 119.97,
+    "change": 2.48,
+    "pct": 2.11,
+    "date": "2026-11-27",
     "spark": [
-     116.2,
      115.38,
      118.16,
      117.33,
@@ -2287,18 +2286,18 @@
      112.46,
      116.93,
      117.72,
-     117.49
+     117.49,
+     119.97
     ]
    },
    {
     "symbol": "XLF",
     "name": "금융",
-    "price": 56.51,
-    "change": 0.4,
-    "pct": 0.71,
-    "date": "2026-11-25",
+    "price": 57.16,
+    "change": 0.65,
+    "pct": 1.15,
+    "date": "2026-11-27",
     "spark": [
-     56.94,
      56.51,
      57.56,
      57.19,
@@ -2317,18 +2316,18 @@
      54.57,
      55.65,
      56.11,
-     56.51
+     56.51,
+     57.16
     ]
    },
    {
     "symbol": "XLV",
     "name": "헬스케어",
-    "price": 183.68,
-    "change": -1.04,
-    "pct": -0.56,
-    "date": "2026-11-25",
+    "price": 184.2,
+    "change": 0.52,
+    "pct": 0.28,
+    "date": "2026-11-27",
     "spark": [
-     184.04,
      184.87,
      184.6,
      184.02,
@@ -2347,18 +2346,18 @@
      177.24,
      179.42,
      184.72,
-     183.68
+     183.68,
+     184.2
     ]
    },
    {
     "symbol": "XLI",
     "name": "산업재",
-    "price": 162.95,
-    "change": 1.34,
-    "pct": 0.83,
-    "date": "2026-11-25",
+    "price": 165.56,
+    "change": 2.61,
+    "pct": 1.6,
+    "date": "2026-11-27",
     "spark": [
-     170.13,
      167.4,
      169.71,
      171.32,
@@ -2377,18 +2376,18 @@
      156.37,
      162.47,
      161.61,
-     162.95
+     162.95,
+     165.56
     ]
    },
    {
     "symbol": "XLE",
     "name": "에너지",
-    "price": 60.9,
-    "change": 0.45,
-    "pct": 0.74,
-    "date": "2026-11-25",
+    "price": 61.67,
+    "change": 0.77,
+    "pct": 1.26,
+    "date": "2026-11-27",
     "spark": [
-     68.71,
      70.02,
      67.25,
      66.68,
@@ -2407,18 +2406,18 @@
      60.51,
      59.87,
      60.45,
-     60.9
+     60.9,
+     61.67
     ]
    },
    {
     "symbol": "XLP",
     "name": "필수소비재",
-    "price": 92.3,
-    "change": 0.42,
-    "pct": 0.46,
-    "date": "2026-11-25",
+    "price": 92.68,
+    "change": 0.38,
+    "pct": 0.41,
+    "date": "2026-11-27",
     "spark": [
-     88.18,
      89.42,
      90.83,
      88.95,
@@ -2437,18 +2436,18 @@
      90.46,
      90.38,
      91.88,
-     92.3
+     92.3,
+     92.68
     ]
    },
    {
     "symbol": "XLU",
     "name": "유틸리티",
-    "price": 43.61,
-    "change": 0.21,
-    "pct": 0.48,
-    "date": "2026-11-25",
+    "price": 43.73,
+    "change": 0.12,
+    "pct": 0.28,
+    "date": "2026-11-27",
     "spark": [
-     43.14,
      43.43,
      43.67,
      43.42,
@@ -2467,7 +2466,8 @@
      42.69,
      43.32,
      43.4,
-     43.61
+     43.61,
+     43.73
     ]
    }
   ],
@@ -2688,12 +2688,11 @@
   {
    "symbol": "KRW=X",
    "name": "원/달러 환율",
-   "price": 1334.87,
-   "change": -8.1,
-   "pct": -0.6,
-   "date": "2026-11-27",
+   "price": 1333.9,
+   "change": -9.63,
+   "pct": -0.72,
+   "date": "2026-11-28",
    "spark": [
-    1325.52,
     1344.8101,
     1342.9,
     1340.0699,
@@ -2712,16 +2711,17 @@
     1341.02,
     1342.65,
     1342.97,
-    1334.87
+    1343.53,
+    1333.9
    ],
    "unit": "krw"
   },
   {
    "symbol": "JPYKRW=X",
    "name": "원/엔 (100엔)",
-   "price": 8.354,
-   "change": -0.081,
-   "pct": -0.96,
+   "price": 8.4428,
+   "change": 0.0078,
+   "pct": 0.09,
    "date": "2026-11-27",
    "spark": [
     8.4501,
@@ -2743,16 +2743,16 @@
     8.4325,
     8.4298,
     8.435,
-    8.354
+    8.4428
    ],
    "unit": "krw100"
   },
   {
    "symbol": "EURKRW=X",
    "name": "원/유로",
-   "price": 1463.5,
-   "change": -9.64,
-   "pct": -0.65,
+   "price": 1473.29,
+   "change": 0.15,
+   "pct": 0.01,
    "date": "2026-11-27",
    "spark": [
     1486.41,
@@ -2774,19 +2774,18 @@
     1461.37,
     1471.0601,
     1473.14,
-    1463.5
+    1473.29
    ],
    "unit": "krw"
   },
   {
    "symbol": "JPY=X",
    "name": "엔/달러",
-   "price": 159.386,
-   "change": 0.171,
-   "pct": 0.11,
-   "date": "2026-11-27",
+   "price": 159.515,
+   "change": 0.234,
+   "pct": 0.15,
+   "date": "2026-11-28",
    "spark": [
-    157.677,
     157.915,
     158.469,
     158.357,
@@ -2805,16 +2804,17 @@
     159.009,
     159.262,
     159.215,
-    159.386
+    159.281,
+    159.515
    ],
    "unit": "jpy"
   },
   {
    "symbol": "DX-Y.NYB",
    "name": "달러 인덱스",
-   "price": 103.727,
-   "change": 0.057,
-   "pct": 0.05,
+   "price": 104.01,
+   "change": 0.34,
+   "pct": 0.33,
    "date": "2026-11-27",
    "spark": [
     101.88,
@@ -2836,19 +2836,18 @@
     104.32,
     103.81,
     103.67,
-    103.727
+    104.01
    ],
    "unit": "idx"
   },
   {
    "symbol": "^TNX",
    "name": "미국채 10년",
-   "price": 4.848,
-   "change": -0.056,
-   "pct": -1.14,
-   "date": "2026-11-25",
+   "price": 4.936,
+   "change": 0.088,
+   "pct": 1.82,
+   "date": "2026-11-27",
    "spark": [
-    4.989,
     4.929,
     4.894,
     4.952,
@@ -2867,19 +2866,19 @@
     4.912,
     4.918,
     4.904,
-    4.848
+    4.848,
+    4.936
    ],
    "unit": "pct"
   },
   {
    "symbol": "^IRX",
    "name": "미국채 3개월",
-   "price": 4.155,
-   "change": -0.013,
-   "pct": -0.31,
-   "date": "2026-11-25",
+   "price": 4.153,
+   "change": -0.002,
+   "pct": -0.05,
+   "date": "2026-11-27",
    "spark": [
-    3.998,
     3.973,
     3.982,
     4.025,
@@ -2898,16 +2897,17 @@
     4.122,
     4.147,
     4.168,
-    4.155
+    4.155,
+    4.153
    ],
    "unit": "pct"
   },
   {
    "symbol": "CL=F",
    "name": "WTI 유가",
-   "price": 86.01,
-   "change": 2.33,
-   "pct": 2.78,
+   "price": 83.08,
+   "change": -0.6,
+   "pct": -0.72,
    "date": "2026-11-27",
    "spark": [
     104.12,
@@ -2929,16 +2929,16 @@
     80.17,
     82.05,
     83.68,
-    86.01
+    83.08
    ],
    "unit": "usd"
   },
   {
    "symbol": "GC=F",
    "name": "금",
-   "price": 3691.3999,
-   "change": 155.5999,
-   "pct": 4.4,
+   "price": 3639.6001,
+   "change": 103.8,
+   "pct": 2.94,
    "date": "2026-11-27",
    "spark": [
     3898.8999,
@@ -2960,7 +2960,7 @@
     3651.3999,
     3561.8999,
     3535.8,
-    3691.3999
+    3639.6001
    ],
    "unit": "usd"
   }
@@ -2969,265 +2969,315 @@
  "news": [
   {
    "market": "us",
-   "title": "장중 4.6% 추락, 0.6% 하락 마감…나스닥 롤러코스터[뉴욕마감] - 머니투데이",
-   "link": "https://news.google.com/rss/articles/CBMiaEFVX3lxTFBmdUlNc25tV2tTZ2tVa2tsQTJrNkZjUzFOdmN2MnhONllyR1RFajctdERLdGZjVXZubXlRX2RPTnRsVUxjdzBFLTdLaEhCUmEtTjBzWUlIcE5xeUZJcENsOENrT3JCSXFm0gFuQVVfeXFMTWRzY3ppTk5RSnA2X2xaUTZEeWQzYllQSnkyXzRtYVFsOE5femZweG00bUNhLXNfczdrRmdZZEVwTlVicGgzTnNoLXlkMnloLUhIenp6c0h6QjFPTzdmYXlTX01RSjJ2ZUwwWERpTEE?oc=5",
-   "source": "머니투데이",
-   "published": "Fri, 27 Nov 2026 04:43:25 GMT"
+   "title": "뉴욕증시 AI 기술주 강세에 상승 마감...주간 나스닥 4월 이후 최대 상승",
+   "link": "https://news.google.com/rss/articles/CBMigAFBVV95cUxNMktmekZYMldHX2dqZ2lody0tb2VxVmpna3BLZE14U0lLaE9EMTF4WUh3YmdZejhWcTZnVG50SW81eHNyVnJaV09UYXBzN3ExWVp1empjNkRsOW5QZEFmMHFzZllLajZ6VGtwNlMwcjc2ZGk5a0RMdDFmYl9tTjR6TA?oc=5",
+   "source": "조선일보",
+   "published": "Sat, 28 Nov 2026 01:06:42 GMT",
+   "note": "주간 나스닥 상승폭이 4월 이후 최대라는 점은 반등 강도를 보여주지만, 20일선 하회 상태라 추세 전환 여부는 추가 확인이 필요하다."
   },
   {
    "market": "us",
-   "title": "S&P500 선물, 추수감사절 휴장 후 상승세…美 국채금리↑ |",
-   "link": "https://news.google.com/rss/articles/CBMidEFVX3lxTE5QcGtxUkdNS1BLNHNZV25DMF80VkJzMk94X3F1cGQyaGF3RGRjc3pXOVZESEVfeFRmMEl1ajhkNWxzaTB1MGdOT2FpZzJseDlST1JCdGIzOTVCOTFQdXVWSUdSaHJZalZibDc3dW5mOWJ6bVp0?oc=5",
-   "source": "연합인포맥스",
-   "published": "Fri, 27 Nov 2026 02:51:10 GMT"
+   "title": "뉴욕증시, AI 우려 완화에 일제히 상승…나스닥 2.31%↑",
+   "link": "https://news.google.com/rss/articles/CBMia0FVX3lxTE0xSHNBMWpPcndyTHhJQzE5UGZ2ZHhnemthSDF0emhUaW5yZlZCUnVhUEtvVlVjYUFVMFl3XzdrV3ZMVEtQcFBRSkt0ZHFRa0s3b0lJdTJsU2RZdm1oWlpsSk1mY0t1RGoyVmQw?oc=5",
+   "source": "BBS불교방송",
+   "published": "Fri, 27 Nov 2026 23:30:00 GMT",
+   "note": "AI 우려 완화가 반등의 직접적 계기로 제시되어 있어, 기술주 수급이 이어질지가 관건이다."
   },
   {
    "market": "us",
-   "title": "[뉴욕 증시] AI주 매도세에 나스닥 0.62%↓...엔비디아 3.91%↓",
-   "link": "https://news.google.com/rss/articles/CBMickFVX3lxTFB2SE41ek92RzR6ZWRPUC05TnE4UEkxNFRCNXYyeGd0eVFqTGY0ZFBUME5oa0xtRGk0TnlWbS0xSl9Kdjk2bUc5S25uS0FQU25yQ1VpNm9xZ2N6dE1sZHVrLWpsWTFzOUJrWC1zV0VJajZwZw?oc=5",
-   "source": "한양경제",
-   "published": "Fri, 27 Nov 2026 02:00:41 GMT"
+   "title": "뉴욕증시, AI·기술주 반등에 일제히 상승…나스닥 2.3% 올라",
+   "link": "https://news.google.com/rss/articles/CBMiVEFVX3lxTE0xYW9mcWlsZ085bm15STZVUzU2b0JGaThZcXFXazBtcUZFWmRyUlBjWWJWUU04Zi1iNm5zeHBZTTlGcko5UVdrU2FMamUtcXU2VUJoUg?oc=5",
+   "source": "JTBC",
+   "published": "Fri, 27 Nov 2026 22:44:00 GMT"
   },
   {
    "market": "us",
-   "title": "사우디 정유시설 피격에 국제유가 다시 올랐다",
-   "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE8tLThzajNIbG9sYUVWbHR4TkZIa1FRYzJKallnd2FxT2tPNmFJekFCU011YkctSmdXUzdCQ3V2WktMQlZ0azBBUGhkQV8zUXQzZmNiNUlQbVk?oc=5",
-   "source": "네이버페이 머니스토리",
-   "published": "Fri, 27 Nov 2026 00:18:37 GMT"
-  },
-  {
-   "market": "us",
-   "title": "뉴욕증시, AI 투자 불안에 혼조 마감...마이크론 이틀 새 15% 급락",
-   "link": "https://news.google.com/rss/articles/CBMiZ0FVX3lxTE5MeXB3R3FrTV9IUnR4YlVCZzFmeGZ1bDRWRDFFbFkzejdwTkhvTHFKNDFiLVZLdXNwQUhfRXlnb0dkWmNZN2JlcjVCWE91Z2NJTnNpVnZHNVdtZzRrUDRWR3ZDN0w5MG8?oc=5",
-   "source": "M이코노미뉴스",
-   "published": "Thu, 26 Nov 2026 22:42:35 GMT"
-  },
-  {
-   "market": "us",
-   "title": "[굿모닝 마켓] 뉴욕증시, 추수감사절 휴장…나스닥 선물 0.4%↑",
-   "link": "https://news.google.com/rss/articles/CBMiU0FVX3lxTE5UdTh3bXFQVk1wWkNvZXhwN2kyYWN1VWQ5RWNybDFKV0tSd0lYYUtkUVBHWGQyTG5RUzFidUJCREh1N2hydVdiYkJhaWhqc2x1SXNB0gFYQVVfeXFMUEVzTjRmN0pBeUtlZEhQQzlzSGxNWFBDYWdoMUtQVERQRmNSNzVfd1JRdjVZcC13ZlJkOHhGaEE4SzZVcE9mWXRqeHVlWlk4Y3RHRXhEUmNScw?oc=5",
-   "source": "SBS Biz",
-   "published": "Thu, 26 Nov 2026 22:50:00 GMT"
-  },
-  {
-   "market": "us",
-   "title": "[오늘의 글로벌마켓] 뉴욕증시 휴장...유럽증시 2% 안팎 상승",
-   "link": "https://news.google.com/rss/articles/CBMickFVX3lxTE0xVk9VeUg0M2JnaGVZYVZ1bUtCYWwwdDZIbzFvVjlpSEJPYndmaks4NV80SGFQSDF3WXFHTmRyOGpCeEdkXzRsNVA4VVpabDZ3dGNsYS1oTU1IZVYwTEYwajdtQlpWQnQzbC1jN3FTaERmQQ?oc=5",
-   "source": "오피니언뉴스",
-   "published": "Thu, 26 Nov 2026 22:35:44 GMT"
-  },
-  {
-   "market": "kr",
-   "title": "코스피·코스닥 동반 급등…외국인 순매수",
-   "link": "https://news.google.com/rss/articles/CBMiZkFVX3lxTFBaV0VPUW9KT2E0dTNrZW1CVVNlLWxvU29zMkVHYmtzcDk4bWVaV0toUTVZaGMya3dLejB2NmpjRkRaZW8yQU1yUlRtU1FmZGJZWk1vbGkzWmEtSWdtc0JxWlU5Y3NqUQ?oc=5",
-   "source": "KBS 뉴스",
-   "published": "Fri, 27 Nov 2026 08:01:00 GMT"
-  },
-  {
-   "market": "kr",
-   "title": "[증시-마감] 돌아온 외국인…코스피 兆단위 순매수에 4.3% 급등",
-   "link": "https://news.google.com/rss/articles/CBMicEFVX3lxTE80bHZ0YkFhTjV2MDJrRlJ4eHoxQTRoaWF4bDBmaDFDcDc5OFJLZmZHV2FYV1VOZlZPZWJZZTQ1WHktNG9BUy14c2xxUms0TW9HcEhfOFZtY0V5VTNud19LZ1F2d2xsbnVpaW1sUFRQdXc?oc=5",
-   "source": "연합인포맥스",
-   "published": "Fri, 27 Nov 2026 07:14:11 GMT",
-   "note": "외국인 순매수 유입이 지수 급등의 직접적 배경으로 제시됐다."
-  },
-  {
-   "market": "kr",
-   "title": "외국인, 두 달여 만에 코스피에서 1조 원 넘게 순매수‥코스피 4%·코스닥 8% 급등",
-   "link": "https://news.google.com/rss/articles/CBMidEFVX3lxTE1KcjlYZC1VZlRLSW5WeTd4UU04MWhTZncxejg2SVJkUlRIbFZsQk5GOTJOdFRDNmVjYnJpRHRTZHRQT1dPYkp4aFk4bUxQTjVNU1dnOXR3RGVYQV9sY0VCaUxLWlU1b1pSUEw2ekEtZkZiM2pD0gF0QVVfeXFMTjY4dDhHYnZuUEhMYXFYekVncHI0ZDNxblhOSW1qVDRoVUtuQlBzTUtQb2o2MEMtVFkxTnpvS3MyTG95NWlHVUNwU281YUFaY1FQTDFxbVVmSWttbVpMSy1ZakUzR1ZkQm5CbmRjZ1VQZHNReC0?oc=5",
-   "source": "MBC 뉴스",
-   "published": "Fri, 27 Nov 2026 07:01:52 GMT",
-   "note": "두 달여 만의 외국인 순매수 전환은 수급 측면의 의미 있는 변화다."
-  },
-  {
-   "market": "kr",
-   "title": "코스피, 4,900선 탈환...코스닥 8% 급등 마감",
-   "link": "https://news.google.com/rss/articles/CBMib0FVX3lxTE4tZkpMQzBQTE5RNWx3aFZYakE1QXJTMWwzUkE4WWtFcE1XTFZGcWNFTVNrcU15N2pVSlRXME5XN1lTckpzUkVxa1ZkTDFRamlNekZkQmFJM1dCUmxTMEI4am9ZRjJiOHJfeXNSSXJ5VQ?oc=5",
-   "source": "YTN",
-   "published": "Fri, 27 Nov 2026 07:06:00 GMT",
-   "note": "4,900선 회복은 단기 심리 개선을 보여주지만 20일 이동평균선까지는 거리가 있다."
-  },
-  {
-   "market": "kr",
-   "title": "엔비디아발 'AI 조정' 잦아드나…코스피·코스닥, 급등 마감(종합)",
-   "link": "https://news.google.com/rss/articles/CBMiYEFVX3lxTE1wWVY4UkxKSkNZYnlpNXVIWkdhVThoOVQ5OXVUZkVHRWxwd0FlWFJvVXdfaFNWMEYtOUVzVFZSYnZXbklzRVptamVPeEc0eUoxMm9yRVNsbExkMThFWWdBaNIBYEFVX3lxTE1wWVY4UkxKSkNZYnlpNXVIWkdhVThoOVQ5OXVUZkVHRWxwd0FlWFJvVXdfaFNWMEYtOUVzVFZSYnZXbklzRVptamVPeEc0eUoxMm9yRVNsbExkMThFWWdBaA?oc=5",
-   "source": "연합뉴스",
-   "published": "Fri, 27 Nov 2026 07:35:56 GMT",
-   "note": "엔비디아발 AI 조정 우려 완화가 반도체 중심 반등의 배경으로 보인다."
-  },
-  {
-   "market": "kr",
-   "title": "코스피·코스닥 동반 급등…증안펀드 기대감",
-   "link": "https://news.google.com/rss/articles/CBMiZ0FVX3lxTFB2bDdZaElWMVBPOW41WUwxX0lRYTY5UzE1NTVtVGY4VzZaWDJINFZUeHRYb1lKU01YRUtfN05IZXhXUldTZUVIYWJVR0hDc3JmTkh6dUotRGs5c25WVkVqSGtCUGNKM2s?oc=5",
+   "title": "뉴욕증시 일제히 상승…AI 투자 우려 완화",
+   "link": "https://news.google.com/rss/articles/CBMiZ0FVX3lxTE02LW1mWVZ4SzJDTzEzNEdLdWpfQ1VOQWhmVUdpTHJWRXJLZ3RaTGw3Q3ZQT29CejN4RnlMOEdyRUN6RE1WMi1ic3Zuc1BCQ3psN05LdkpDZTlGQjRKMnhvTmNDblpqNzQ?oc=5",
    "source": "연합뉴스TV",
-   "published": "Fri, 27 Nov 2026 07:08:00 GMT",
-   "note": "증안펀드 기대감은 아직 기대 단계이므로 실제 집행 규모와 시기를 확인할 필요가 있다."
+   "published": "Sat, 28 Nov 2026 02:32:00 GMT",
+   "note": "여러 매체가 같은 AI 투자 우려 완화 흐름을 전하고 있어 시장의 반등 이유가 비교적 일관되다."
+  },
+  {
+   "market": "us",
+   "title": "뉴욕증시, AI·기술주 반등에 일제히 상승 마감‥나스닥 2.3%↑",
+   "link": "https://news.google.com/rss/articles/CBMidEFVX3lxTE81RXk3eS11MnlVWnZPdGVmTHVRUGl3OW1qczBTNXU2RjBhRDVMOGZwN2xCanI2bXBYTUdIZENnRkF6V3RCN1JScFAwYkl0ZHVpQ2htSThILWF6ZDhtVW9GdGZ1aUZ3Sy1OTzVTUTRkb1pqcXg20gF0QVVfeXFMTmtUYm9XQlJ5RHp0Z001RGtiR0JKYXJMbl9yNWZkazBCM0FwektCUy1wbkxvbllObnhyYzdyR05WSUh2WWFuMEp1VXRiV3kxMDJHZS1tcW9nMzRSOWx2ZDY1R3VTVDRjZGQxX0VFWWFoVDlxcVQ?oc=5",
+   "source": "MBC 뉴스",
+   "published": "Fri, 27 Nov 2026 20:41:16 GMT"
+  },
+  {
+   "market": "us",
+   "title": "뉴욕증시, AI·기술주 반등에 일제히 상승…나스닥 2.3%↑(종합)",
+   "link": "https://news.google.com/rss/articles/CBMiW0FVX3lxTE5mZG1nMXE3bzNwbDBXVjNUUXowZ1hsSTRpeHdaaDk2eVpwSU9sT0JRS0R2VE9GcXB6aDJ5d0dtdEJ1MkV0ZzJsWjFLRmlsSGVPbFZiOEFCeHhFLXPSAWBBVV95cUxPZ2FyY2RlY2pORXd3OWl3V3BHQi04QVFOcXJTOWdPZWNrUG8tLV82TmJXMFZCb0RlRjB2cnZZUnpRb0VNNVVPSnROa3otTDJxZXNoaEQ4RHYyVHVjZTlNbEY?oc=5",
+   "source": "연합뉴스",
+   "published": "Fri, 27 Nov 2026 18:59:19 GMT"
+  },
+  {
+   "market": "us",
+   "title": "예년만 못한 미국 쇼핑 대목 블랙프라이데이...뉴욕 증시 '롤러코스터' 영향",
+   "link": "https://news.google.com/rss/articles/CBMiXkFVX3lxTE9RZm41aWVpcDlfbXRnTkIyZHZFeGFWeXYwZmNqalp3UXcwZUItcWFORWVYVzJobGNmMFJ6VmllTF9RZWMzSDVvNEdtcjZtQUlZQVFkY3RsVm1fa3h3T0E?oc=5",
+   "source": "YTN",
+   "published": "Fri, 27 Nov 2026 22:25:00 GMT",
+   "note": "블랙프라이데이 쇼핑 실적이 예년만 못했다는 보도는 소비 둔화 우려를 키울 수 있어 임의소비재 강세와 함께 볼 필요가 있다."
   },
   {
    "market": "kr",
-   "title": "‘증안펀드’ 기대감?…코스피 4%·코스닥 8% 급등",
-   "link": "https://news.google.com/rss/articles/CBMiZ0FVX3lxTFAxeWV0aEpXWnUxUlpVU2c5dWU0clFmVTVEZlI0VDZZOUsyc0hTZUxhZEtNMmQxS09Bem5VUXVVRjk0TThsQl9WczJjbGRPTnBEd3lnYUVrMlkyMWpNS2lyX2hibDhtajA?oc=5",
-   "source": "한겨레",
-   "published": "Fri, 27 Nov 2026 07:33:00 GMT",
-   "note": "코스닥 8% 급등은 변동성 확대와 추격 매수 과열 가능성을 함께 보여준다."
+   "title": "“외국인만 224조원 판 코스피, 반토막인데 오르긴 할까요”…당국, 증안펀드 승부수",
+   "link": "https://news.google.com/rss/articles/CBMiUkFVX3lxTFBtelVnUmZPU2NJYTBWbkVuR182ZDRyb0VvM2Y5OFlGYk83Qk12ZkhpbFpUZWg4NV9XS3BjdmVXcXlJdE80ZEhFU0tYV2huSGN6aEE?oc=5",
+   "source": "매일경제",
+   "published": "Sat, 28 Nov 2026 08:39:46 GMT"
+  },
+  {
+   "market": "kr",
+   "title": "4,900선 탈환 코스피, 오를 일만 남았다는데… 이유는?",
+   "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE5vazQ4V2tCNTVZYUlESHk3UXVUOVo1Nmk4a1QxZ2liRU4tdVcxTEZNeDhPX19IX3R2T0tldUtPYTZtc25kcXRlRlBLYkIwR2tsbmQwVVIwU2k?oc=5",
+   "source": "네이버페이 머니스토리",
+   "published": "Sat, 28 Nov 2026 01:13:49 GMT"
+  },
+  {
+   "market": "kr",
+   "title": "코스피 5000선 뚫을까…증안펀드·젠슨 황에 쏠린 눈[다음주 주요변수 미리보기]",
+   "link": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE82a0RFYUxkVWIzbThES1hQMm9VZS1MTDhYOTlmYmJqUi1SdVpqakNxYU9CWVJyQ21FYzRVRW5YN3p3OVhva1g1MTR6aGtJT2xZaXJvSEZzcS1wZw?oc=5",
+   "source": "한국경제",
+   "published": "Sat, 28 Nov 2026 03:00:04 GMT"
+  },
+  {
+   "market": "kr",
+   "title": "개미 10명 중 7명 '피눈물'…코스피 전망 물었더니 '의외의 결과'",
+   "link": "https://news.google.com/rss/articles/CBMic0FVX3lxTE9VTkVVQWY1Q1hGVC1RQkNScTVzN3NfLTZZRlBOV1MwZ1dYS0xMdjN2TVpEdE42a1RtY3pHSFVSaHoyLTluV0s3eG42ZXJKVjNUUW5MUzdyWTQwYmFVaHJ4T3BPUTg5R3BqeWJhajRRa01PcjA?oc=5",
+   "source": "마켓인",
+   "published": "Sat, 28 Nov 2026 14:11:16 GMT"
+  },
+  {
+   "market": "kr",
+   "title": "\"코스닥 8%, 코스피 4% 쭉쭉\" 증안펀드 기대, 외인도 올라탔다 - 머니투데이",
+   "link": "https://news.google.com/rss/articles/CBMiaEFVX3lxTE5KYTEtcXBBUGpXdWVvVllISHQ3cmsxN3drdVZGbVNYNEpWVWdIckF5ZURCMUNFcEwwVGRLMjlQUHYtQkFiMDJUTFlxZE04ODF4S0NxSlFHU1h0c1VhN25mdHlfbUtTZmJJ0gFuQVVfeXFMT3pqTVZvX2FCMFIyUUpzbDBZdzJydGJaTDZ6QWg1RmhKcTNZbU12bV9VVHB0bWNkc1IxVDdMekRYaDYxck5Ua29GUThoR2MwY1ZNb3NoTXdJMzI3NXhleHVyZXVONnIyZW9idFZOWUE?oc=5",
+   "source": "머니투데이",
+   "published": "Sat, 28 Nov 2026 08:09:05 GMT"
+  },
+  {
+   "market": "kr",
+   "title": "‘반토막 코스피’에 촛불든 투자자들… “증시 정상화 대책 마련해야”",
+   "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE56bVpYdk1HcEVoeHVaaElaamFOVlZ3S19QNU9aZnFhOUYwVFFPSWtiSHpoaHpZS256ZDFRdHV6RmpSX0pXNEZzRXFlcFBqLXdEM0xJRVF0YmzSAVRBVV95cUxObjZJR2F3czdySnJsZWdpNlVsR2N6SFhRRUY2Um51Qi10MjVPOWViZExLaGZCdllRLU51QXVfdDhQdFkyZXJ5UGdfSGtSek9PU1RTVEg?oc=5",
+   "source": "세계일보",
+   "published": "Sat, 28 Nov 2026 11:28:22 GMT"
+  },
+  {
+   "market": "kr",
+   "title": "개미 투자자 10명 중 7명 물렸는데…\"그래도 코스피 상승\" 믿어",
+   "link": "https://news.google.com/rss/articles/CBMiYkFVX3lxTE9GZTVtS25nUkttbkswOXBpRVBQd3hhSnJjTmJFYUFKSWVEYVhhRHNKUi1GN25rQkRucjNuVWgyTlJaU1RwZ3IwZ29uOTNsam5TcGpPMlFPei14RXdoLUU2OGRn?oc=5",
+   "source": "매일신문",
+   "published": "Sat, 28 Nov 2026 12:36:39 GMT"
   }
  ],
  "analysis": {
   "triggers": [
-   "코스피 +4.34%",
-   "코스닥 +8.13%"
+   "나스닥 종합 +2.31%",
+   "나스닥 100 +2.61%"
   ],
   "trig": {
-   "us": [],
-   "kr": [
-    "코스피 +4.34%",
-    "코스닥 +8.13%"
+   "us": [
+    "나스닥 종합 +2.31%",
+    "나스닥 100 +2.61%"
    ],
+   "kr": [],
    "crypto": [],
-   "crypto_part": false
+   "crypto_part": true
   },
-  "title": "증안펀드 기대·외국인 복귀에 코스피 4%, 코스닥 8% 급등",
-  "summary": "27일 한국 증시는 증안펀드 확대 기대와 외국인 1조 원대 순매수, 미국 나스닥100 선물 강세에 따른 AI·반도체 불안 완화가 겹쳐 코스피 4.34%, 코스닥 8.13% 급등했다. 다만 낙폭 과대에 따른 반등 성격이 강해, 다음 주 미 의회 청문회와 미국 지표 등에 따라 변동성이 이어질 수 있다.",
+  "title": "AI·반도체 저가매수에 나스닥 2.31% 급반등",
+  "summary": "27일(현지시간) 미국 증시는 AI 투자 수익성 우려가 일부 누그러지고 낙폭이 컸던 반도체·AI 인프라주에 저가매수가 몰리면서 나스닥 종합이 2.31% 올랐다. 같은 시간 비트코인은 ETF 자금 유출과 금리 인상 경계 속에 주식과 따로 움직여 6만 달러 아래에서 극단적 공포 구간에 머물렀다.",
   "parts": [
    {
-    "market": "kr",
-    "title": "코스피 4900 탈환, 코스닥 700 회복",
-    "summary": "코스피는 204.47포인트(4.34%) 오른 4915.68, 코스닥은 53.28포인트(8.13%) 오른 708.99로 마감했다. 코스닥은 장중 매수 사이드카가 발동됐고, 외국인이 코스피에서 1조 원대를 순매수하며 반등을 주도했다.",
+    "market": "us",
+    "title": "추수감사절 후 AI·반도체 낙폭과대 반등",
+    "summary": "나스닥 종합은 2.31% 오른 24,129.50, 필라델피아 반도체지수는 4.69% 오르며 반등을 이끌었다. 다만 연휴 단축 거래로 거래량이 적었고, 금리 인상 우려와 AI 자금조달 부담은 그대로 남아 있다.",
     "causes": [
      {
-      "title": "증안펀드 확대 기대",
+      "title": "AI 투자 우려 완화·저가매수",
       "weight": "높음",
-      "detail": "금융당국이 증권시장안정펀드(증안펀드) 확대와 가동 방안을 논의한다는 보도가 나왔다. 현재 10조7600억 원 규모를 20조 원 이상으로 늘리는 방안을 검토 중인 것으로 알려졌고, 30일 시장안정 긴급회의가 예정돼 있다. 시장에서는 실제 가동 여부보다 정책 기대 자체가 투자심리를 개선했다고 받아들였다. 이 기대는 반도체뿐 아니라 바이오·2차전지·건설 등 전 업종으로 매수세를 번지게 했다."
+      "detail": "연합뉴스 등은 AI 투자 수익성 우려가 완화되고 최근 많이 떨어진 기술주에 매수세가 들어와 3대 지수가 모두 올랐다고 보도했다. 이번 주 초에는 젠슨 황 엔비디아 CEO 복귀 소식으로 급등했다가 AI 수익성 논란이 다시 불거져 변동성이 컸다. 제이미 콕스 해리스파이낸셜그룹 매니징 파트너는 시장이 과매도 상태여서 반등이 불가피했다고 말했다. 나스닥 100은 2.61%, 기술 섹터(XLK)는 2.80% 올라 상승이 대형 기술주 전반에 퍼졌다."
      },
      {
-      "title": "외국인 순매수 전환",
+      "title": "메모리·AI 인프라주 주도",
       "weight": "높음",
-      "detail": "외국인은 유가증권시장에서 1조1000억 원대(매체별 집계 1조4000억 원대도 있음)를 순매수해 3거래일 만에 매수 우위로 돌아섰다. 장 초반 순매도였던 수급이 오전 중 매수로 바뀐 뒤 지수가 가파르게 올랐다. 코스닥에서도 외국인 약 3000억 원, 기관 약 5900억 원이 순매수했고, 개인은 코스피에서 약 1조7700억 원, 코스닥에서 약 8800억 원을 순매도했다. 개인의 차익 실현 물량을 외국인과 기관이 받아낸 구조다."
+      "detail": "마이크론은 7.34%, SK하이닉스 ADR은 7.38%, AMD는 4.89% 올랐고 샌디스크는 약 16% 급등했다. 반면 엔비디아는 0.8% 상승에 그쳐, 이번 반등은 GPU 대장주보다 최근 낙폭이 컸던 메모리·인프라 종목에 집중됐다. 이 영향으로 필라델피아 반도체지수가 하루 4.69% 올랐다. 다만 이 지수는 20일 고점 대비 약 14% 낮은 수준이어서 반등폭 대비 아직 회복 여지가 남아 있다."
      },
      {
-      "title": "미국 AI 불안 완화",
-      "weight": "높음",
-      "detail": "미국 증시가 추수감사절로 휴장한 가운데 나스닥100 선물이 2%대 올라 반도체주 매수를 거들었다. 젠슨 황 엔비디아 CEO 관련 논란에서 비롯된 글로벌 'AI 조정' 공포가 진정됐다는 해석이 나왔다. 엔비디아와 키옥시아의 SSD 기반 GPU 메모리 확장 기술 시연으로 키옥시아가 급등하며 메모리 투자심리가 개선됐다는 분석도 있었다. 김석환 미래에셋증권 연구원 등은 급락이 과도했다는 인식이 저가 매수를 부른 것으로 설명했다."
-     },
-     {
-      "title": "낙폭 과대·테마 순환매",
+      "title": "수급: 거래 감소·레버리지 청산",
       "weight": "중간",
-      "detail": "코스피는 20일 고점(5859.08) 대비 16.1% 낮은 수준에서 반등해 기술적 반발 매수가 유입되기 쉬운 구간이었다. 코스닥은 로봇·2차전지·바이오로 매수가 몰렸고, 로봇주에는 '삼성전자 효과'가 거론됐다. 삼성전자 배당금 지급과 재투자 기대감도 우호 요인으로 꼽혔다. 숏커버링 가능성은 제기됐지만 실제 영향은 확인되지 않았다."
+      "detail": "증시는 추수감사절 휴장 다음 날 오후 1시에 조기 마감했고, 거래량이 줄어든 가운데 매도 압력이 잦아든 점이 반등에 영향을 준 것으로 분석됐다. 앤드루 슬리먼 모간스탠리 인베스트먼트 매니지먼트 포트폴리오 매니저는 단기 자금이 레버리지를 줄이며 기술주에서 빠져나갔다고 보았다. 그는 이 자금이 다시 상승세를 쫓아 매수에 나설 수 있어 다음 주에도 반등이 이어질 수 있다고 전망했다. VIX는 11.16% 내린 23.81로 심리가 다소 안정됐다."
+     },
+     {
+      "title": "금리 인상 우려는 여전",
+      "weight": "중간",
+      "detail": "10월 PCE 물가가 연준의 추가 금리 인상 전망에 힘을 실었고, 시장에는 12월 0.25%포인트 인상 가능성이 반영되고 있다. 10년물 금리는 8거래일 연속 내림세 끝에 7bp 오른 4.93% 안팎으로 마감했다. 시장에서는 위험자산 선호가 살아나며 채권 가격이 내린 것으로 받아들였다. 금리가 4.9%대에 올라서 있는 만큼 기술주 반등의 지속성에는 부담이 된다."
      }
     ],
-    "reaction": "대형 반도체가 지수를 끌어올렸다. 삼성전자는 4.55%, SK하이닉스는 5.41% 올랐고, 반도체 업종은 7.86%, 2차전지 업종은 7.88% 상승했다. 코스닥에서는 에코프로 13.91%, 에코프로비엠 13.44%, 레인보우로보틱스 13.70%, 삼천당제약 14.12%가 올랐고 알테오젠도 9.40% 상승했다. 반면 KB금융은 0.21% 내렸고 은행 업종도 0.57% 하락해 금융주는 상대적으로 소외됐다.",
+    "reaction": "반도체(필라델피아 반도체 +4.69%)와 기술(XLK +2.80%), 임의소비재(XLY +2.11%), 커뮤니케이션(XLC +1.99%)이 강했다. 아마존 +3.96%, 메타 +3.13%, 테슬라 +5.22%, 브로드컴 +3.82%가 올랐고 엔비디아·애플·마이크로소프트는 0.6~0.8%대 상승에 그쳤다. 헬스케어(+0.28%)와 유틸리티(+0.28%) 등 방어 업종은 상대적으로 약했다. AI 개발사 앤트로픽은 약 11% 올라 공모가 83달러를 다시 넘었다.",
     "outlook": {
      "stance": "중립",
      "horizon": "1~2주",
-     "reason": "외국인 수급 복귀와 정책 기대는 우호적이지만, 반등 폭이 컸고 지수는 아직 20일 이동평균선(5154.25) 아래다. 시장에서는 AI 신용위험 우려가 완전히 해소됐다고 보기는 어렵다고 본다. 다음 주 미 의회 청문회, 증안펀드 회의, 미국 지표와 12월 FOMC가 방향을 가를 변수다.",
+     "reason": "단기 과매도 반등과 이번 주 큰 주간 상승률은 긍정적이지만, 나스닥은 20일 이동평균선(약 24,610)과 20일 고점을 아직 회복하지 못했다. 12월 금리 인상 경계와 AI 자금조달 부담이 남아 있고, 이날은 단축 거래라 신뢰도가 낮다. 정상 거래가 재개되는 30일 이후 거래량이 붙는지가 관건이다.",
      "scenarios": [
       {
        "name": "기본",
        "likelihood": "높음",
        "direction": "flat",
-       "desc": "증안펀드 회의 결과와 미국 기술주 흐름을 확인하며 4800~5100선에서 등락한다. 급등한 코스닥은 차익 실현 매물이 나오며 변동성이 커진다."
+       "desc": "거래량이 돌아오며 20일선 부근에서 등락하는 박스권 흐름. 금리와 AI 수익성 논란에 따라 업종별로 엇갈린다."
       },
       {
        "name": "상방",
        "likelihood": "중간",
        "direction": "up",
-       "desc": "증안펀드 확대 방안이 구체화되고 미국 기술주 반등이 이어지며 외국인 순매수가 지속되면 20일선(5154) 회복을 시도한다."
+       "desc": "11월 고용보고서(12/4)와 물가 흐름이 금리 인상 부담을 덜어주고 메모리·AI 인프라주 매수세가 이어지면 20일선(약 24,610)을 넘어 20일 고점(25,736) 쪽을 시험할 수 있다."
       },
       {
        "name": "하방",
        "likelihood": "중간",
        "direction": "down",
-       "desc": "엔비디아 CEO 청문회나 미국 지표 결과가 AI 불안을 다시 키우거나 증안펀드 기대가 실망으로 바뀌면 외국인이 매도로 돌아서고, 5일선(4808)과 20일 저점(4698) 재시험 가능성이 있다."
+       "desc": "고용·물가 호조로 10년물 금리가 더 오르거나 AI 자금조달 우려가 재부각되면 단기 반등분이 되돌려지며 5일선(약 23,630)과 20일 저점(22,618) 부근을 다시 볼 수 있다."
       }
      ],
      "levels": [
-      "코스피 5일선 4807.79 및 20일 저점 4697.51",
-      "코스피 20일선 5154.25",
-      "코스닥 700선 및 20일 고점 734.36"
+      "나스닥 종합 20일선 약 24,610",
+      "나스닥 종합 20일 고점 25,737 / 저점 22,618",
+      "필라델피아 반도체 20일선 약 9,733"
+     ]
+    }
+   },
+   {
+    "market": "crypto",
+    "title": "주식 반등에도 비트코인 약세 지속",
+    "summary": "비트코인은 약 59,161달러로 1.18% 내려 미국 증시 반등에 동행하지 못했다. 공포·탐욕지수는 10(전일 12)으로 극단적 공포가 이어졌다.",
+    "causes": [
+     {
+      "title": "현물 ETF 자금 유출",
+      "weight": "높음",
+      "detail": "11월 미국 비트코인 현물 ETF에서 47억1000만 달러가 순유출돼 월간 기준 역대 최대로 집계됐다. 유안타증권 연구원은 단기적으로 수요 이탈에 따른 약세로 보았다. 주식은 AI 저가매수로 올랐지만, 코인에는 이런 수급 공백이 먼저 작용한 것으로 풀이된다."
+     },
+     {
+      "title": "옵션 만기·숏스퀴즈 되돌림",
+      "weight": "중간",
+      "detail": "27일 비트코인은 장중 6만2125달러까지 올랐으나 데리빗에서 약 70억 달러 규모 옵션이 만기를 맞으며 5만8719달러까지 밀렸다. 한 시장 분석가는 앞선 반등을 신규 자금 유입이 아닌 숏 포지션 강제 청산에 따른 것으로 해석했다. 온체인 지표에서도 SOPR이 1을 밑돌아 손절 매도가 우위인 것으로 나타났다."
+     },
+     {
+      "title": "금리 인상 경계와 심리 위축",
+      "weight": "중간",
+      "detail": "시장은 12월 연준 금리 인상 가능성을 반영하고 있고, 국채금리가 4.9%대로 올라 이자가 없는 자산의 상대 매력이 떨어졌다는 해석이 나온다. 이날 기준 공포·탐욕지수는 10으로 극단적 공포 구간이다. 한국 시세는 약 8,046만 원(-0.97%)이며 김치 프리미엄은 약 1.95%로 과열 신호는 없다."
+     }
+    ],
+    "reaction": "이더리움(-1.08%), 리플(-1.04%), 솔라나(-1.57%), 도지코인(-1.97%), 체인링크(-2.33%) 등 대부분 알트코인이 비트코인과 비슷하거나 더 크게 내렸다. 일부 알트코인(하이퍼리퀴드·지캐시)은 강세를 보이며 차별화됐다. 국내 원화 시세 하락폭은 달러 기준보다 다소 작았다.",
+    "outlook": {
+     "stance": "중립",
+     "horizon": "1~2주",
+     "reason": "ETF 유출과 극단적 공포가 이어지고 있어 반등 신뢰도는 낮다. 반면 심리가 극단적으로 위축된 구간이어서 단기 기술적 반등 여지도 있다. 주식과의 동조화가 약해진 만큼 금리와 ETF 자금 흐름이 더 중요한 변수다.",
+     "scenarios": [
+      {
+       "name": "기본",
+       "likelihood": "높음",
+       "direction": "flat",
+       "desc": "6만 달러 안팎에서 등락하며 ETF 자금 흐름을 확인하는 흐름."
+      },
+      {
+       "name": "상방",
+       "likelihood": "낮음",
+       "direction": "up",
+       "desc": "ETF가 순유입으로 돌아서고 금리 부담이 완화되면 6만 달러를 회복하며 숏 청산이 이어질 수 있다."
+      },
+      {
+       "name": "하방",
+       "likelihood": "중간",
+       "direction": "down",
+       "desc": "ETF 유출이 계속되고 금리 인상 경계가 커지면 최근 거론된 5만5000달러 부근 지지선을 다시 시험할 수 있다."
+      }
+     ],
+     "levels": [
+      "비트코인 6만 달러(심리적 저항·지지)",
+      "비트코인 5만5000달러 부근(최근 저점)"
      ]
     }
    }
   ],
-  "link": "미국 증시는 휴장했지만 나스닥100 선물 강세가 한국 반도체주 매수의 직접 계기였다. 한국 증시는 삼성전자·SK하이닉스 비중이 커서 미국 AI·반도체주 흐름과 외국인 수급에 크게 연동된다.",
-  "history": "이번 주 초에도 엔비디아가 하루 31.5% 급등하자 코스피가 장중 5% 넘게 오르는 등 AI 기업 뉴스에 따라 지수가 큰 폭으로 오르내렸다. 반등과 급락이 반복되는 구간이라 이번 상승이 추세 전환인지는 추가 확인이 필요하다.",
+  "link": "미국 증시의 마이크론·SK하이닉스 ADR 급등은 한국 반도체 대형주와 AI 밸류체인 투자심리에 우호적인 재료로 거론된다. 다만 미국 금리 상승과 한국은행의 기준금리 인상(3.25%) 여파가 환율·채권시장에 반영되는 과정이어서, 반도체 반등과 긴축 변수가 맞서는 흐름이 될 수 있다.",
+  "history": "이번 주 다우지수와 S&P500은 각각 2022년 10월, 지난해 4월 이후 최대 주간 상승률을 기록했고 나스닥도 지난 4월 이후 최대 주간 상승률을 냈다. 다만 이번 반등만으로 11월 하락분을 모두 만회하지는 못했다.",
   "watch": [
-   "11월 30일(월) 금융당국 시장안정 긴급회의의 증안펀드 확대·가동 결정",
-   "다음 주 젠슨 황 엔비디아 CEO 미 의회 청문회",
-   "다음 주 미국 11월 ISM 제조업 PMI와 11월 비농업 고용 발표",
-   "12월 FOMC와 외국인 순매수 지속 여부"
+   "11/30 정상 거래 재개 후 거래량 회복과 기술주 매수세 유지 여부",
+   "12/2 ISM 제조업 PMI(11월, 한국시간 00:00)",
+   "12/4 ISM 서비스업 PMI(11월)와 22:30 11월 고용보고서(12월 FOMC 전 마지막 고용지표)",
+   "미국 10년물 금리 4.9%대 안착 여부와 12월 FOMC 금리 인상 기대, 비트코인 현물 ETF 자금 흐름"
   ],
   "sources": [
    {
-    "title": "외국인 귀환에 코스피 4900선 회복…코스닥 8%대 급등 [MTN 마감시황]",
-    "url": "https://news.mtn.co.kr/article/2026112716072729860"
+    "title": "뉴욕증시, 반도체주 강세에 3대 지수 상승…나스닥 2.31%↑ (EBN)",
+    "url": "https://www.ebn.co.kr/news/articleView.html?idxno=1733293"
    },
    {
-    "title": "증안펀드 가동 기대감? 코스피 3거래일 만에 4900선 회복",
-    "url": "https://seoul.co.kr/news/economy/securities/2026/11/27/20261127500238"
+    "title": "AI주 반등에 나스닥 2.31%…다우 4년 만에 최대 주간 상승 [뉴욕마감] (MTN)",
+    "url": "https://news.mtn.co.kr/article/2026112804042189215"
    },
    {
-    "title": "코스피, 증안펀드 증액 기대에 4900선 회복…코스닥 700 탈환",
-    "url": "https://www.sentv.co.kr/article/view/sentv202611270215"
+    "title": "[뉴욕증시]AI 저가 매수에 나스닥 2.31% 상승 (네이트뉴스)",
+    "url": "https://m.news.nate.com/view/20261128n02884"
    },
    {
-    "title": "엔비디아발 'AI 조정' 잦아드나…코스피·코스닥, 급등 마감(종합)",
-    "url": "https://supple.kr/news/cmwyolfrxena7kwp81gtdqv5x"
+    "title": "[지난밤 뉴욕에선] AI 저가 매수에 나스닥 2.31% 상승 (스트레이트뉴스)",
+    "url": "https://www.straightnews.co.kr/news/articleView.html?idxno=316443"
    },
    {
-    "title": "외인 '사자' 반도체株 '불기둥'⋯코스피 4% 급등 '4910선'",
-    "url": "https://m.inews24.com/v/2031339"
+    "title": "뉴욕증시, 블프 저가매수에 일제히 반등…나스닥 2.31%·필라델피아 반도체 4.69% 급등 (메가경제)",
+    "url": "https://megaeconomy.co.kr/news/newsview.php?ncode=1065572874083005"
    },
    {
-    "title": "코스피, 4.34% 오른 4915.68 마감...대내외 시장 안정 기대 유입",
-    "url": "http://www.opinionnews.co.kr/news/articleView.html?idxno=147609"
+    "title": "미국증시, AI 우려 완화에 급등…SK하이닉스·마이크론 강세 (톱스타뉴스)",
+    "url": "https://www.topstarnews.net/news/articleView.html?idxno=16288187"
    },
    {
-    "title": "코스피 4.34%·코스닥 8.13% 폭등 마감…숏커버링 가세했나",
-    "url": "https://www.slist.kr/news/articleView.html?idxno=785383"
+    "title": "뉴욕증시 AI·반도체 급반등에 3대 지수 일제히 상승 (국제뉴스)",
+    "url": "https://www.gukjenews.com/news/articleView.html?idxno=3765945"
    },
    {
-    "title": "[e마켓클로징] 외국인 1兆 순매수···코스피 4900선 회복",
-    "url": "https://www.sisajournal-e.com/news/articleView.html?idxno=425396"
+    "title": "[뉴욕 코인시황] 증시 상승에도 디지털자산 하락 (블록미디어)",
+    "url": "https://www.blockmedia.co.kr/archives/1171620"
    }
   ],
-  "origin": "2026-11-27-afternoon"
+  "origin": "2026-11-28-morning"
  },
  "analysis_ref": null,
- "focus": "kr",
+ "focus": "us",
  "market_date": "2026-11-27",
  "drivers": [
-  "외국인이 두 달여 만에 코스피에서 1조 원 넘게 순매수해 지수 상승을 이끌었다.",
-  "증안펀드 기대감과 엔비디아발 AI 조정 우려 완화 보도가 투자심리를 개선했다.",
-  "반도체(+7.86%)와 2차전지(+7.88%) 업종이 크게 올랐고, 삼성전자(+4.55%)와 SK하이닉스(+5.41%)가 지수를 견인했다."
+  "AI 투자 우려가 완화되면서 필라델피아 반도체 지수가 4.69% 급등해 기술 섹터(XLK, +2.8%)를 끌어올렸다.",
+  "테슬라(+5.22%), 아마존(+3.96%), 브로드컴(+3.82%), 메타(+3.13%) 등 대형 기술주가 강세를 보이며 지수 상승을 주도했다.",
+  "미국채 10년물 금리가 1.82% 오른 4.936%로 부담 요인이었지만, 지수 상승과 VIX 하락(-11.16%)으로 위험회피 심리는 완화됐다."
  ],
  "outlook": {
   "stance": "중립",
   "horizon": "다음 거래일~1주",
-  "reason": "코스피는 20일 고점 대비 16.1% 낮고 20일 이동평균선을 4.63% 밑돌아 중기 추세는 약하다. 반면 코스닥은 20일 이동평균선(675.5)을 4.96% 웃돌고 있다. 외국인 순매수 지속 여부와 증안펀드 관련 구체 내용이 확인되기 전까지는 방향성을 단정하기 어렵다.",
+  "reason": "나스닥 종합은 5일 이동평균(23,631) 위에서 반등했지만 20일 이동평균(24,610) 아래에 머물고 있어 추세 회복은 확인되지 않았다. 필라델피아 반도체 지수가 20일 고점 대비 14% 이상 낮아 반도체 업황에 대한 불확실성이 남아 있다. 12월 초 ISM 지표와 11월 고용보고서가 연이어 예정돼 있어 방향성은 이들 발표 결과에 달려 있다.",
   "scenarios": [
    {
     "name": "기본",
-    "likelihood": "중간",
+    "likelihood": "높음",
     "direction": "flat",
-    "desc": "외국인 수급이 일부 유지되면서 코스피가 4,800~5,000 구간에서 등락하는 흐름이다. 업종별 차별화가 이어질 가능성이 있다."
+    "desc": "AI 관련 우려가 재부각되지 않는 가운데 지표 발표를 기다리며 20일 이동평균 부근에서 등락하는 흐름이 예상된다."
    },
    {
     "name": "상방",
-    "likelihood": "낮음",
+    "likelihood": "중간",
     "direction": "up",
-    "desc": "외국인 순매수가 지속되고 증안펀드 등 정책 기대가 실제 조치로 이어지면 코스피가 20일 이동평균선(5,154) 회복을 시도할 수 있다."
+    "desc": "ISM 지표와 고용보고서가 경기 연착륙을 확인하고 반도체 반등이 이어지면 나스닥 종합이 20일 이동평균 24,610선을 회복할 수 있다."
    },
    {
     "name": "하방",
     "likelihood": "중간",
     "direction": "down",
-    "desc": "반등 이후 차익실현 매물이 나오거나 AI 관련 조정이 재개되면 코스피가 5일 이동평균선(4,808)을 하회할 수 있다. 이 경우 20일 저점(4,697)이 다음 지지선으로 거론된다."
+    "desc": "금리 상승이 이어지거나 AI 투자 우려가 재발해 나스닥 종합이 5일 이동평균 23,631선을 下회하면 20일 저점 22,618선을 재확인할 수 있다."
    }
   ],
   "levels": [
-   "코스피 5일 이동평균선 4,807.8",
-   "코스피 20일 이동평균선 5,154.3",
-   "코스닥 20일 고점 734.4(20일 이동평균선 675.5 상단 참고)"
+   "나스닥 종합 20일 이동평균 24,610선 (상방 기준선)",
+   "나스닥 종합 5일 이동평균 23,631선 (단기 지지 여부 확인선)",
+   "나스닥 종합 20일 저점 22,618선 (하방 지지선)"
   ]
  }
 }
